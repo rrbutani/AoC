@@ -4,7 +4,6 @@
 
 using namespace std;
 
-
 int main()
 {
     string in;
@@ -18,3 +17,8 @@ int main()
     for_each(in.begin(), in.end(), [&](char a) { sum += (a-'0')*(a==in[(idx++ + in.length()/2) % in.length()]); });
     cout << "P2: " << sum << endl;
 }
+
+/*****************************
+* Author: Rahul Butani       *
+* Date:   December 1st, 2017 *
+*****************************/
