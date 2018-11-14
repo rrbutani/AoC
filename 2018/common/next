@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+
+# Expects <name>
+
+
+function dependencies() {
+    return 0
+}
+
+langs=(python rust haskell scala elm elixir clojure)
+
+function python() {
+    echo "Yay python!"
+}
+
+function rust() {
+    echo "ferris says hi"
+}
+
+function haskell() {
+    echo "cabal"
+}
+
+function scala() {
+    echo "watch it clojure"
+}
+
+function elm() {
+    echo "we r functional"
+}
+
+function elixir() {
+    echo "purple. use cowboy"
+}
+
+function clojure() {
+    echo "hello"
+}
+
+if [ -z "${1+x}" ]; then
+    echo "Give me a name please!"
+    exit 2
+fi
+
+nom="${1}"
+
+aocDir="$(dirname "$0")/../"
+lastDir=$(ls "${aocDir}" | grep -E '^[0-9]{2}$' | sort | tail -1)
+nextDir="${aocDir}/$(printf "%02d" $((lastDir + 1)))"
+
+mkdir -p "${nextDir}"
+
+dependencies &&
+    for lang in "${langs[@]}"; do $lang "${nextDir}" "${nom}" || { echo "Something broke! Blame $lang ($?)" && exit 2; } ; done
+
