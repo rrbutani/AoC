@@ -1,3 +1,5 @@
+#!/usr/bin/env runhaskell
+
 import Data.List
 
 main = do
