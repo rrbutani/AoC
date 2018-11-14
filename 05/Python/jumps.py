@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 
 l = [ int(x) for x in open("input")]
-# l = [0, 3,  0,  1,  -3] 
-print(l)
-print(len(l))
 i = 0
 c = 0
 
@@ -27,5 +24,7 @@ while(i < len(l)):
         l[i] = l[i] + 1
     i += jmp
     c += 1
+
+# (i += l[i]++) < len(l)
 
 print("P2: ", c)

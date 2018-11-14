@@ -12,7 +12,7 @@ def program(line):
     return (name, weight, above)
 
 
-pgms = [program(i) for i in [ x.split() for x in open("input")] ]
+pgms = [program(i) for i in [ x.split() for x in open("input.txt")] ]
 
 root = 0
 for p in pgms:
@@ -66,13 +66,13 @@ def recurseWeights(pname):
         print("ON: ", pname)
         print("CHILD: ", pmap[pname][1])
         print(childrenW)
-        # exit()
+        exit()
 
     pmap.update({pname : (pmap[pname][0] + sum(childrenW), pmap[pname][1])})
 
-print(pmap['gozhrsf'])
+print(pmap['vmttcwe'])
 
-for i in pmap['gozhrsf'][1]:
+for i in pmap['vmttcwe'][1]:
     # print(i, pmap[i])
     recurseWeights(i)
     print(i, pmap[i])
