@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# A really bad script to make it seems like Rust has a script execution mode.
+#
+# Add '#!/usr/bin/env rustr' to the top of your .rs file and make sure `rustr` is in your PATH.
+# Then: ./<your_file>.rs
+# It may work!
+#
+# This has many obvious shortcomings (i.e. crates!) but it might work for simple programs!
+
+rustc "$@" -o out && { ./out; rm -f out 2>/dev/null; }
