@@ -25,7 +25,7 @@ function rust() {
 	fn main() {
 	    let mut aoc = AdventOfCode::new_with_year(2018, ${3});
 	    let input: String = aoc.get_input();
-	 
+
 	    println!("{}", input);
 
 	    let output1 = 0;
@@ -86,4 +86,4 @@ mkdir -p "${nextDir}"
 
 dependencies &&
     for lang in "${langs[@]}"; do $lang "${nextDir}" "${nom}" "${day}" || { echo "Something broke! Blame $lang ($?)" && exit 2; } ; done &&
-    openEditor "${nextDir}"
+    openEditor "${nextDir}" # && git add "${nextDir}"
