@@ -310,7 +310,6 @@ fn get_cached_file_path(day: u8, tok: Option<&str>) -> PathBuf {
 
     file_path
         .tap(|f| f.push(Component::ParentDir))
-        .tap(|f| f.push(Component::ParentDir))
         .tap(|f| f.push(file_name))
 }
 
