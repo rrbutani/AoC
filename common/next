@@ -10,31 +10,64 @@ function dependencies() {
 langs=(python rust haskell scala elm elixir clojure)
 
 function python() {
+    mkdir -p "${1}/Python" && touch "${1}/Python/${2}.py"
     echo "Yay python!"
 }
 
 function rust() {
+    mkdir -p "${1}/Rust" && touch "${1}/Rust/${2}.rs"
+    cat <<-EOF > "${1}/Rust/${2}.rs"
+	#!/usr/bin/env rustr
+	extern crate aoc;
+
+	use aoc::{AdventOfCode};
+
+	fn main() {
+	    let mut aoc = AdventOfCode::new_with_year(2018, ${3});
+	    let input: String = aoc.get_input();
+	 
+	    println!("{}", input);
+
+	    let output1 = 0;
+	    println!("{}", output1);
+
+	    // aoc.submit_p1(output1);
+
+	    let output2 = 0;
+	    println!("{}", output2);
+	    // aoc.submit_p2(output2);
+	}
+	EOF
+
     echo "ferris says hi"
 }
 
 function haskell() {
+    mkdir -p "${1}/Haskell" && touch "${1}/Haskell/${2}.hs"
     echo "cabal"
 }
 
 function scala() {
+    mkdir -p "${1}/Scala" && touch "${1}/Scala/${2}.scala"
     echo "watch it clojure"
 }
 
 function elm() {
+    mkdir -p "${1}/Elm" && touch "${1}/Elm/${2}.elm"
     echo "we r functional"
 }
 
 function elixir() {
+    mkdir -p "${1}/Elixir" && touch "${1}/Elixir/${2}.exs"
     echo "purple. use cowboy"
 }
 
 function clojure() {
     echo "hello"
+}
+
+function openEditor() {
+    subl "${@}"
 }
 
 if [ -z "${1+x}" ]; then
@@ -46,10 +79,11 @@ nom="${1}"
 
 aocDir="$(dirname "$0")/../"
 lastDir=$(ls "${aocDir}" | grep -E '^[0-9]{2}$' | sort | tail -1)
-nextDir="${aocDir}/$(printf "%02d" $((lastDir + 1)))"
+day="$(printf "%02d" $((lastDir + 1)))"
+nextDir="${aocDir}/${day}"
 
 mkdir -p "${nextDir}"
 
 dependencies &&
-    for lang in "${langs[@]}"; do $lang "${nextDir}" "${nom}" || { echo "Something broke! Blame $lang ($?)" && exit 2; } ; done
-
+    for lang in "${langs[@]}"; do $lang "${nextDir}" "${nom}" "${day}" || { echo "Something broke! Blame $lang ($?)" && exit 2; } ; done &&
+    openEditor "${nextDir}"
