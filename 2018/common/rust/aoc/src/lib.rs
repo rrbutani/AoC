@@ -1,3 +1,5 @@
+#![deny(missing_debug_implementations, missing_docs)]
+
 extern crate clap;
 extern crate reqwest;
 
@@ -7,18 +9,39 @@ use std::fs::File;
 
 use clap::{Arg, ArgGroup, App};
 
-const YEAR: u16 = 2018;
+use crate::AdventOfCodeClient::{AocClient, AocError, Part};
+
+const YEAR: u16 = 2017;
 
 mod AdventOfCodeClient {
-    enum Error {
+
+    #[derive(PartialEq)]
+    pub struct AocClient {
+        day: u8,
+        year: u16,
+        token: String,
+    }
+
+    pub enum AocError {
 
     }
 
-    fn get_input(year: u16, day: u8) -> RetType {
+    pub enum Part {
+        One,
+        Two,
+    }
+
+    impl AocClient {
+        pub fn new(year: u16, day: u8, token: String) -> Option<Self> {
+            unimplemented!()
+        }
+    }
+
+    pub fn get_input(year: u16, day: u8, token: String) -> Result<String, AocError> {
         unimplemented!()
     }
 
-    fn submit_answer(year: u16, day: u8) {
+    pub fn submit_answer(year: u16, day: u8, token: String) -> Result<String, AocError> {
         unimplemented!()
     }
 }
@@ -26,20 +49,20 @@ mod AdventOfCodeClient {
 #[derive(PartialEq)]
 enum InputSource {
     File(String),
-    StdIn,
+    Stdin,
     Web,
 }
 
 #[derive(PartialEq)]
 enum OutputSink {
     StdOut,
-    Web
+    Web(AocClient)
 }
 
 struct Config {
+    day: u8,
     input: InputSource,
     output: OutputSink,
-    token: Option<String>,
 }
 
 macro_rules! cargo_env {
@@ -49,19 +72,43 @@ macro_rules! cargo_env {
 }
 
 impl Config {
-    fn get_config() -> Self {
-        Self::get_config_internal(None)
+    pub fn get_config(day: u8) -> Self {
+        Self::get_config_internal(day, None)
     }
 
-    fn get_config_with_token(tok: &str) -> Self {
-        Self::get_config_internal(Some(tok))
+    pub fn get_config_with_token(day: u8, tok: &str) -> Self {
+        Self::get_config_internal(day, Some(tok))
     }
 
-    fn get_config_internal(tok: Option<&str>) -> Self {
+    fn get_config_internal(day: u8, tok: Option<&str>) -> Self {
 
         // Args:
         //  - input: [ stdin | input file ]
         //  - auth: [ credentials file | token ]
+        //  
+        // The general strategy here is use defaults implicitly, but if an
+        // option is specified, use it or fail.
+        //
+        // For example, for the input we'll try to use a file/stdin if you
+        // say to. If you don't we'll try to grab the input from the web if
+        // a valid token is provided. However, if you specify a file that
+        // doesn't exist, we'll blow up, even if you _did_ specify a valid
+        // token.
+        //
+        // In other words, if you specify something explicitly, that's what
+        // we'll use.
+        //
+        // The same goes for the output: if you pass in a token as an cli arg,
+        // we'll use that or fail. But if you didn't we'll check for a
+        // credentials file/a token passed in programmatically.
+        //
+        // We rely on clap not allowing you to pass in multiple input/output
+        // methods so that there isn't ambiguity. The one exception to this is
+        // the token argument in this function and `get_config_with_token`: a
+        // token passed in at runtime will take precedence over a token passed
+        // into the function programmatically (since the latter is potentially
+        // fixed). This allows for a nice override mechanism that could be
+        // useful if the token changes (it'll save you a recompile). 
         let matches = App::new("Advent of Code Helper")
             .version(cargo_env!(PKG_VERSION))
             .author(cargo_env!(PKG_AUTHORS))
@@ -96,9 +143,9 @@ impl Config {
             .get_matches();
 
         // Check if we've been given a token:
-        let token = if let Some(token) = tok {
-            Some(String::from(token))
-        } else if let Some(cred_file) = matches.value_of("creds") {
+        // Check for args first so they'll 'shadow' a programmatically provided
+        // token.
+        let token = if let Some(cred_file) = matches.value_of("creds") {
             let mut file = File::open(cred_file).expect(&format!("Unable to open `{}`.", cred_file));
             let mut token = String::new();
 
@@ -107,22 +154,19 @@ impl Config {
             Some(token)
         } else if let Some(token) = matches.value_of("token") {
             Some(String::from(token))
+        } else if let Some(token) = tok {
+            Some(String::from(token))
         } else {
             None
         };
 
         // Now check if the token (if we have one) is valid:
-        let token = if let Some(token) = token {
-            Some(token) // TODO
+        let output = if let Some(token) = token {
+            AocClient::new(YEAR, self.day, )
         } else {
-            None
-        };
-
-        // Based on whether we have a valid token, decide how we're going to
-        // output results:
-        let output = match token {
-            Some(_) => OutputSink::Web,
-            None => OutputSink::StdOut,
+            // If we don't have a valid token, fall back to printing out to stdout:
+            eprint!("Warning: Printing results to stdout");
+            OutputSink::StdOut
         };
 
         // Next, figure out how we're going to take input:
@@ -136,7 +180,7 @@ impl Config {
                 panic!("`{}` doesn't exist! Please specify a valid input file.", input);
             }
         } else if matches.is_present("stdin") {
-            InputSource::StdIn
+            InputSource::Stdin
         } else {
             // Failing any explicit input option, we'll try to take input from
             // the website. We can only do this if we have a valid token, so
@@ -149,7 +193,7 @@ impl Config {
             }
         };
 
-        Config { input, output, token }
+        Config { day, input, output }
     }
 
     fn assert_config(self, inp: InputSource, out: OutputSink) -> bool {
@@ -158,7 +202,6 @@ impl Config {
 }
 
 struct AdventOfCode {
-    day: u8,
     config: Config,
     input: Option<String>
 }
@@ -169,24 +212,20 @@ enum Error {
     UnknownError(String),
 }
 
-enum Part {
-    One,
-    Two,
-}
+type Result = std::result::Result<Option<String>, Error>;
 
 impl AdventOfCode {
+
     pub fn new(day: u8) -> Self {
         Self {
-            day,
-            config: Config::get_config(),
+            config: Config::get_config(day),
             input: None,
         }
     }
 
     pub fn new_with_token(day: u8, token: &str) -> Self {
         Self {
-            day,
-            config: Config::get_config_with_token(token),
+            config: Config::get_config_with_token(day, token),
             input: None
         }
     }
@@ -198,41 +237,66 @@ impl AdventOfCode {
             use self::InputSource::*;
             match self.config.input {
                 File(f) => {
+                    let mut file = std::fs::File::open(f).expect(&format!("Unable to open `{}`.", f));
+                    let input = String::new();
 
+                    file.read_to_string(&mut input).expect(&format!("Unable to read `{}`.", f));
+
+                    self.input = Some(input);
+                    &input
                 },
-                StdIn => {
+                Stdin => {
+                    let input = String::new();
+                    let mut handle = std::io::stdin().lock();
 
+                    handle.read_to_string(&mut input).expect("Unable to read from stdin");
+
+                    self.input = Some(input);
+                    &input
                 },
-                Web => {
-
+                Web(aoc) => {
+                    AdventOfCodeClient::get_input(YEAR, self.day, self.token)
                 },
             }
         }
     }
 
-    fn submit<T: Into<String>>(&self, part: Part, answer: T) -> Result<(), Error> {
+    fn submit<T: Into<String>>(&self, part: Part, answer: T) -> Result {
         use self::OutputSink::*;
         match self.config.output {
             StdOut => {
-                
+                println!("{}", answer.into());
+                Err(Error::CannotSubmitAutomatically)
             },
-            Web => {
+            Web(aoc) => {
 
             },
         }
     }
 
-    fn submit_with_feedback<T: Into<String>>(&self, part: Part, answer: T) -> Result<(), Error> {
+    fn submit_with_feedback<T: Into<String>>(&self, part: Part, answer: T) -> Result {
+        let res = self.submit(part, answer);
 
+        use self::Error::*;
+        match res {
+            Ok(message) => {
+
+            },
+            Err(err) => match err {
+                CannotSubmitAutomatically => {
+                    eprintln!("Not configured to submit automatically.");
+                    eprintln!("Please go to `https://adventofcode.com/{}/day/{}` to submit!", YEAR, self.day);
+            }
+        };
+
+        res
     }
 
-    let hi = 9;
-
-    pub fn submit_p1<T: Into<String>>(&self, answer: T) -> Result<(), Error> {
+    pub fn submit_p1<T: Into<String>>(&self, answer: T) -> Result {
         self.submit_with_feedback(Part::One, answer)
     }
 
-    pub fn submit_p2<T: Into<String>>(&self, answer: T) -> Result<(), Error> {
+    pub fn submit_p2<T: Into<String>>(&self, answer: T) -> Result {
         self.submit_with_feedback(Part::Two, answer)
     }
 }
