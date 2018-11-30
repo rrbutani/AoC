@@ -1,9 +1,10 @@
-#![deny(missing_debug_implementations, missing_docs)]
+// #![deny(missing_debug_implementations, missing_docs)]
 #![feature(range_contains)]
 
 extern crate clap;
 extern crate http;
 extern crate reqwest;
+#[macro_use] extern crate scan_fmt;
 extern crate select;
 
 use std::path::{Component, Path, PathBuf};
@@ -13,16 +14,19 @@ use std::fs::File;
 use clap::{Arg, ArgGroup, App};
 use tap::TapOps;
 
-use crate::AdventOfCodeClient::{AocClient, AocError, Part};
+use crate::advent_of_code_client::{AocClient, AocError, Part};
 
 const YEAR: u16 = 2018;
 
-mod AdventOfCodeClient {
+mod advent_of_code_client {
+
+    use std::collections::HashMap;
 
     use http::StatusCode;
-    use reqwest::{Client, Error as RequestError, header, Url};
+    use reqwest::{Client, Error as RequestError, header, RedirectPolicy, Url};
     use select::document::Document;
-    use select::predicate::{Predicate, Attr, Class, Name};
+    use select::predicate::Name;
+    use tap::TapOps;
 
     #[derive(Debug, PartialEq)]
     pub struct AocClient {
@@ -53,10 +57,13 @@ mod AdventOfCodeClient {
         AuthError(RequestError),
         NotFound(RequestError),
         InvalidToken(String),
-        WrongAnswer(ErrDirection),
-        Timeout(u8),
+        WrongAnswer(Option<u8>, Option<u8>, ErrDirection),
+        InvalidAnswer,
+        LevelIssue(String),
+        Timeout(Option<u8>, Option<u8>),
         RequestError(RequestError),
         UnknownError(String),
+        UnexpectedResponse(String),
     }
 
     pub enum Part {
@@ -76,22 +83,25 @@ mod AdventOfCodeClient {
     pub type AocResult = Result<String, AocError>;
 
     fn get_client(token: &String) -> Result<Client, AocError> {
+        let tok = String::from("session=").tap(|s| s.push_str(token));
+
         let mut headers = header::HeaderMap::new();
         headers
             .insert(header::COOKIE, 
-                header::HeaderValue::from_str(&token)
+                header::HeaderValue::from_str(&tok)
                     .map_err(|e| AocError::InvalidToken(e.to_string()))?);
 
         reqwest::Client::builder()
             .default_headers(headers)
-            .gzip(true)
+            // .gzip(true)
+            .redirect(RedirectPolicy::none())
             .build()
             .map_err(|e| AocError::RequestError(e))
     }
 
     // static base: Box<Fn(u16, u8) -> String> = Box::new(|y, d| format!("https://adventofcode.com/{}/day/{}", y, d));
 
-    fn base(y: u16, d: u8) -> String {
+    pub(crate) fn base(y: u16, d: u8) -> String {
         format!("https://adventofcode.com/{}/day/{}", y, d)
     }
 
@@ -108,6 +118,7 @@ mod AdventOfCodeClient {
             match status {
                 StatusCode::BAD_REQUEST => AocError::AuthError(err),
                 StatusCode::NOT_FOUND => AocError::NotFound(err),
+                StatusCode::FOUND => AocError::InvalidAnswer,
                 _ => AocError::RequestError(err),
             }
         } else {
@@ -117,7 +128,7 @@ mod AdventOfCodeClient {
 
     impl AocClient {
         pub fn new(year: u16, day: u8, token: String) -> Result<Self, String> {
-            if ! (1 .. 25).contains(&day) {
+            if ! (1 ..= 25).contains(&day) {
                 return Err(format!("Invalid day: {}", day));
             }
 
@@ -162,13 +173,13 @@ mod AdventOfCodeClient {
         let url = Url::parse(&get_output_url(year, day))
             .map_err(|e| AocError::UnknownError(e.to_string()))?;
 
-        let body = format!("level={}&answer={}",
-            match part { Part::One => 1, Part::Two => 2 },
-            answer);
+        let mut params = HashMap::new();
+        params.insert("level", match part { Part::One => "1", Part::Two => "2" });
+        params.insert("answer", answer);
 
         let mut resp = client
             .post(url)
-            .body(body)
+            .form(&params)
             .send()
             .map_err(err_mapper)?
             .error_for_status()
@@ -176,9 +187,75 @@ mod AdventOfCodeClient {
 
         let body = resp.text().map_err(|e| AocError::RequestError(e))?;
 
-        // let doc = Document::from(body.as_str());
-        // doc.find(predicate)
-        Ok(body)
+        match resp.status() {
+            StatusCode::OK => {
+                let doc = Document::from(body.as_str());
+
+                let err = || {
+                    let body = body.clone();
+                    AocError::UnexpectedResponse(body)
+                };
+
+                let message = doc.find(Name("main"))
+                    .take(1)
+                    .next()
+                    .ok_or_else(err)?
+                    .find(Name("p"))
+                    .take(1)
+                    .next()
+                    .ok_or_else(err)?
+                    .text();
+
+                eprintln!("Message: {}", message);
+
+                if message.contains("That's not the right answer.") {
+                    let (attempts, timeout) = if message.contains("Because you have guessed incorrectly") {
+                        let idx = message.rfind("Because you have guessed incorrectly").unwrap();
+                        let incorrect_msg = &message[idx..];
+
+                        let end_idx = incorrect_msg.find('.').unwrap();
+                        let incorrect_msg = &incorrect_msg[..end_idx];
+
+                        scan_fmt!(incorrect_msg, 
+                            "Because you have guessed incorrectly {} times on this puzzle, please wait {} minutes before trying again",
+                            u8, u8)
+                    } else { (None, None) };
+
+                    let dir = if message.contains("too high") {
+                        ErrDirection::TooHigh
+                    } else if message.contains("too low") {
+                        ErrDirection::TooLow
+                    } else {
+                        ErrDirection::Unknown
+                    };
+
+                    Err(AocError::WrongAnswer(attempts, timeout, dir))
+                } else if message.contains("You gave an answer too recently") {
+                    let (mins, seconds) = if message.contains("left to wait") {
+                        let end_idx = message.find("left to wait.").unwrap();
+                        let start_idx = message.rfind("You have ").unwrap();
+
+                        let timeout_message = &message[start_idx+8..end_idx];
+
+                        scan_fmt!(timeout_message,
+                            " {}m {}s ",
+                            u8, u8)
+                    } else {
+                        (None, None)
+                    };
+
+                    Err(AocError::Timeout(mins, seconds))
+                } else if message.contains("You don't seem to be solving the right level.") {
+                    Err(AocError::LevelIssue(message))
+                } else if message.contains("Good Job!") {
+                    Ok(body)
+                } else {
+                    Err(AocError::UnexpectedResponse(message))
+                }
+            },
+            StatusCode::FOUND => Err(AocError::InvalidAnswer),
+            _ => Err(AocError::UnknownError(body)),
+        }
     }
 }
 
@@ -225,19 +302,11 @@ fn get_cached_file_path(day: u8, tok: Option<&str>) -> PathBuf {
 }
 
 impl Config {
-    pub fn get_config(day: u8) -> Self {
-        Self::get_config_internal(YEAR, day, None)
-    }
-
-    pub fn get_config_with_year(year: u16, day: u8) -> Self {
+    pub fn get_config(year: u16, day: u8) -> Self {
         Self::get_config_internal(year, day, None)
     }
 
-    pub fn get_config_with_token(day: u8, tok: &str) -> Self {
-        Self::get_config_internal(YEAR, day, Some(tok))
-    }
-
-    pub fn get_config_with_year_and_token(year: u16, day: u8, tok: &str) -> Self {
+    pub fn get_config_with_token(year: u16, day: u8, tok: &str) -> Self {
         Self::get_config_internal(year, day, Some(tok))
     }
 
@@ -294,8 +363,7 @@ impl Config {
             .arg(
                 Arg::with_name("stdin")
                     .short("")
-                    .long("stdin")
-                    .number_of_values(0))
+                    .long("stdin"))
             .arg(
                 Arg::with_name("creds")
                     .short("c")
@@ -323,7 +391,7 @@ impl Config {
 
             file.read_to_string(&mut token).expect(&format!("Unable to read `{}`.", cred_file));
             
-            Some(token)
+            Some(token.lines().next().expect("Token file is empty.").to_owned())
         } else if let Some(token) = matches.value_of("token") {
             Some(String::from(token))
         } else if let Some(token) = tok {
@@ -333,11 +401,11 @@ impl Config {
         };
 
         // Now check if the token (if we have one) is valid:
-        let output = if let Some(token) = token {
-            OutputSink::Web(AocClient::new(year, day, token).unwrap())
+        let output = if let Some(ref token) = token {
+            OutputSink::Web(AocClient::new(year, day, token.to_string()).unwrap())
         } else {
             // If we don't have a valid token, fall back to printing out to stdout:
-            eprint!("Warning: Printing results to stdout");
+            eprintln!("Warning: Printing results to stdout.");
             OutputSink::StdOut
         };
 
@@ -357,10 +425,17 @@ impl Config {
             // Failing any explicit input option, we'll try to take input from
             // the website. Before we do that though, we should make sure that
             // there isn't already a copy of the input data we're looking for:
+            
+            let tok = if let Some(ref token) = token {
+                Some(token.as_str())
+            } else {
+                None
+            };
             let f = get_cached_file_path(day, tok);
 
             // If there is, we'll use it:
             if f.exists() {
+                eprintln!("Note: Using cached input file.");
                 InputSource::File(f.to_str().unwrap().to_string())
             } else {
 
@@ -380,7 +455,7 @@ impl Config {
         Config { year, day, input, output }
     }
 
-    pub fn assert_config(self, inp: InputSource, out: OutputSink) -> bool {
+    pub(crate) fn assert_config(self, inp: InputSource, out: OutputSink) -> bool {
         self.input == inp && self.output == out
     }
 }
@@ -403,14 +478,28 @@ impl AdventOfCode {
 
     pub fn new(day: u8) -> Self {
         Self {
-            config: Config::get_config(day),
+            config: Config::get_config(YEAR, day),
+            input: None,
+        }
+    }
+
+    pub fn new_with_year(year: u16, day: u8) -> Self {
+        Self {
+            config: Config::get_config(year, day),
             input: None,
         }
     }
 
     pub fn new_with_token(day: u8, token: &str) -> Self {
         Self {
-            config: Config::get_config_with_token(day, token),
+            config: Config::get_config_with_token(YEAR, day, token),
+            input: None
+        }
+    }
+
+    pub fn new_with_year_and_token(day: u8, year: u16, token: &str) -> Self {
+        Self {
+            config: Config::get_config_with_token(year, day, token),
             input: None
         }
     }
@@ -469,20 +558,20 @@ impl AdventOfCode {
         }
     }
 
-    fn submit<T: Into<String>>(&mut self, part: &Part, answer: T) -> Result {
+    fn submit<T: ToString>(&mut self, part: &Part, answer: T) -> Result {
         use self::OutputSink::*;
         match &self.config.output {
             StdOut => {
-                println!("{}", answer.into());
+                println!("{}", answer.to_string());
                 Err(Error::CannotSubmitAutomatically)
             },
             Web(aoc) => {
-                aoc.submit_answer(part, &answer.into()).map_err(|e| Error::AutoSubmitError(e))
+                aoc.submit_answer(part, &answer.to_string()).map_err(|e| Error::AutoSubmitError(e))
             },
         }
     }
 
-    fn submit_with_feedback<T: Into<String>>(&mut self, part: &Part, answer: T) -> Result {
+    fn submit_with_feedback<T: ToString>(&mut self, part: &Part, answer: T) -> Result {
         let res = self.submit(part, answer);
 
         use self::Error::*;
@@ -494,17 +583,21 @@ impl AdventOfCode {
             Err(ref err) => match err {
                 CannotSubmitAutomatically => {
                     eprintln!("Not configured to submit automatically.");
-                    eprintln!("Please go to `https://adventofcode.com/{}/day/{}` to submit!", self.config.year, self.config.day);
+                    eprintln!("Please go to '{}' to submit!", advent_of_code_client::base(self.config.year, self.config.day));
                 },
                 AutoSubmitError(err) => match err {
                     AuthError(err) => eprintln!("Authentication failed; check your token? Got: {}", err.to_string()),
                     NotFound(err) => eprintln!("Got a 404; maybe it's too early? We're trying to submit Part {} of \
                         Day {}, {}. Got: {}", part.to_string(), self.config.day, self.config.year, err.to_string()),
                     InvalidToken(message) => eprintln!("Invalid token. Got: {}", message),
-                    WrongAnswer(dir) => eprintln!("Wrong answer! {}", dir.to_string()),
-                    Timeout(timeout) => eprintln!("Slow down! Hit a timeout: {}", timeout),
+                    WrongAnswer(attempts, timeout, dir) => eprintln!("Wrong answer! {} {:?} attempts so far and now a {:?} minute timeout.", dir.to_string(), attempts, timeout),
+                    LevelIssue(message) => eprintln!("Wrong level? Or already finished? Got: {}", message),
+                    InvalidAnswer => eprintln!("Something went wrong and the server didn't reply to us. Make sure the \
+                        POST request is still right."),
+                    Timeout(mins, seconds) => eprintln!("Slow down! Hit a timeout: {:?} minutes and {:?} seconds", mins, seconds),
                     RequestError(err) => eprintln!("Request Error: {}", err.to_string()),
                     UnknownError(message) => eprintln!("Unknown Error: {}", message),
+                    UnexpectedResponse(message) => eprintln!("Received an unexpected response back from the server: {}", message),
                 }
             }
         };
@@ -512,11 +605,11 @@ impl AdventOfCode {
         res
     }
 
-    pub fn submit_p1<T: Into<String>>(&mut self, answer: T) -> Result {
+    pub fn submit_p1<T: ToString>(&mut self, answer: T) -> Result {
         self.submit_with_feedback(&Part::One, answer)
     }
 
-    pub fn submit_p2<T: Into<String>>(&mut self, answer: T) -> Result {
+    pub fn submit_p2<T: ToString>(&mut self, answer: T) -> Result {
         self.submit_with_feedback(&Part::Two, answer)
     }
 }
