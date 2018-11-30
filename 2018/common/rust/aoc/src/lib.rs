@@ -1,12 +1,14 @@
 #![deny(missing_debug_implementations, missing_docs)]
+#![feature(range_contains)]
 
 extern crate clap;
 extern crate reqwest;
 
-use std::path::Path;
+use std::path::{Component, Path, PathBuf};
 use std::io::prelude::*;
 use std::fs::File;
 
+use tap::TapOps;
 use clap::{Arg, ArgGroup, App};
 
 use crate::AdventOfCodeClient::{AocClient, AocError, Part};
@@ -22,8 +24,11 @@ mod AdventOfCodeClient {
         token: String,
     }
 
+    #[derive(Debug)]
     pub enum AocError {
-
+        UnableToSubmit,
+        WrongAnswer,
+        OtherError(String),
     }
 
     pub enum Part {
@@ -31,17 +36,35 @@ mod AdventOfCodeClient {
         Two,
     }
 
+    pub type AocResult = Result<String, AocError>;
+
     impl AocClient {
-        pub fn new(year: u16, day: u8, token: String) -> Option<Self> {
+        pub fn new(year: u16, day: u8, token: String) -> Result<Self, String> {
+            if ! (1 .. 25).contains(&day) {
+                return Err(format!("Invalid day: {}", day));
+            }
+
             unimplemented!()
+        }
+
+        pub fn get_input(self) -> AocResult {
+            get_input(self.year, self.day, self.token)
+        }
+
+        pub fn submit_answer(self, answer: String) -> AocResult {
+            submit_answer(self.year, self.day, self.token, answer)
+        }
+
+        pub(crate) fn get_token(self) -> String {
+            self.token
         }
     }
 
-    pub fn get_input(year: u16, day: u8, token: String) -> Result<String, AocError> {
+    pub fn get_input(year: u16, day: u8, token: String) -> AocResult {
         unimplemented!()
     }
 
-    pub fn submit_answer(year: u16, day: u8, token: String) -> Result<String, AocError> {
+    pub fn submit_answer(year: u16, day: u8, token: String, answer: String) -> AocResult {
         unimplemented!()
     }
 }
@@ -69,6 +92,21 @@ macro_rules! cargo_env {
     ($cargo_env_var:ident) => {
         env!(concat!("CARGO_", stringify!($cargo_env_var)))
     };
+}
+
+fn get_cached_file_path(day: u8, tok: Option<&str>) -> PathBuf {
+    let mut file_path = PathBuf::new();
+
+    // Though we will never create an input file that doesn't have the token
+    // specified (we only create this file when we grab the input from the
+    // web which we can only do if we have a token), the user may create such a
+    // file which is why we account for this possibility.
+    let file_name = format!("{}{}.input", day, tok.map_or("", |t| &format!("-{}", t)));
+
+    file_path
+        .tap(|f| f.push(Component::ParentDir))
+        .tap(|f| f.push(Component::ParentDir))
+        .tap(|f| f.push(file_name))
 }
 
 impl Config {
@@ -108,7 +146,18 @@ impl Config {
         // token passed in at runtime will take precedence over a token passed
         // into the function programmatically (since the latter is potentially
         // fixed). This allows for a nice override mechanism that could be
-        // useful if the token changes (it'll save you a recompile). 
+        // useful if the token changes (it'll save you a recompile).
+        //
+        // One other bit of ambiguity that I should document: if inputs are
+        // grabbed from the web, they're written to a local file (with the
+        // token appended to the file name). The next time the program is run,
+        // it looks for the file matching the current day+token and if it
+        // exists, it'll opt to use that instead of grabbing the input file
+        // anew. If an input file or stdin are specified, however, those will
+        // take precedence. So, to recap, the order is:
+        //  - stdin/specified file
+        //  - cached file
+        //  - grabbed anew, if possible
         let matches = App::new("Advent of Code Helper")
             .version(cargo_env!(PKG_VERSION))
             .author(cargo_env!(PKG_AUTHORS))
@@ -162,7 +211,7 @@ impl Config {
 
         // Now check if the token (if we have one) is valid:
         let output = if let Some(token) = token {
-            AocClient::new(YEAR, self.day, )
+            OutputSink::Web(AocClient::new(YEAR, day, token).unwrap())
         } else {
             // If we don't have a valid token, fall back to printing out to stdout:
             eprint!("Warning: Printing results to stdout");
@@ -183,13 +232,25 @@ impl Config {
             InputSource::Stdin
         } else {
             // Failing any explicit input option, we'll try to take input from
-            // the website. We can only do this if we have a valid token, so
-            // let's check that:
-            if let Some(_) = token {
-                InputSource::Web
+            // the website. Before we do that though, we should make sure that
+            // there isn't already a copy of the input data we're looking for:
+            let f = get_cached_file_path(day, tok);
+
+            // If there is, we'll use it:
+            if f.exists() {
+                InputSource::File(f.to_str().unwrap().to_string())
             } else {
-                // If we have no way to take input, we must error!
-                panic!("No way to take input specified and no token provided!");
+
+                // If there isn't we'll just grab the input data. We can only do
+                // this if we're configured to submit outputs too (if we're not and
+                // still running at this point it means we don't have tokens), so
+                // let's check that:
+                if let OutputSink::Web(web) = output {
+                    InputSource::Web
+                } else {
+                    // If we have no way to take input, we must error!
+                    panic!("No way to take input specified and no token provided!");
+                }
             }
         };
 
@@ -208,8 +269,7 @@ struct AdventOfCode {
 
 enum Error {
     CannotSubmitAutomatically,
-    IncorrectAnswer,
-    UnknownError(String),
+    AutoSubmitError(AocError),
 }
 
 type Result = std::result::Result<Option<String>, Error>;
@@ -254,8 +314,25 @@ impl AdventOfCode {
                     self.input = Some(input);
                     &input
                 },
-                Web(aoc) => {
-                    AdventOfCodeClient::get_input(YEAR, self.day, self.token)
+                Web => {
+                    let aoc = match self.config.output {
+                        OutputSink::Web(aoc) => aoc,
+                        _ => panic!("It shouldn't be possible to make an AdventOfCode struct\
+                            that's configured to grab input from the web but *not* configured\
+                            to submit outputs to the web (since web inputs can only be enabled\
+                            if we have a valid AocClient already. Please let someone know this\
+                            happened")
+                    };
+                    let input = aoc.get_input().unwrap();
+
+                    // If we successfully got input, let's take this opportunity
+                    // to cache the input to be nice to the Advent of Code
+                    // servers:
+                    let f = get_cached_file_path(self.config.day, Some(&aoc.get_token()));
+                    std::fs::write(f, input).expect(&format!("Couldn't write to file `{:?}`.", f));
+
+                    self.input = Some(input);
+                    &input
                 },
             }
         }
@@ -285,7 +362,11 @@ impl AdventOfCode {
             Err(err) => match err {
                 CannotSubmitAutomatically => {
                     eprintln!("Not configured to submit automatically.");
-                    eprintln!("Please go to `https://adventofcode.com/{}/day/{}` to submit!", YEAR, self.day);
+                    eprintln!("Please go to `https://adventofcode.com/{}/day/{}` to submit!", YEAR, self.config.day);
+                },
+                AutoSubmitError(err) => match err {
+
+                }
             }
         };
 

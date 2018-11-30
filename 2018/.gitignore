@@ -1,0 +1,22 @@
+# General:
+*.input
+
+# OS Specific:
+.fuse_hidden*
+.Trash-*
+.nfs*
+.DS_Store
+
+# Rubbish:
+*.swp
+*.tmp
+*.log
+*.sublime-workspace
+*.sublime-project
+
+### Rust ###
+**/*.rs.bk
+target/
+
+### Misc ###
+out
