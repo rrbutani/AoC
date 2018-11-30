@@ -208,7 +208,7 @@ mod advent_of_code_client {
 
                 eprintln!("Message: {}", message);
 
-                if message.contains("That's not the right answer.") {
+                if message.contains("That's not the right answer") {
                     let (attempts, timeout) = if message.contains("Because you have guessed incorrectly") {
                         let idx = message.rfind("Because you have guessed incorrectly").unwrap();
                         let incorrect_msg = &message[idx..];
@@ -220,6 +220,19 @@ mod advent_of_code_client {
                             "Because you have guessed incorrectly {} times on this puzzle, please wait {} minutes before trying again",
                             u8, u8)
                     } else { (None, None) };
+
+                    let timeout = if None == timeout && message.contains("Please wait") {
+                        let idx = message.rfind("Please wait").unwrap();
+                        let idx_end = message.rfind("minute").unwrap();
+
+                        let timeout_message = &message[idx+12..idx_end];
+
+                        scan_fmt!(timeout_message,
+                            " {} ",
+                            u8)
+                    } else {
+                        timeout
+                    };
 
                     let dir = if message.contains("too high") {
                         ErrDirection::TooHigh
@@ -247,8 +260,8 @@ mod advent_of_code_client {
                     Err(AocError::Timeout(mins, seconds))
                 } else if message.contains("You don't seem to be solving the right level.") {
                     Err(AocError::LevelIssue(message))
-                } else if message.contains("Good Job!") {
-                    Ok(body)
+                } else if message.contains("That's the right answer!") {
+                    Ok(message)
                 } else {
                     Err(AocError::UnexpectedResponse(message))
                 }
