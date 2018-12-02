@@ -3,26 +3,20 @@ extern crate aoc;
 
 #[allow(unused_imports)]
 use aoc::{AdventOfCode, friends::*};
-use std::collections::{HashMap};
 
-fn letter_counts(s: String) -> (bool, bool) {
-    let mut hm = HashMap::<char, u8>::new();
-    s.chars().for_each(|c| {
-        let j = { *hm.get(&c).unwrap_or(&0) }; // NLL, please save me
-        hm.insert(c, 1 + j);
-    });
+fn letter_counts(s: &str) -> (bool, bool) {
+    let mut chars = [0u8; 256]; // We are making an assumption here..
+    s.chars().for_each(|c| chars[c as usize] += 1);
 
-    let mut vals = hm.values().into_iter();
-    (vals.any(|v| *v == 2), vals.any(|v| *v == 3))
+    let f = |n| chars.iter().any(|v| *v == n);
+    (f(2), f(3))
 }
 
 fn compare_allowing_one(a: &[&str]) -> Option<String> {
-    let (a, b) = (a[0], a[1]);
-    let v = a.chars().zip(b.chars());
+    let v = a[0].chars().zip(a[1].chars());
 
-    if v.clone().map(|(a, b)| if a != b {1} else {0}).sum::<i32>() == 1 {
-        Some(v.filter_map(|(a, b)| if a == b {Some(a)} else {None})
-            .collect::<String>())
+    if v.clone().filter(|(a, b)| a != b).count() == 1 {
+        Some(v.filter(|(a, b)| a == b).map(|(a, _)| a).collect())
     } else { None }
 }
 
@@ -32,8 +26,8 @@ fn main() {
     let input: String = aoc.get_input();
 
     let counts = input.lines()
-        .map(|s| letter_counts(s.to_string()))
-        .fold((0, 0), |acc, x| (acc.0 + if x.0 {1} else {0}, acc.1 + if x.1 {1} else {0}));
+        .map(letter_counts)
+        .fold((0, 0), |a, x| (a.0 + x.0 as u32, a.1 + x.1 as u32));
 
     let p1 = counts.0 * counts.1;
     aoc.submit_p1(p1);
