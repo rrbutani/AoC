@@ -187,6 +187,11 @@ fn main() {
     // except that HashSets aren't magic and that this is actually probably
     // slower.
     
+    // The bit where we go and insert '_' is gross but necessary, I think, to
+    // enforce the same position requirement. Consider:
+    //  - abcdefg -> abc_efg -> abcefg
+    //  - abcefgg -> abcefg_ -> abcefg
+
     use std::collections::HashSet;
     use std::iter::FromIterator;
 
