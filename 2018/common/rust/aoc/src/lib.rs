@@ -4,6 +4,7 @@
 extern crate clap;
 extern crate http;
 extern crate reqwest;
+#[macro_use] extern crate itertools;
 #[macro_use] extern crate scan_fmt;
 extern crate select;
 
@@ -17,6 +18,8 @@ use tap::TapOps;
 use crate::advent_of_code_client::{AocClient, AocError, Part};
 
 const YEAR: u16 = 2018;
+
+pub mod friends;
 
 mod advent_of_code_client {
 
