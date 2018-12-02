@@ -7,6 +7,9 @@
 # It may work!
 #
 # This has many obvious shortcomings (i.e. crates!) but it might work for simple programs!
+# We also support one bit of condition behavior: if $offline is set, we'll pass the right
+# arguments so that the program runs without hitting AoC's servers.
+
 
 pth="../../common/rust/aoc/target/debug/deps/lib"
 # deps=( "--extern clap="../../common/rust/aoc/target/debug/deps/libclap*.rlib )
@@ -19,4 +22,16 @@ deps=(
 --extern tap=${pth}tap-a1b1b81ca635c4dc.rlib
 )
 
-rustc "$@" -L dependency=../../common/rust/aoc/target/debug/deps "${deps[@]}" --extern aoc=../../common/rust/aoc/target/debug/libaoc.rlib -o out && { ./out --creds ../../common/creds ; rm -f out 2>/dev/null; }
+if [ -z "${offline+x}" ]; then
+    # Not offline!
+    flags=(--creds "../../common/creds")
+else
+    input_file=$(find ../ -iname '*.input')
+    flags=(--input "${input_file}")
+fi
+
+rustc "$@" -L dependency=../../common/rust/aoc/target/debug/deps \
+   "${deps[@]}" \
+   --extern aoc=../../common/rust/aoc/target/debug/libaoc.rlib \
+   -o out \
+   && { ./out "${flags[@]}" ; rm -f out 2>/dev/null; }

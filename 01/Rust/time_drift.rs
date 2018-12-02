@@ -19,7 +19,7 @@ fn main() {
         .cycle()
         .map(|f| f.parse::<i64>().unwrap())
         .map(|f| { current_freq += f; current_freq })
-        .filter(|f| ! hm.insert(f.clone()))
+        .filter(|f| ! hm.insert(*f))
         .next()
         .unwrap();
 
