@@ -20,22 +20,24 @@ function rust() {
 	#!/usr/bin/env rustr
 	extern crate aoc;
 
-	use aoc::{AdventOfCode};
+	#[allow(unused_imports)]
+	use aoc::{AdventOfCode, friends::*};
 
+	#[allow(unused_must_use)]
 	fn main() {
 	    let mut aoc = AdventOfCode::new_with_year(2018, ${3});
 	    let input: String = aoc.get_input();
 
 	    println!("{}", input);
 
-	    let output1 = 0;
-	    println!("{}", output1);
+	    let p1 = 0;
+	    println!("{}", p1);
 
-	    // aoc.submit_p1(output1);
+	    // aoc.submit_p1(p1);
 
-	    let output2 = 0;
-	    println!("{}", output2);
-	    // aoc.submit_p2(output2);
+	    let p2 = 0;
+	    println!("{}", p2);
+	    // aoc.submit_p2(p2);
 	}
 	EOF
 
