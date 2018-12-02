@@ -11,27 +11,26 @@
 # arguments so that the program runs without hitting AoC's servers.
 
 
-pth="../../common/rust/aoc/target/debug/deps/lib"
-# deps=( "--extern clap="../../common/rust/aoc/target/debug/deps/libclap*.rlib )
-deps=(
---extern clap=${pth}clap-285ebe091358d042.rlib
---extern http=${pth}http-625341d94605846a.rlib
---extern reqwest=${pth}reqwest-32689ee78bcf90d0.rlib
---extern scan_fmt=${pth}scan_fmt-4f9e0c9a54e9ab4f.rlib
---extern select=${pth}select-dd0b838d6c0ab975.rlib
---extern tap=${pth}tap-a1b1b81ca635c4dc.rlib
-)
+pth="../../common/rust/aoc/target/release/deps"
+lib="${pth}/lib"
+deps=(clap http reqwest scan_fmt select tap itertools)
+
+for ((i=0; i < ${#deps[@]}; i++)); do
+    dep=${deps[i]}
+    p=$(echo $lib$dep-*.rlib)
+    deps[i]="--extern ${dep}=${p}"
+done
 
 if [ -z "${offline+x}" ]; then
     # Not offline!
     flags=(--creds "../../common/creds")
 else
-    input_file=$(find ../ -iname '*.input')
-    flags=(--input "${input_file}")
+    # input_file=$(find ../ -iname '*.input')
+    flags=(--input ../*.input)
 fi
 
-rustc "$@" -L dependency=../../common/rust/aoc/target/debug/deps \
-   "${deps[@]}" \
-   --extern aoc=../../common/rust/aoc/target/debug/libaoc.rlib \
+rustc "$@" -L dependency="${pth}" \
+   ${deps[@]} \
+   --extern aoc="${pth}/../libaoc.rlib" \
    -o out \
-   && { ./out "${flags[@]}" ; rm -f out 2>/dev/null; }
+   && { ./out "${flags[@]}" ; [ -x "${keep+x}" ] && rm -f out 2>/dev/null; }
