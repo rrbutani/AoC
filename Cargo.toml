@@ -1,0 +1,32 @@
+[package]
+name = "aoc18"
+version = "0.0.1"
+authors = ["Rahul Butani <rr.butani@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+aoc = { path = "common/Rust/aoc" }
+clap = "2.32.0"
+reqwest = "0.9.5"
+tap = "0.3.0"
+http = "0.1.14"
+select = "0.4.2"
+scan_fmt = "0.1.3"
+itertools = "0.7.11"
+bit-set = "0.5.0"
+bit-vec = "0.5.0"
+
+[lib]
+path = "common/Rust/lib.rs"
+
+[[bin]]
+name = "day01"
+path = "01/Rust/time_drift.rs"
+
+[[bin]]
+name = "day02"
+path = "02/Rust/letter_checksum.rs"
+
+[[bin]]
+name = "day03"
+path = "03/Rust/fabric.rs"
