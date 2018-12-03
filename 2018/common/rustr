@@ -11,13 +11,12 @@
 # arguments so that the program runs without hitting AoC's servers.
 
 
-pth="../../common/rust/aoc/target/release/deps"
-lib="${pth}/lib"
-deps=(clap http reqwest scan_fmt select tap itertools)
+pth="../../common/Rust/aoc/target/release/deps"
+deps=(clap http reqwest scan_fmt select tap itertools bit_set bit_vec)
 
 for ((i=0; i < ${#deps[@]}; i++)); do
     dep=${deps[i]}
-    p=$(echo $lib$dep-*.rlib)
+    p=$(find "${pth}/" -iname "lib$dep-*.rlib" -print -quit)
     deps[i]="--extern ${dep}=${p}"
 done
 

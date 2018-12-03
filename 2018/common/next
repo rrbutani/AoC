@@ -41,6 +41,13 @@ function rust() {
 	}
 	EOF
 
+    cat <<-EOF >> "${1}/../Cargo.toml"
+
+	[[bin]]
+	name = "day${3}"
+	path = "${1}/Rust/${2}.rs"
+	EOF
+
     echo "ferris says hi"
 }
 
