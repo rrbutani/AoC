@@ -7,6 +7,7 @@ extern crate bit_vec;
 #[allow(unused_imports)]
 use aoc::{AdventOfCode, friends::*};
 use std::collections::HashMap;
+use std::u16;
 
 #[allow(unused_must_use)]
 fn main() {
@@ -66,12 +67,17 @@ fn main() {
     let mut hm: HashMap<u16, GuardRecord> = HashMap::new();
     let mut unprocessed: Vec<Item> = input.clone().collect();
 
+    // So that we properly finish off the last real guard:
+    unprocessed.push(Item { year: u16::MAX, month: 0, day: 0, hour: 0, minute: 60, event: Event::New(u16::MAX)});
+
     unprocessed.sort_by_key(|i| (i.year, i.month, i.day, i.hour, i.minute));
 
+    // Check that the first Event is a new guard:
     let guard_id: u16 = if let Event::New(g) = unprocessed[0].event { g } else {
         panic!("No guard switch as the first thing!")
     };
 
+    // And then, to get us started, set up the new guard and put them in the map:
     let mut guard = GuardRecord { id: guard_id, sleep_records: Vec::<Vec<bool>>::new() };
     guard.sleep_records.push(Vec::<bool>::with_capacity(60));
 
@@ -79,6 +85,9 @@ fn main() {
     let mut guard: &mut GuardRecord = hm.get_mut(&guard_id).unwrap();
     let mut last_state: &Event = &unprocessed[0].event;
 
+    // Skip the first 'Event' (adding the new guard) so that we don't give them an empty
+    // sleep_record (since we don't actually count awake time anywhere, this would be
+    // okay, but it's nice to avoid this).
     let mut unprocessed_iter = unprocessed.iter(); unprocessed_iter.next();
     for i in unprocessed_iter {
         match i.event {
@@ -89,14 +98,6 @@ fn main() {
 
                 (guard.sleep_records[0].len()..(i.minute as usize)).for_each(|_| {guard.sleep_records[0].push(asleep);});
             },
-            // Event::Sleeps => {
-            //     // If the previous state was Wakes or New (as it should be), mark
-            //     // until now as awake. Otherwise (if we went to sleep *after* going to
-            //     // sleep) just mark until now as asleep, I guess..
-            //     let asleep = if let Event::Sleeps = last_state { true } else { false };
-
-            //     (guard.sleep_records[0].len()..i.minute).for_each(|_| {guard.sleep_records[0].push(asleep);});
-            // },
             Event::New(g) => {
                 // Top off current record to 60:
                 let asleep = if let Event::Sleeps = last_state { true } else { false };
@@ -124,9 +125,6 @@ fn main() {
         last_state = &i.event;
     }
 
-    let asleep = if let Event::Sleeps = last_state { true } else { false };
-    (guard.sleep_records[0].len()..60).for_each(|_| {guard.sleep_records[0].push(asleep);});
-
     let p1: usize = hm.iter().max_by_key(|(_, g)| {
         g.sleep_records.iter().map(|v|{
             v.iter().filter(|b| **b).count()
@@ -138,9 +136,6 @@ fn main() {
                 .map(|v| v[*i] as u16)
                 .sum::<u16>()
         }).unwrap();
-        // let minute = minute.max_by_key(|(_, t)| t).unwrap();
-            // .map(|(m, _)| m)
-            // .unwrap();
 
         // A nice minimal lifetimes puzzle:
         // let v = vec![(0, 1), (1, 2), (2, 3)];
@@ -149,17 +144,7 @@ fn main() {
         minute * *i as usize
     }).unwrap();
 
-    println!("{}", p1);
-
-    // aoc.submit_p1(p1);
-
-    // hm.iter().for_each(|(id, g)| {
-    //     g.sleep_records.iter().for_each(|v| {
-    //         if v.len() != 60 {
-    //             println!("{} has a vec of len {}", id, v.len());
-    //         } else { println!("yo"); }
-    //     })
-    // });
+    aoc.submit_p1(p1);
 
     let p2: usize = hm.iter().map(|(id, g)| {
         // Let's turn every guard into their sleepiest minute + how many times
@@ -172,29 +157,11 @@ fn main() {
         }).enumerate().max_by(|(_, t1), (_, t2)| t1.cmp(t2)).unwrap();
 
         (id, min, time)
-    }).max_by(|(.., t1), (.., t2)| t1.cmp(t2))
+    })
+    // Get the guard who slept the most on their minute
+    .max_by(|(.., t1), (.., t2)| t1.cmp(t2))
+        // And now multiply their minute by their ID.
         .map(|(id, m, _)| *id as usize * m).unwrap();
 
-    // .max_by_key(|(_, g)| {
-    //     g.sleep_records.iter().map(|v|{
-    //         v.iter().filter(|b| **b).count()
-    //     }).sum::<usize>()
-    // }).map(|(i, g)| {
-    //     let minute = (0..60).max_by_key(|i| {
-    //         g.sleep_records
-    //             .iter()
-    //             .map(|v| v[*i] as u16)
-    //             .sum::<u16>()
-    //     }).unwrap();
-    //     // let minute = minute.max_by_key(|(_, t)| t).unwrap();
-    //         // .map(|(m, _)| m)
-    //         // .unwrap();
-
-    //     // A nice minimal lifetimes puzzle:
-    //     let v = vec![(0, 1), (1, 2), (2, 3)];
-    //     // v.iter().map(|(_, _)| (8, 9)).max_by_key(|(_, t)| t);
-
-    //     minute * *i as usize
-    // }).unwrap();
     aoc.submit_p2(p2);
 }
