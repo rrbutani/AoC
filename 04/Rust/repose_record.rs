@@ -1,8 +1,7 @@
 #!/usr/bin/env rustr
-#![feature(nll)] // Yes this is bad but you know what? Shut up.
+#![feature(nll)]
 extern crate aoc;
 #[macro_use(scan_fmt)] extern crate scan_fmt;
-extern crate bit_vec;
 
 #[allow(unused_imports)]
 use aoc::{AdventOfCode, friends::*};
@@ -31,7 +30,7 @@ struct Item {
 #[derive(Clone)]
 struct GuardRecord {
     id: u16,
-    /// true when asleep
+    /// Number of times asleep at each minute
     sleep_record: [u8; 60],
 }
 
@@ -71,25 +70,6 @@ impl FromStr for Item {
     }
 }
 
-fn print_records(guards: &HashMap<u16, GuardRecord>) {
-    println!("       000000000011111111112222222222333333333344444444445555555555");
-    println!("       012345678901234567890123456789012345678901234567890123456789");
-    guards.iter().for_each(|(id, g)|{
-        print!("#{:04}: ", id);
-        g.sleep_record.iter().for_each(|i| match i {
-            0 => print!("."),
-            1 => print!("-"),
-            2 | 3 | 4 | 5 => print!("+"),
-            6 => print!("6"),
-            7 => print!("7"),
-            8 => print!("8"),
-            9 => print!("9"),
-            _ => print!("&"),
-        });
-        println!("");
-    });
-}
-
 #[allow(unused_must_use)]
 fn main() {
     let mut aoc = AdventOfCode::new_with_year(2018, 04);
@@ -120,14 +100,9 @@ fn main() {
             (Event::Sleeps, Event::New(_)) | (Event::Sleeps, Event::Finish) => {
                 (c.minute..60).for_each(|i| guard.sleep_record[i as usize] += 1)  
             },
-            (Event::Sleeps, Event::Sleeps) => { /* bad input */ },
-            (Event::Wakes, Event::Sleeps) | (Event::Wakes, Event::New(_)) | (Event::Wakes, Event::Finish)=> { /* no need */ },
-            (Event::Wakes, Event::Wakes) => { /* bad input */ },
-            (Event::Finish, _) => { unreachable!() },
+            _ => { },
         };
     }
-
-    // print_records(&guards);
 
     let p1: usize = guards.iter()
         .max_by_key(|(_, g)| g.sleep_record.iter().fold(0u16, |acc, i| acc + *i as u16))
@@ -141,8 +116,6 @@ fn main() {
 
     aoc.submit_p1(p1);
 
-    // print_records(&guards);
-
     let p2: usize = guards.iter().map(|(id, g)| {
         // Let's turn every guard into their sleepiest minute + count for that minute:
         g.sleep_record.iter()
@@ -150,15 +123,8 @@ fn main() {
             .max_by(|(_, t1),(_, t2)| t1.cmp(t2))
             .map(|(m, t)| (t, m, id))
             .unwrap()
-    })
-    // Get the guard who slept the most on their minute
-    .max()
-        // And now multiply their minute by their ID.
-        .map(|(t, m, id)| { println!("Guard {} slept {} times at minute {}", id, t, m); *id as usize * m }).unwrap();
+    }).max() // Get the guard who slept the most on their minute
+        .map(|(_, m, id)| *id as usize * m).unwrap(); // their minute * their ID
 
     aoc.submit_p2(p2);
 }
-
-// A nice minimal lifetimes puzzle:
-// let v = vec![(0, 1), (1, 2), (2, 3)];
-// v.iter().map(|(_, _)| (8, 9)).max_by_key(|(_, t)| t);
