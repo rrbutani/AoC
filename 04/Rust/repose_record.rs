@@ -6,43 +6,49 @@ extern crate bit_vec;
 
 #[allow(unused_imports)]
 use aoc::{AdventOfCode, friends::*};
+use std::str::FromStr;
 use std::collections::HashMap;
 use std::u16;
 
-#[allow(unused_must_use)]
-fn main() {
-    let mut aoc = AdventOfCode::new_with_year(2018, 04);
-    let input: String = aoc.get_input();
+#[derive(Debug, Clone, Ord, Eq, PartialEq, PartialOrd)]
+enum Event {
+    Wakes,
+    Sleeps,
+    New(u16),
+    Finish,
+}
 
-    #[derive(Debug, Clone)]
-    enum Event {
-        Wakes,
-        Sleeps,
-        New(u16),
+#[derive(Debug, Clone, Ord, Eq, PartialEq, PartialOrd)]
+struct Item {
+    year: u16,
+    month: u8,
+    day: u8,
+    hour: u8,
+    minute: u8,
+    event: Event
+}
+
+#[derive(Clone)]
+struct GuardRecord {
+    id: u16,
+    /// true when asleep
+    sleep_record: [u8; 60],
+}
+
+impl Default for GuardRecord {
+    fn default() -> Self {
+        Self { id: 0, sleep_record: [0u8; 60] }
     }
-    
-    #[derive(Debug, Clone)]
-    struct Item {
-        year: u16,
-        month: u8,
-        day: u8,
-        hour: u8,
-        minute: u8,
-        event: Event
-    }
+}
 
-    #[derive(Debug, Clone)]
-    struct GuardRecord {
-        id: u16,
-        /// true when asleep
-        sleep_records: Vec<Vec<bool>>,
-    };
+impl FromStr for Item {
+    type Err = &'static str;
 
-    // [1518-04-05 00:03] falls asleep | wakes up | Guard #1301
-    let input = input.lines().map(|l| {
-        let mut v = l.split("]");
+    fn from_str(inp: &str) -> Result<Self, Self::Err> {
+        let mut v = inp.split("]");
         let (time, event) = (v.next().unwrap(), v.next().unwrap());
 
+        // Ex: [1518-04-05 00:03] falls asleep | wakes up | Guard #1301
         let time = scan_fmt!(time, "[{d}-{d}-{d} {d}:{d}", u16, u8, u8, u8, u8);
         let event = match event {
             e if e.contains("falls asleep") => Event::Sleeps,
@@ -51,117 +57,108 @@ fn main() {
                 let g = scan_fmt!(e, "Guard #{d} begins shift", u16);
                 Event::New(g.unwrap())
             },
-            _ => panic!("Bad input!! {}", event)
+            _ => return Err("Bad input!!")
         };
 
-        Item {
-            year: time.0.unwrap(),
-            month: time.1.unwrap(),
-            day: time.2.unwrap(),
-            hour: time.3.unwrap(),
-            minute: time.4.unwrap(),
+        Ok(Item {
+            year: time.0.ok_or("Bad year")?,
+            month: time.1.ok_or("Missing month")?,
+            day: time.2.ok_or("Where'd the day go?")?,
+            hour: time.3.ok_or("Need an hour")?,
+            minute: time.4.ok_or("No minute!")?,
             event
-        }
-    });
+        })
+    }
+}
 
-    let mut hm: HashMap<u16, GuardRecord> = HashMap::new();
-    let mut unprocessed: Vec<Item> = input.clone().collect();
+fn print_records(guards: &HashMap<u16, GuardRecord>) {
+    println!("       000000000011111111112222222222333333333344444444445555555555");
+    println!("       012345678901234567890123456789012345678901234567890123456789");
+    guards.iter().for_each(|(id, g)|{
+        print!("#{:04}: ", id);
+        g.sleep_record.iter().for_each(|i| match i {
+            0 => print!("."),
+            1 => print!("-"),
+            2 | 3 | 4 | 5 => print!("+"),
+            6 => print!("6"),
+            7 => print!("7"),
+            8 => print!("8"),
+            9 => print!("9"),
+            _ => print!("&"),
+        });
+        println!("");
+    });
+}
+
+#[allow(unused_must_use)]
+fn main() {
+    let mut aoc = AdventOfCode::new_with_year(2018, 04);
+    let input = aoc.get_input();
+    let input = input.lines().map(|l| l.parse().unwrap());
+
+    let mut guards: HashMap<u16, GuardRecord> = HashMap::new();
+    let mut event_stream: Vec<Item> = input.clone().collect();
 
     // So that we properly finish off the last real guard:
-    unprocessed.push(Item { year: u16::MAX, month: 0, day: 0, hour: 0, minute: 60, event: Event::New(u16::MAX)});
+    event_stream.push(Item {year: u16::MAX, month: 0, day: 0, hour: 0, minute: 60, event: Event::Finish});
+    event_stream.sort();
 
-    unprocessed.sort_by_key(|i| (i.year, i.month, i.day, i.hour, i.minute));
+    let mut guard = &mut GuardRecord::default();
 
-    // Check that the first Event is a new guard:
-    let guard_id: u16 = if let Event::New(g) = unprocessed[0].event { g } else {
-        panic!("No guard switch as the first thing!")
-    };
+    for v in event_stream.windows(2) {
+        let (c, n) = (v[0].clone(), v[1].clone());
 
-    // And then, to get us started, set up the new guard and put them in the map:
-    let mut guard = GuardRecord { id: guard_id, sleep_records: Vec::<Vec<bool>>::new() };
-    guard.sleep_records.push(Vec::<bool>::with_capacity(60));
-
-    hm.insert(guard_id, guard);
-    let mut guard: &mut GuardRecord = hm.get_mut(&guard_id).unwrap();
-    let mut last_state: &Event = &unprocessed[0].event;
-
-    // Skip the first 'Event' (adding the new guard) so that we don't give them an empty
-    // sleep_record (since we don't actually count awake time anywhere, this would be
-    // okay, but it's nice to avoid this).
-    let mut unprocessed_iter = unprocessed.iter(); unprocessed_iter.next();
-    for i in unprocessed_iter {
-        match i.event {
-            Event::Wakes | Event::Sleeps => {
-                // If the previous state was Sleeps (and it really should be), mark
-                // until now as asleep:
-                let asleep = if let Event::Sleeps = last_state { true } else { false };
-
-                (guard.sleep_records[0].len()..(i.minute as usize)).for_each(|_| {guard.sleep_records[0].push(asleep);});
+        match (c.event, n.event) {
+            (Event::New(id), _) => {
+                // We have a new guard! Let's set them up:
+                guard = guards.entry(id).or_insert(GuardRecord { id, sleep_record: [0u8; 60] });
             },
-            Event::New(g) => {
-                // Top off current record to 60:
-                let asleep = if let Event::Sleeps = last_state { true } else { false };
-                (guard.sleep_records[0].len()..60).for_each(|_| {guard.sleep_records[0].push(asleep);});
-                // No need to stick it in the HashMap; it should already live there.
-
-                // Check if we've got a record for our current guard:
-                guard = if hm.contains_key(&g) { hm.get_mut(&g).unwrap() } else {
-                    // And if we don't make one and stick it in:
-                    hm.insert(g, GuardRecord { id: g, sleep_records: Vec::with_capacity(60) });
-                    hm.get_mut(&g).unwrap()
-                };
-
-                // Add a new sleep record to the guard:
-                guard.sleep_records.insert(0, Vec::<bool>::new());
-
-                // And mark the guard as being not asleep until they started their
-                // shift:
-                if i.hour == 0 {
-                    (0..=i.minute).for_each(|_| {guard.sleep_records[0].push(false);});
-                }
+            (Event::Sleeps, Event::Wakes) => {
+                // Record the guard's nap!
+                (c.minute..n.minute).for_each(|i| guard.sleep_record[i as usize] += 1)
             },
+            (Event::Sleeps, Event::New(_)) | (Event::Sleeps, Event::Finish) => {
+                (c.minute..60).for_each(|i| guard.sleep_record[i as usize] += 1)  
+            },
+            (Event::Sleeps, Event::Sleeps) => { /* bad input */ },
+            (Event::Wakes, Event::Sleeps) | (Event::Wakes, Event::New(_)) | (Event::Wakes, Event::Finish)=> { /* no need */ },
+            (Event::Wakes, Event::Wakes) => { /* bad input */ },
+            (Event::Finish, _) => { unreachable!() },
         };
-
-        last_state = &i.event;
     }
 
-    let p1: usize = hm.iter().max_by_key(|(_, g)| {
-        g.sleep_records.iter().map(|v|{
-            v.iter().filter(|b| **b).count()
-        }).sum::<usize>()
-    }).map(|(i, g)| {
-        let minute = (0..60).max_by_key(|i| {
-            g.sleep_records
-                .iter()
-                .map(|v| v[*i] as u16)
-                .sum::<u16>()
-        }).unwrap();
+    // print_records(&guards);
 
-        // A nice minimal lifetimes puzzle:
-        // let v = vec![(0, 1), (1, 2), (2, 3)];
-        // v.iter().map(|(_, _)| (8, 9)).max_by_key(|(_, t)| t);
-
-        minute * *i as usize
-    }).unwrap();
+    let p1: usize = guards.iter()
+        .max_by_key(|(_, g)| g.sleep_record.iter().fold(0u16, |acc, i| acc + *i as u16))
+        .map(|(i, g)|
+            g.sleep_record.iter()
+                .enumerate()
+                .max_by(|(_, t1),(_, t2)| t1.cmp(t2))
+                .map(|(i, _)| i)
+                .unwrap() * *i as usize
+    ).unwrap();
 
     aoc.submit_p1(p1);
 
-    let p2: usize = hm.iter().map(|(id, g)| {
-        // Let's turn every guard into their sleepiest minute + how many times
-        // they've slept at that minute:
-        let (min, time) = (0..60).map(|i| {
-            g.sleep_records
-                .iter()
-                .map(|v| v[i] as u16)
-                .sum::<u16>()
-        }).enumerate().max_by(|(_, t1), (_, t2)| t1.cmp(t2)).unwrap();
+    // print_records(&guards);
 
-        (id, min, time)
+    let p2: usize = guards.iter().map(|(id, g)| {
+        // Let's turn every guard into their sleepiest minute + count for that minute:
+        g.sleep_record.iter()
+            .enumerate()
+            .max_by(|(_, t1),(_, t2)| t1.cmp(t2))
+            .map(|(m, t)| (t, m, id))
+            .unwrap()
     })
     // Get the guard who slept the most on their minute
-    .max_by(|(.., t1), (.., t2)| t1.cmp(t2))
+    .max()
         // And now multiply their minute by their ID.
-        .map(|(id, m, _)| *id as usize * m).unwrap();
+        .map(|(t, m, id)| { println!("Guard {} slept {} times at minute {}", id, t, m); *id as usize * m }).unwrap();
 
     aoc.submit_p2(p2);
 }
+
+// A nice minimal lifetimes puzzle:
+// let v = vec![(0, 1), (1, 2), (2, 3)];
+// v.iter().map(|(_, _)| (8, 9)).max_by_key(|(_, t)| t);
