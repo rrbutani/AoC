@@ -21,42 +21,37 @@ struct Cell {
     dist: u32,
 }
 
-fn manhat(x: usize, y: usize, coord: &Coord) -> u32 {
-    ((coord.x as i16 - x as i16).abs() + (coord.y as i16 - y as i16).abs()) as u32
+fn manhat(x: usize, y: usize, c: &Coord) -> u32 {
+    ((c.x as i16 - x as i16).abs() + (c.y as i16 - y as i16).abs()) as u32
+}
+
+fn new_grid(min_x: u16, max_x: u16, min_y: u16, max_y: u16, d: u32) -> Vec<Vec<Cell>> {
+    vec![ vec![ Cell { owner: None, matched: Vec::new(), dist: d };
+        (max_y - min_y + 1) as usize ]; (max_x - min_x + 1) as usize ]
 }
 
 fn flood(grid: &mut Vec<Vec<Cell>>, idx: u16, coord: &Coord) {
+    for x in 0..grid.len() { for y in 0..grid[x].len() {
+        let h = &mut grid[x][y];
+        let d = manhat(x, y, coord);
 
-    for x in 0..grid.len() {
-        for y in 0..grid[x].len() {
-            let h = &mut grid[x][y];
-            let d = manhat(x, y, coord);
-
-            h.owner = if h.dist > d {
-                h.dist = d;
-                h.matched.drain(..);
-                h.matched.push(idx);
-                Some(idx)
-            } else if h.dist == d {
-                h.matched.push(idx);
-                None
-            } else {
-                h.owner
-            };
-        }
-    }
+        h.owner = if h.dist > d {
+            h.dist = d;
+            h.matched.drain(..);
+            h.matched.push(idx);
+            Some(idx)
+        } else if h.dist == d {
+            h.matched.push(idx);
+            None
+        } else { h.owner }
+    }}
 }
 
 fn fill(grid: &mut Vec<Vec<Cell>>, coord: &Coord) {
-
-    for x in 0..grid.len() {
-        for y in 0..grid[x].len() {
-            let h = &mut grid[x][y];
-            let d = manhat(x, y, coord);
-
-            h.dist += d;
-        }
-    }
+    for x in 0..grid.len() { for y in 0..grid[x].len() {
+        let h = &mut grid[x][y];
+        h.dist += manhat(x, y, coord);
+    }}
 }
 
 #[allow(unused_must_use)]
@@ -86,16 +81,7 @@ fn main() {
         .map(|(i, c)| Coord { idx: i as u16, x: c.x - min_x, y: c.y - min_y, count: 0, infinite: false })
         .collect::<Vec<Coord>>();
 
-    let mut grid: Vec<Vec<Cell>> = Vec::with_capacity((max_x - min_x) as usize + 1);
-
-    for _x in 0..(max_x - min_x + 1) {
-        let mut v = Vec::with_capacity((max_y - min_y) as usize + 1);
-        for _y in 0..(max_y - min_y + 1) {
-            v.push(Cell { owner: None, matched: Vec::new(), dist: u32::MAX });
-        }
-        grid.push(v);
-    }
-
+    let mut grid = new_grid(min_x, max_x, min_y, max_y, u32::MAX);
     coords.iter().enumerate().for_each(|(i, c)| flood(&mut grid, i as u16, c));
 
     for x in 0..grid.len() {
@@ -118,33 +104,14 @@ fn main() {
         }
     }
 
-    // let pixels = String::from("!@#$%^&*()1234567890qwertyuioasdfghjklzxcvbnm[];',./=-~`").chars().collect::<Vec<char>>();
-
-    // for v in grid.iter() {
-    //     for c in v.iter() {
-    //         if let Some(owner) = c.owner {
-    //             print!("{}", pixels[owner as usize]);
-    //         } else {
-    //             print!(" ");
-    //         }
-    //     }
-    //     println!("");
-    // }
+    // let pixels = String::from(" !@#$%^&*()1234567890qwertyuioasdfghjklzxcvbnm[];',./=-~`").chars().collect::<Vec<char>>();
+    // grid.iter().for_each(|v| { v.iter().for_each(|c| print!("{}", pixels[c.owner.map_or(0, |c| 1 + c as usize)])); println!(" ");});
 
     let p1 = coords.iter().filter(|c| ! c.infinite).map(|c| c.count).max().unwrap();
     aoc.submit_p1(p1);
 
-    let mut grid: Vec<Vec<Cell>> = Vec::with_capacity((max_x - min_x) as usize + 1);
-
-    for _x in 0..(max_x - min_x + 1) {
-        let mut v = Vec::with_capacity((max_y - min_y) as usize + 1);
-        for _y in 0..(max_y - min_y + 1) {
-            v.push(Cell { owner: None, matched: Vec::new(), dist: 0 });
-        }
-        grid.push(v);
-    }
-
-    coords.iter().enumerate().for_each(|(_i, c)| fill(&mut grid, c));
+    let mut grid = new_grid(min_x, max_x, min_y, max_y, 0);
+    coords.iter().enumerate().for_each(|(_, c)| fill(&mut grid, c));
 
     let p2 = grid.iter().flat_map(|y| y.iter()).filter(|c| c.dist < 10_000).count();
     aoc.submit_p2(p2);
