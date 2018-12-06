@@ -4,10 +4,10 @@ extern crate aoc;
 #[allow(unused_imports)]
 use aoc::{AdventOfCode, friends::*};
 use std::u32::{self};
-// use std::collections::HashMap;
 
 #[derive(Debug, Eq, PartialEq, PartialOrd, Ord, Clone)]
 struct Coord {
+    idx: u16,
     x: u16,
     y: u16,
     count: u32,
@@ -66,25 +66,25 @@ fn main() {
 
     let input = input.lines().map(|s| {
         let mut v = s.split(',');
-        // println!("{}", v.next().unwrap());
-        // println!("{}", v.next().unwrap());
         let t: (u16, u16) = (v.next().unwrap().parse().unwrap(),
             v.next().unwrap().trim().parse().unwrap());
         
-        Coord { x: t.0, y: t.1, count: 0, infinite: false }
+        Coord { idx: 0, x: t.0, y: t.1, count: 0, infinite: false }
     });
 
-    // Need to start by establishing bounds
+    // Alright, let's be dumb and naive:
     let coords = input.clone().collect::<Vec<Coord>>();
 
-    // Alright, let's be dumb and naive:
+    // Need to start by establishing bounds
     let (min_x, max_x) = coords.iter().minmax_by_key(|c| c.x).into_option().unwrap();
     let (min_y, max_y) = coords.iter().minmax_by_key(|c| c.y).into_option().unwrap();
-    // let max_x = coords.iter().max_by_cmp(|(ax, ay), (bx, by)| ax.cmp(bx))
-    // let br = coords.iter().max().unwrap();
     let (min_x, max_x, min_y, max_y) = (min_x.x, max_x.x, min_y.y, max_y.y);
 
-    let mut coords = coords.iter().map(|c| Coord { x: c.x - min_x, y: c.y - min_y, count: 0, infinite: false } ).collect::<Vec<Coord>>();
+    let mut coords = coords
+        .iter()
+        .enumerate()
+        .map(|(i, c)| Coord { idx: i as u16, x: c.x - min_x, y: c.y - min_y, count: 0, infinite: false })
+        .collect::<Vec<Coord>>();
 
     let mut grid: Vec<Vec<Cell>> = Vec::with_capacity((max_x - min_x) as usize + 1);
 
@@ -96,40 +96,43 @@ fn main() {
         grid.push(v);
     }
 
-    coords.iter().enumerate().for_each(|(i, c)| {
-        flood(&mut grid, i as u16, c)
-    });
-
+    coords.iter().enumerate().for_each(|(i, c)| flood(&mut grid, i as u16, c));
 
     for x in 0..grid.len() {
         for y in 0..grid[x].len() {
             let c = &grid[x][y];
 
-            // println!("{}, {}", x, y);
-
-            if x == 0 || y == 0 || x as u16 == max_x || y as u16 == max_y {
+            if x == 0 || y == 0 || x as u16 == max_x - min_x || y as u16 == max_y - min_y {
                 if let Some(idx) = c.owner {
                     coords[idx as usize].infinite = true;
                 } else {
                     for v in c.matched.iter() {
                         coords[*v as usize].infinite = true;
                     }
-                } // I hope I don't need to handle this edge case!!
+                }
             }
 
             if let Some(idx) = c.owner {
                 coords[idx as usize].count += 1;
-                // println!("{} ({}, {}): {}", idx, coords[idx as usize].x, coords[idx as usize].y, coords[idx as usize].count);
             }
-
         }
     }
 
-    let p1 = coords.iter().filter(|c| ! c.infinite).map(|c| { println!("{}", c.count); c.count }).max().unwrap();
+    // let pixels = String::from("!@#$%^&*()1234567890qwertyuioasdfghjklzxcvbnm[];',./=-~`").chars().collect::<Vec<char>>();
 
-    println!("{}", p1);
+    // for v in grid.iter() {
+    //     for c in v.iter() {
+    //         if let Some(owner) = c.owner {
+    //             print!("{}", pixels[owner as usize]);
+    //         } else {
+    //             print!(" ");
+    //         }
+    //     }
+    //     println!("");
+    // }
 
-    // aoc.submit_p1(p1);
+    let p1 = coords.iter().filter(|c| ! c.infinite).map(|c| c.count).max().unwrap();
+    aoc.submit_p1(p1);
 
     let mut grid: Vec<Vec<Cell>> = Vec::with_capacity((max_x - min_x) as usize + 1);
 
@@ -141,11 +144,8 @@ fn main() {
         grid.push(v);
     }
 
-    coords.iter().enumerate().for_each(|(_i, c)| {
-        fill(&mut grid, c)
-    });
+    coords.iter().enumerate().for_each(|(_i, c)| fill(&mut grid, c));
 
     let p2 = grid.iter().flat_map(|y| y.iter()).filter(|c| c.dist < 10_000).count();
-    println!("{}", p2);
     aoc.submit_p2(p2);
 }
