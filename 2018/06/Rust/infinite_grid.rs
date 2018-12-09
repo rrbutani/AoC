@@ -104,6 +104,7 @@ fn main() {
         }
     }
 
+    // Uncomment for a (bad) Voronoi diagram (make your font really small!):
     // let pixels = String::from(" !@#$%^&*()1234567890qwertyuioasdfghjklzxcvbnm[];',./=-~`").chars().collect::<Vec<char>>();
     // grid.iter().for_each(|v| { v.iter().for_each(|c| print!("{}", pixels[c.owner.map_or(0, |c| 1 + c as usize)])); println!(" ");});
 
