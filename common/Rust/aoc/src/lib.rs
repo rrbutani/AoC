@@ -211,6 +211,9 @@ mod advent_of_code_client {
 
                 eprintln!("Message: {}", message);
 
+                // Todo: Add "curiously it's the right answer for someone else"
+                // "Curiously, it's the right answer for someone else; you're either logged in to the wrong account, unlucky, or cheating. In any case, you need to be using your puzzle input."
+
                 if message.contains("That's not the right answer") {
                     let (attempts, timeout) = if message.contains("Because you have guessed incorrectly") {
                         let idx = message.rfind("Because you have guessed incorrectly").unwrap();

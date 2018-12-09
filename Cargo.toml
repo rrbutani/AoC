@@ -42,3 +42,7 @@ path = "05/Rust/reductio.rs"
 [[bin]]
 name = "day06"
 path = "06/Rust/infinite_grid.rs"
+
+[[bin]]
+name = "day07"
+path = "07/Rust/steps.rs"
