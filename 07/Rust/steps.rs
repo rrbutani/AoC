@@ -7,7 +7,6 @@ extern crate aoc;
 #[allow(unused_imports)]
 use aoc::{AdventOfCode, friends::*};
 use std::slice::Iter;
-use std::{thread, time};
 
 #[derive(Clone, Copy)]
 struct Steps {
@@ -146,79 +145,7 @@ fn main() {
         find_or_create(&mut steps, s, &mut total);
     });
 
-    fn prop(steps: &[Option<Steps>], mut curr: u32, order: &mut String) -> u32 {
-        for s in steps.iter().filter_map(|s| *s) {
-            // Check that we have the necessary prereqs:
-            if s.prereqs | curr != curr { continue }
-
-            // And that we haven't already done this step:
-            if curr | (1 << (s.name as usize - A)) == curr { continue }
-
-            // If we haven't, let's:
-            // Do this step:
-            order.push(s.name);
-
-            // Update curr to indicate that we've done this step:
-            curr |= 1 << (s.name as usize - A);
-
-            // Recurse to see what steps we can now do:
-            curr = prop(steps, curr, order);
-        }
-
-        // let mut acc = 0u32;
-        // curr |= steps
-        //     .iter()
-        //     .filter_map(|s| *s)
-        //     // Check that we have the necessary prereqs:
-        //     .filter(|s| s.prereqs | curr == curr)
-        //     // And that we haven't already done this step:
-        //     .filter(|s| curr | (1 << (s.name as usize - A)) != curr)
-        //     // If we haven't, let's:
-        //     .map(|s| {
-        //         // Do this step:
-        //         order.push(s.name);
-        //         // 
-        //         acc |= curr | (1 << (s.name as usize - A));
-        //         let curr = prop(steps, acc, order);
-        //         (curr, 1 << (s.name as usize - A))
-        //     })
-        //     .fold((0u32, 0u32), |(c1, acc), (curr, c)| (c1 | acc | curr | c, 0u32)).0;
-            curr
-    }
-
-    fn _prop(steps: &[Option<Steps>], curr: u32, parent: &mut Node) -> u32 {
-        // println!("For parent: {:?}", parent.name);
-        let mut currs: Vec<u32> = Vec::new();
-        for s in steps.iter().filter_map(|s| *s) {
-            // Check that we have the necessary prereqs:
-            if s.prereqs | curr != curr { continue }
-
-            // And that we haven't already done this step:
-            if curr | (1 << (s.name as usize - A)) == curr { continue }
-
-            // If we haven't, let's:
-            // Make a Node for this step:
-            let mut n = Node { name: s.name, allows_for: Vec::new() };
-
-            // println!("We can do {}", n.name);
-            // Update curr to indicate we've done this step:
-            let curr_local = curr | 1 << (s.name as usize - A);
-
-            // Recurse to see what steps we can do now:
-            currs.push(prop2(steps, curr_local, &mut n));
-
-            // And finally, add this node to it's parent:
-            parent.allows_for.push(n);
-        }
-
-        currs.iter().fold(0u32, |acc, x| acc | x)
-    }
-
-    fn prop2(steps: &[Option<Steps>], visited: u32, parent: &mut Node) -> u32 {
-        let mut visited_staged = visited;
-
-        // println!("For parent: {:?}", parent.name);
-
+    fn prop(steps: &[Option<Steps>], mut visited: u32, parent: &mut Node) -> u32 {
         for s in steps.iter().filter_map(|s| *s) {
             // Given the steps we've completed, check if we can complete this step:
             if s.prereqs | visited != visited { continue }
@@ -231,25 +158,20 @@ fn main() {
 
             // If we haven't, make a Node for this step:
             let mut n = Node { name: s.name, allows_for: Vec::new() };
-            // println!("We can do {}", n.name);
 
             // Check what steps finishing our current step allows us to do:
-            // Note that the recursive call is given a visited value that indicates:
-            //   - n is complete
-            //   - steps completed before this iteration are complete
-            //   - steps that are finished *in* this iteration (besides n) are not complete
-            visited_staged |= prop2(steps, visited_staged | (1 << (s.name as usize - A)), &mut n);
+            visited |= prop(steps, visited | (1 << (s.name as usize - A)), &mut n);
             
             // And finally, add this node to it's parent:
             parent.allows_for.push(n);
         }
 
-        visited_staged
+        visited
     }
 
 
     let mut root: Node = Node { name: '@', allows_for: Vec::new() };
-    while curr != total { curr = prop2(&steps, curr, &mut root) }
+    while curr != total { curr = prop(&steps, curr, &mut root) }
 
     let mut iter = root.iter().filter_map(|e|
         match e {
@@ -261,26 +183,9 @@ fn main() {
     let order: String = iter.map(|n| n.name).collect();
 
 
-    // while curr != total {
-    //     // Check that we've met all the prereqs that this step needs:
-    //     curr = prop(&steps, curr, &mut order);
-    // }
-
-    // Flatten to a string:
-    
-
-    println!("{}", order);
     // P1: DFS except you have to check that all incoming edges are traversed
-    // aoc.submit_p1(order);
+    aoc.submit_p1(order);
 
-
-    let mut iter = root.iter().filter_map(|e|
-        match e {
-            IteratorEvent::Added(n) => Some(n),
-            _ => None
-        });
-
-    // root.iter().for_each(|e| println!("{:?}", e));
 
     #[derive(Debug)]
     enum Next<'a> {
@@ -296,7 +201,6 @@ fn main() {
     iter.next(); // Skip root
     let mut previous = iter.next().unwrap();
     for e in iter {
-        // println!("{:?}", e);
         match (previous, e) {
             (Entered(n), Added(_)) => tranches.push(Next::Stall(n)),
             (Added(n), _) => tranches.push(Next::Node(n)),
@@ -310,15 +214,7 @@ fn main() {
     let mut workers: [(Option<char>, u8); 5] = [(None, 0u8); 5];
     let mut curr: u32 = 0;
 
-    // tranches.iter().for_each(|s| {
-    //     match s {
-    //         Next::Node(n) => println!("NODE: {}", n.name),
-    //         Next::Stall(n) => println!("STALL: {}", n.name),
-    //     }
-    // });
-
     while curr != total {
-
         for (n, t) in workers.iter_mut() {
             if *t == 0 {
                 // For all the workers that are done with a step, mark curr to match:
@@ -332,7 +228,6 @@ fn main() {
         }
 
         for (n, t) in workers.iter_mut() {
-            
             // If this worker is done:
             if *t == 0 {
                 // Try to find some new work for this node, if we still
@@ -341,12 +236,10 @@ fn main() {
 
                 // If we've got a stall condition:
                 if let Next::Stall(n) = tranches[0] {
-                    // println!("Stalled on {}", n.name);
                     // See if we can resolve it:
                     if curr | 1 << (n.name as usize - A) == curr {
                         tranches.remove(0);
                         if tranches.len() == 0 { continue }
-                        // println!("Stall resolved.");
                     }
                 }
 
@@ -355,7 +248,6 @@ fn main() {
                     *n = Some(next.name);
                     *t = next.name as u8 - 5; // minus 1 because we include this step
                     tranches.remove(0);
-                    // println!("Worker now working on {} for {} time steps", n.unwrap(), *t);
                 }
             } else {
                 // If this worker isn't done, just business as usual:
@@ -364,18 +256,9 @@ fn main() {
         }
 
         time_step += 1;
-        println!("{}: {:?}", time_step, workers);
+        // println!("{}: {:?}", time_step, workers);
     }
 
-    // while curr != total {
-
-    //     workers.iter_mut().filter(|(t, n)| t == 0).
-
-    //     time_step += 1;
-    // }
-
-
-    println!("{}", time_step);
     // P2: BFS. The timings and the fact that we're sorting by cost eliminates
     // all the edge cases, I think.
     aoc.submit_p2(time_step);
