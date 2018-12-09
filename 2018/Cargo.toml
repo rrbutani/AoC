@@ -46,3 +46,7 @@ path = "06/Rust/infinite_grid.rs"
 [[bin]]
 name = "day07"
 path = "07/Rust/steps.rs"
+
+[[bin]]
+name = "day08"
+path = "08/Rust/license_file.rs"
