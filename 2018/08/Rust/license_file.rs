@@ -8,29 +8,26 @@ use aoc::{AdventOfCode, friends::*};
 fn main() {
     let mut aoc = AdventOfCode::new_with_year(2018, 08);
     let input: String = aoc.get_input();
-    let input = input.lines().next().unwrap();
-    let input = input.split(" ").map(|s| s.parse::<u32>().unwrap());
+    let input = input.lines().next().unwrap().split(" ").map(|s| s.parse::<u32>().unwrap());
 
-    fn metadata_sum(i: &mut impl Iterator<Item=u32>) -> u32 {
+    fn metadata_sum(i: &mut Iterator<Item=u32>) -> u32 {
         let (children, metadata) = (i.next().unwrap(), i.next().unwrap());
 
-        let sum: u32 = (0..children).map(|_| metadata_sum(i)).sum();
-
-        sum + (0..metadata).map(|_| i.next().unwrap()).sum::<u32>()
+        (0..children).map(|_| metadata_sum(i)).sum::<u32>()
+            + i.take(metadata as usize).sum::<u32>()
     }
 
     aoc.submit_p1(metadata_sum(&mut input.clone()));
 
-    fn sum(i: &mut impl Iterator<Item=u32>) -> u32 {
-        let (children, metadata) = (i.next().unwrap(), i.next().unwrap());
+    fn sum(i: &mut Iterator<Item=u32>) -> u32 {
+        let (kid_count, metadata) = (i.next().unwrap(), i.next().unwrap());
 
-        let children: Vec<u32> = (0..children).map(|_| sum(i)).collect();
-        let metadata: Vec<u32> = (0..metadata).map(|_| i.next().unwrap()).collect();
+        let kids: Vec<u32> = (0..kid_count).map(|_| sum(i)).collect();
+        let metadata = i.take(metadata as usize);
 
-        if children.len() == 0 {
-            metadata.iter().sum()
-        } else {
-            metadata.iter().filter(|i| 1 <= **i && **i as usize <= children.len()).map(|i| children[*i as usize - 1]).sum()
+        if kids.len() == 0 { metadata.sum() }
+        else {
+            metadata.filter(|i| 1 <= *i && *i <= kid_count).map(|i| kids[i as usize - 1]).sum()
         }
     }
 
