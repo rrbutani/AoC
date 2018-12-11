@@ -50,3 +50,7 @@ path = "07/Rust/steps.rs"
 [[bin]]
 name = "day08"
 path = "08/Rust/license_file.rs"
+
+[[bin]]
+name = "day09"
+path = "09/Rust/marble_mania.rs"
