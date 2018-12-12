@@ -526,6 +526,9 @@ mod tests {
         assert_current(&circle, 40); circle.rotate_clockwise(42);
         assert_current(&circle, 20); circle.rotate(-2);
         assert_current(&circle, 40);
+
+        // TODO: Regression test for when a node is removed but other
+        // nodes still remain.
     }
 
     #[test]
