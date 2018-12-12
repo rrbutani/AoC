@@ -57,5 +57,9 @@ name = "day09"
 path = "09/Rust/marble_mania.rs"
 
 [[bin]]
+name = "day10"
+path = "10/Rust/lights_in_the_sky.rs"
+
+[[bin]]
 name = "day12"
 path = "12/Rust/pots.rs"
