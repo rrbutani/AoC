@@ -109,11 +109,7 @@ fn prompt(s: &str) -> bool {
     let io = io::stdin();
     let mut input = String::new();
     io.lock().read_line(&mut input).ok();
-    // io.lock().read_to_string(&mut input).expect("Couldn't read input.");
-    
-    // println!("GOT: {}", input);
 
-    // if let Some('y') = input.trim().to_lowercase().chars().next() {
     if let Some('y') = input.trim().to_lowercase().chars().next() {
         println!("Proceeding.\n");
         true
@@ -216,30 +212,10 @@ fn main() {
             }
         }
 
-        // if dir {
-        //     (0..count).for_each(|_| points.iter_mut().for_each(forward))
-        // } else {
-        //     (0..count).for_each(|_| points.iter_mut().for_each(backward))
-        // }
-
         if let Some(s) = draw(&points) {
             aoc.submit_p1(s);//.and_then(|_| aoc.submit_p2(total_count));
             if prompt("Right?") { aoc.submit_p2(total_count); }
             if prompt("Exit?") { break; }
         }
     }
-
-    // for _ in 0..100 {
-    //     points.iter_mut().for_each(|p| p.step_forward());
-    //     draw(&points);
-    // }
-
-    let p1 = 0;
-    println!("{}", p1);
-
-    // aoc.submit_p1(p1);
-
-    let p2 = 0;
-    println!("{}", p2);
-    // aoc.submit_p2(p2);
 }
