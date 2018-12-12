@@ -61,5 +61,9 @@ name = "day10"
 path = "10/Rust/lights_in_the_sky.rs"
 
 [[bin]]
+name = "day11"
+path = "11/Rust/chronal_charge.rs"
+
+[[bin]]
 name = "day12"
 path = "12/Rust/pots.rs"
