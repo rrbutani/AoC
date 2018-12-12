@@ -12,7 +12,7 @@
 
 
 pth="../../common/Rust/aoc/target/release/deps"
-deps=(clap http reqwest scan_fmt select tap itertools bit_set bit_vec)
+deps=(clap http reqwest scan_fmt select tap itertools bit_set bit_vec arrayvec)
 
 for ((i=0; i < ${#deps[@]}; i++)); do
     dep=${deps[i]}
