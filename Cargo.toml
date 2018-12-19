@@ -69,5 +69,9 @@ name = "day12"
 path = "12/Rust/pots.rs"
 
 [[bin]]
+name = "day13"
+path = "13/Rust/minecart_madness.rs"
+
+[[bin]]
 name = "day14"
 path = "14/Rust/recipes.rs"
