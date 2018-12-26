@@ -16,6 +16,7 @@ itertools = "0.7.11"
 bit-set = "0.5.0"
 bit-vec = "0.5.0"
 arrayvec = "0.4.8"
+macros = { path = "common/Rust/macros" }
 
 [lib]
 path = "common/Rust/lib.rs"

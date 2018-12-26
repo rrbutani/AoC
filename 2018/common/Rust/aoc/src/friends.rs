@@ -3,6 +3,23 @@ pub use itertools::Itertools;
 use std::iter::Iterator;
 use core::ops::{Add, DerefMut};
 
+/// Types that implement this can cycle through some set number of states.
+/// It is up to the implementer whether to repeat states once they have all
+/// been covered or to simply repeatedly return the last state.
+pub trait StateSequence {
+    fn next(&self) -> Self;
+}
+
+/// Like StateSequence, but also mutates the item it is called from. Like with
+/// StateSequence, it is up the implementer whether states are cycled through
+/// again or whether the last state is simply repeated.
+///
+/// Note that while it is permissible to implement both StateSequence and
+/// StateSequenceMutate on a type, the #[sequence()] macro will never do this.
+pub trait StateSequenceMutate {
+    fn next(&mut self) -> Self;
+}
+
 pub trait Accumulator: Iterator {
 
     /// Self::Item is the input type
