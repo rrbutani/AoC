@@ -31,5 +31,6 @@ fi
 rustc "$@" -L dependency="${pth}" \
    ${deps[@]} \
    --extern aoc="${pth}/../libaoc.rlib" \
+   --extern aoc="${pth}/../libmacros.rlib" \
    -o out \
    && { ./out "${flags[@]}" ; [ -z "${keep+x}" ] && rm -f out 2>/dev/null; }
