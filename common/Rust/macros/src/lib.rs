@@ -1,30 +1,12 @@
 #![recursion_limit = "128"]
-// #![feature(concat_idents)]
 
 extern crate proc_macro;
-// extern crate proc_macro2;
-extern crate aoc;
-extern crate quote;
 #[macro_use] extern crate syn;
 
-
-// use syn::AttributeArgs;
-// use syn::punctuated::Punctuated;
 use syn::{AttributeArgs, DeriveInput};
-use crate::proc_macro::TokenStream;
-// use crate::proc_macro2::Span;
+use proc_macro::TokenStream;
 use quote::quote;
 use std::iter;
-// use syn::Item;
-// use aoc::friends::{StateSequence, StateSequenceMutate};
-
-/// A crash course in Rust macros:
-///
-/// We've got *declarative* macros and *procedural* macros.
-///
-/// Declarative macros are like C macros in that they ultimately do replacement
-/// but they're better since they' 
-
 
 enum Looping {
     Loop,
@@ -127,12 +109,7 @@ impl Config {
 // TODO: multiple errors before panicking?
 #[proc_macro_attribute]
 pub fn sequence(attr: TokenStream, item: TokenStream) -> TokenStream {
-    // let attr = syn::parse_macro_input!(attr as Punctuated<syn::Item, Token![,]>);
-    // let attr_raw = attr.clone();
     let attr = syn::parse_macro_input!(attr as AttributeArgs);
-    // let attr = syn::Punctuated::parse_terminated(attr)
-    // let attr = syn::parse_macro_input!(attr as Punctuated<syn::NestedMeta, Token![,]>);
-
     let mut config = Config::default();
     let mut num = 0;
 
@@ -140,7 +117,7 @@ pub fn sequence(attr: TokenStream, item: TokenStream) -> TokenStream {
         match num {
             0..=2 => {
                 if let syn::NestedMeta::Meta(syn::Meta::Word(w)) = nm {
-                    let nom: String = w.to_string();//.expect("???");
+                    let nom: String = w.to_string();
 
                     config.set(match num {
                         0 => Looping::into,
@@ -152,21 +129,6 @@ pub fn sequence(attr: TokenStream, item: TokenStream) -> TokenStream {
                 } else {
                     panic!("Invalid arg!")
                 }
-
-                // // Check that this is a VerbatimItem:
-                // if let syn::NestedMeta::Literal(syn::Lit::Str(l)) = a {
-                //     let nom: String = l.value();//.expect("???");
-
-                //     config.set(match num {
-                //         0 => Looping::into,
-                //         1 => Mutability::into,
-                //         2 => ImplIter::into,
-                //         _ => unreachable!(),
-                //     }(&nom));
-                // } else {
-                //     panic!(format!("Invalid arg `{:?}`", attr_raw))
-                //     // panic!("Invalid arg")
-                // }
             },
             _ => {
                 // TODO: Span this correctly
@@ -194,9 +156,6 @@ pub fn sequence(attr: TokenStream, item: TokenStream) -> TokenStream {
         _ => panic!("We can only generate StateSequence implementations for Enums!")
     }
 
-    // TODO: Edge case: 1 variant? (I think this is fine)
-    // TODO: Edge case: 0 variants? (this is not fine)
-
     // for a .. d this'll give us (a, b), ... (c, d).
     let state_transitions = states.iter()
         .zip(states.iter().skip(1))
@@ -207,32 +166,6 @@ pub fn sequence(attr: TokenStream, item: TokenStream) -> TokenStream {
 
     let (from, to) = (state_transitions.clone().map(|(f, _)| f), state_transitions.clone().map(|(_, t)| t));
 
-    // let trait_name = match config.mutability {
-    //     Mutability::DoNot => "",
-    //     Mutability::Modify => "",
-    // }
-
-        // use self::#enum_name::*;
-    // let match_block = quote! {
-    //     #item
-    //     impl StateSequence for #enum_name {
-    //         fn next(&self) -> Self {
-    //             use self::#enum_name::*;
-    //             match *self {
-    //                 #( #from => #to, )*
-    //             }
-    //         }
-    //     }
-
-    //     impl Iterator for #enum_name {
-    //         type Item = Self;
-    //         fn next(&mut self) -> Option<Self> {
-    //             Some(self.next())
-    //         }
-    //     }
-
-    // };
-
     let match_block = quote! {
         match *self {
             #( #from => #to, )*
@@ -242,7 +175,7 @@ pub fn sequence(attr: TokenStream, item: TokenStream) -> TokenStream {
     let trait_impl = match config.mutability {
         Mutability::DoNot => {
             quote! {
-                impl aoc::friends::StateSequence for self::#enum_name {
+                impl crate::aoc::friends::StateSequence for self::#enum_name {
                     fn next(&self) -> Self {
                         use self::#enum_name::*;
                         #match_block
@@ -252,7 +185,7 @@ pub fn sequence(attr: TokenStream, item: TokenStream) -> TokenStream {
         },
         Mutability::Modify => {
             quote! {
-                impl aoc::friends::StateSequenceMutate for self::#enum_name {
+                impl crate::aoc::friends::StateSequenceMutate for self::#enum_name {
                     fn next(&mut self) -> Self {
                         use self::#enum_name::*;
                         *self = #match_block;
@@ -264,8 +197,8 @@ pub fn sequence(attr: TokenStream, item: TokenStream) -> TokenStream {
     };
 
     let next_fn_invocation = match config.mutability {
-        Mutability::DoNot => quote! { aoc::friends::StateSequence },
-        Mutability::Modify => quote! { aoc::friends::StateSequenceMutate },
+        Mutability::DoNot => quote! { crate::aoc::friends::StateSequence },
+        Mutability::Modify => quote! { crate::aoc::friends::StateSequenceMutate },
     };
 
     let with_iter_impl = match config.impl_iter {
@@ -304,15 +237,6 @@ pub fn sequence(attr: TokenStream, item: TokenStream) -> TokenStream {
                     }
                 }
 
-                // impl IntoIterator for self::#enum_name {
-                //     type Item = Self;
-                //     type IntoIter = #struct_name;
-
-                //     fn into_iter(self) -> Self::IntoIter {
-
-                //     }
-                // }
-
                 impl<'a> Iterator for #struct_name<'a> {
                     type Item = self::#enum_name;
 
@@ -327,13 +251,6 @@ pub fn sequence(attr: TokenStream, item: TokenStream) -> TokenStream {
                                 Some(n)
                             }
                         } else { None };
-                        // self.last = n;
-
-                        // if c == n {
-                        //     None
-                        // } else {
-                        //     Some(c)
-                        // }
 
                         c
                     }
@@ -349,26 +266,5 @@ pub fn sequence(attr: TokenStream, item: TokenStream) -> TokenStream {
         #with_iter_impl
     };
 
-    // println!("{}", match_block);
-
-    // match_block.into()
     all_together.into()
 }
-
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-
-//     #[test]
-//     fn basic() {
-//         #[sequence]
-//         enum Test1 {
-//             Hello,
-//             World,
-//         }
-
-//         let a = Test1::Hello;
-
-//         assert_eq!(a.next(), Test1::World);
-//     }
-// }
