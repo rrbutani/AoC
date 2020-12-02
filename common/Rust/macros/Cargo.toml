@@ -1,5 +1,5 @@
 [package]
-name = "macros"
+name = "aoc-macros"
 version = "0.1.0"
 authors = ["Rahul Butani <rr.butani@gmail.com>"]
 edition = "2018"
@@ -8,10 +8,5 @@ edition = "2018"
 proc-macro = true
 
 [dependencies]
-syn = { version = "0.15.23", features = ["full"] }
-quote = "0.6.10"
-aoc = { path = "../aoc" }
-# proc-macro2 = "0.4"
-
-# [dependencies.syn]
-# features = ["full"]
+syn = { version = "1.0.53", features = ["derive"] }
+quote = "1.0.7"

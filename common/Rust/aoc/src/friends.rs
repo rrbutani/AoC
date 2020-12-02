@@ -1,6 +1,13 @@
 use core::ops::{Add, DerefMut};
 use std::iter::Iterator;
 
+#[doc(inline)]
+pub use crate::sequence;
+
+pub use scan_fmt::scan_fmt_some as scan_fmt;
+
+pub use itertools::{self, Itertools};
+
 /// Types that implement this can cycle through some set number of states.
 /// It is up to the implementer whether to repeat states once they have all
 /// been covered or to simply repeatedly return the last state.

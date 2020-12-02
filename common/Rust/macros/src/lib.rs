@@ -1,9 +1,6 @@
 #![recursion_limit = "128"]
 
-extern crate proc_macro;
-#[macro_use] extern crate syn;
-
-use syn::{AttributeArgs, DeriveInput};
+use syn::{AttributeArgs, DeriveInput, parse_macro_input};
 use proc_macro::TokenStream;
 use quote::quote;
 use std::iter;
@@ -116,8 +113,8 @@ pub fn sequence(attr: TokenStream, item: TokenStream) -> TokenStream {
     for nm in attr {
         match num {
             0..=2 => {
-                if let syn::NestedMeta::Meta(syn::Meta::Word(w)) = nm {
-                    let nom: String = w.to_string();
+                if let syn::NestedMeta::Meta(syn::Meta::Path(w)) = nm {
+                    let nom: String = w.get_ident().unwrap().to_string();
 
                     config.set(match num {
                         0 => Looping::into,

@@ -13,15 +13,16 @@ function dependencies() {
 langs=(rust)
 
 function python() {
-    mkdir -p "${1}/Python" && touch "${1}/${2}.py"
+    mkdir -p "${1}/Python" && touch "${1}/${2}.py" && chmod +x "${1}/${2}.py"
 }
 
 function rust() {
-    mkdir -p "${1}/" && touch "${1}/${2}.rs"
+    mkdir -p "${1}/" && touch "${1}/${2}.rs" && chmod +x "${1}/${2}.rs"
     cat <<-EOF > "${1}/${2}.rs"
 	#!/usr/bin/env rustr
 
-	use aoc::*;
+	#[allow(unused_imports)]
+	use aoc::{AdventOfCode, friends::*};
 
 	fn main() {
 	    let mut aoc = AdventOfCode::new(${YEAR}, ${3});
@@ -31,11 +32,11 @@ function rust() {
 
 	    let p1 = 0;
 	    println!("{}", p1);
-	    // aoc.submit_p1(p1);
+	    // let _ = aoc.submit_p1(p1);
 
 	    let p2 = 0;
 	    println!("{}", p2);
-	    // aoc.submit_p2(p2);
+	    // let _ = aoc.submit_p2(p2);
 	}
 	EOF
 
