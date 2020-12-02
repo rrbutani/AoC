@@ -20,7 +20,7 @@ pub trait StateSequence {
 /// again or whether the last state is simply repeated.
 ///
 /// Note that while it is permissible to implement both StateSequence and
-/// StateSequenceMutate on a type, the #[sequence()] macro will never do this.
+/// StateSequenceMutate on a type, the `#[sequence()]` macro will never do this.
 pub trait StateSequenceMutate {
     fn next(&mut self) -> Self;
 }

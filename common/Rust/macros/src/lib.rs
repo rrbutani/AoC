@@ -214,7 +214,7 @@ pub fn sequence(attr: TokenStream, item: TokenStream) -> TokenStream {
         ImplIter::Into => {
             let span = enum_name.span();
             let struct_name = syn::Ident::new(&format!("_{}{}", enum_name.to_string(), "_Iterator"), span);
-            println!("{}", struct_name);
+
             quote! {
                 #trait_impl
 
