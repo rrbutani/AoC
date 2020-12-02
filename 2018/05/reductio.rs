@@ -23,7 +23,7 @@ fn reduce(polymer: &mut Vec<u8>) -> &mut Vec<u8> {
 
 #[allow(unused_must_use)]
 fn main() {
-    let mut aoc = AdventOfCode::new_with_year(2018, 05);
+    let mut aoc = AdventOfCode::new(2018, 05);
     let input: String = aoc.get_input();
     let input = input.lines().next().unwrap().clone().get(0..).unwrap().bytes();
 

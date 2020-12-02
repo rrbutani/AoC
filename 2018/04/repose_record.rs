@@ -72,7 +72,7 @@ impl FromStr for Item {
 
 #[allow(unused_must_use)]
 fn main() {
-    let mut aoc = AdventOfCode::new_with_year(2018, 04);
+    let mut aoc = AdventOfCode::new(2018, 04);
     let input = aoc.get_input();
     let input = input.lines().map(|l| l.parse().unwrap());
 
@@ -98,7 +98,7 @@ fn main() {
                 (c.minute..n.minute).for_each(|i| guard.sleep_record[i as usize] += 1)
             },
             (Event::Sleeps, Event::New(_)) | (Event::Sleeps, Event::Finish) => {
-                (c.minute..60).for_each(|i| guard.sleep_record[i as usize] += 1)  
+                (c.minute..60).for_each(|i| guard.sleep_record[i as usize] += 1)
             },
             _ => { },
         };

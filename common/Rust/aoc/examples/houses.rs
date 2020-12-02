@@ -1,15 +1,12 @@
-extern crate aoc;
-extern crate itertools;
-
 #[allow(unused_imports)]
 use aoc::{AdventOfCode, friends::*};
 use std::collections::HashSet;
 
 #[allow(unused_must_use)]
 fn main() {
-    let mut aoc = AdventOfCode::new_with_year(2015, 3);
+    let mut aoc = AdventOfCode::new(2015, 3);
     let input: String = aoc.get_input();
- 
+
     fn do_the_steps(hs: &mut HashSet<(i16, i16)>, s: &str) {
         let (mut x, mut y) = (0, 0);
         hs.insert((x, y));
@@ -39,7 +36,7 @@ fn main() {
     let houses_p2: usize = input.lines().map(|l|{
         let mut hs = HashSet::<(i16, i16)>::new();
         do_the_steps(&mut hs, &l.chars().step_by(2).collect::<String>());
-        
+
         let mut robo = l.chars();
         robo.next();
         do_the_steps(&mut hs, &robo.step_by(2).collect::<String>());

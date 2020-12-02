@@ -39,7 +39,7 @@ fn max_in_grid(serial_number: i32) -> ((u16, u16, u16), i32) {
 
 #[allow(unused_must_use)]
 fn main() {
-    let mut aoc = AdventOfCode::new_with_year(2018, 11);
+    let mut aoc = AdventOfCode::new(2018, 11);
     let input: String = aoc.get_input();
 
     let serial_number = input.lines().next().unwrap().parse::<i32>().unwrap();

@@ -5,13 +5,13 @@ use std::path::{Component, Path, PathBuf};
 
 use clap::{App, Arg, ArgGroup};
 use http::StatusCode;
-use reqwest::{header, Client, Error as RequestError, RedirectPolicy, Url};
-use scan_fmt::scan_fmt;
+use reqwest::{header, blocking::Client, Error as RequestError, Url};
+use scan_fmt::scan_fmt_some;
 use select::{
     document::Document,
     predicate::Name,
 };
-use tap::TapOps;
+use tap::tap::Tap;
 
 #[derive(Debug, PartialEq)]
 pub struct AocClient {
@@ -68,7 +68,7 @@ impl Part {
 pub type AocResult = Result<String, AocError>;
 
 fn get_client(token: &String) -> Result<Client, AocError> {
-    let tok = String::from("session=").tap(|s| s.push_str(token));
+    let tok = String::from("session=").tap_mut(|s| s.push_str(token));
 
     let mut headers = header::HeaderMap::new();
     headers.insert(
@@ -76,10 +76,9 @@ fn get_client(token: &String) -> Result<Client, AocError> {
         header::HeaderValue::from_str(&tok).map_err(|e| AocError::InvalidToken(e.to_string()))?,
     );
 
-    reqwest::Client::builder()
+    Client::builder()
         .default_headers(headers)
         // .gzip(true)
-        .redirect(RedirectPolicy::none())
         .build()
         .map_err(|e| AocError::RequestError(e))
 }
@@ -136,16 +135,17 @@ pub fn get_input(year: u16, day: u8, token: &String) -> AocResult {
     let url =
         Url::parse(&get_input_url(year, day)).map_err(|e| AocError::UnknownError(e.to_string()))?;
 
-    let mut resp = client
+    let resp = client
         .get(url)
         .send()
         .map_err(err_mapper)?
         .error_for_status()
         .map_err(err_mapper)?;
 
+    let status = resp.status();
     let body = resp.text().map_err(|e| AocError::RequestError(e))?;
 
-    match resp.status() {
+    match status {
         StatusCode::OK => Ok(body),
         _ => Err(AocError::UnknownError(body)),
     }
@@ -172,7 +172,7 @@ pub fn submit_answer(
     );
     params.insert("answer", answer);
 
-    let mut resp = client
+    let resp = client
         .post(url)
         .form(&params)
         .send()
@@ -180,9 +180,10 @@ pub fn submit_answer(
         .error_for_status()
         .map_err(err_mapper)?;
 
+    let status = resp.status();
     let body = resp.text().map_err(|e| AocError::RequestError(e))?;
 
-    match resp.status() {
+    match status {
         StatusCode::OK => {
             let doc = Document::from(body.as_str());
 
@@ -219,7 +220,7 @@ pub fn submit_answer(
                     let end_idx = incorrect_msg.find('.').unwrap();
                     let incorrect_msg = &incorrect_msg[..end_idx];
 
-                    scan_fmt!(incorrect_msg,
+                    scan_fmt_some!(incorrect_msg,
                         "Because you have guessed incorrectly {} times on this \
                         puzzle, please wait {} minutes before trying again",
                         u8, u8)
@@ -233,7 +234,7 @@ pub fn submit_answer(
 
                     let timeout_message = &message[idx + 12..idx_end];
 
-                    scan_fmt!(timeout_message, " {} ", u8)
+                    scan_fmt_some!(timeout_message, " {} ", u8)
                 } else {
                     timeout
                 };
@@ -254,7 +255,7 @@ pub fn submit_answer(
 
                     let timeout_message = &message[start_idx + 8..end_idx];
 
-                    scan_fmt!(timeout_message, " {}m {}s ", u8, u8)
+                    scan_fmt_some!(timeout_message, " {}m {}s ", u8, u8)
                 } else {
                     (None, None)
                 };
@@ -314,8 +315,8 @@ fn get_cached_file_path(day: u8, tok: Option<&str>) -> PathBuf {
     );
 
     file_path
-        .tap(|f| f.push(Component::ParentDir))
-        .tap(|f| f.push(file_name))
+        .tap_mut(|f| f.push(Component::ParentDir))
+        .tap_mut(|f| f.push(file_name))
 }
 
 impl Config {
@@ -397,7 +398,7 @@ impl Config {
             .get_matches();
 
         fn read_token_from_file(cred_file_path: impl AsRef<Path>) -> Option<String> {
-            let mut file = File::open(cred_file_path).ok()?;
+            let mut file = File::open(cred_file_path.as_ref()).ok()?;
             let mut token = String::new();
 
             file.read_to_string(&mut token).expect(&format!(
@@ -419,7 +420,7 @@ impl Config {
         // token.
         let token = if let Some(cred_file) = matches.value_of("creds") {
             Some(
-                read_token_from_file(cred_file)
+                read_token_from_file(&  cred_file)
                     .expect(&format!("Unable to open `{}`.", cred_file)),
             )
         } else if let Some(token) = matches.value_of("token") {
@@ -429,6 +430,8 @@ impl Config {
         } else {
             // Try to use "../common/creds" as a last resort:
             read_token_from_file("../common/creds")
+                .or_else(|| read_token_from_file("../../common/creds"))
+                .or_else(|| read_token_from_file("../../../common/creds"))
         };
 
         // Now check if the token (if we have one) is valid:
@@ -493,9 +496,9 @@ impl Config {
         }
     }
 
-    pub(crate) fn assert_config(self, inp: InputSource, out: OutputSink) -> bool {
-        self.input == inp && self.output == out
-    }
+    // pub(crate) fn assert_config(self, inp: InputSource, out: OutputSink) -> bool {
+    //     self.input == inp && self.output == out
+    // }
 }
 
 #[derive(Debug)]
@@ -519,13 +522,6 @@ impl AdventOfCode {
     }
 
     pub fn new_with_token(year: u16, day: u8, token: &str) -> Self {
-        Self {
-            config: Config::get_config_with_token(year, day, token),
-            input: None,
-        }
-    }
-
-    pub fn new_with_year_and_token(day: u8, year: u16, token: &str) -> Self {
         Self {
             config: Config::get_config_with_token(year, day, token),
             input: None,
@@ -593,7 +589,7 @@ impl AdventOfCode {
         }
     }
 
-    fn submit<T: ToString>(&mut self, part: &Part, answer: T) -> AocResult {
+    fn submit<T: ToString>(&mut self, part: &Part, answer: T) -> Result<String, Error> {
         use self::OutputSink::*;
         match &self.config.output {
             StdOut => {
@@ -606,7 +602,7 @@ impl AdventOfCode {
         }
     }
 
-    fn submit_with_feedback<T: ToString>(&mut self, part: &Part, answer: T) -> AocResult {
+    fn submit_with_feedback<T: ToString>(&mut self, part: &Part, answer: T) -> Result<String, Error> {
         let res = self.submit(part, answer);
 
         use self::AocError::*;
@@ -668,11 +664,11 @@ impl AdventOfCode {
         res
     }
 
-    pub fn submit_p1<T: ToString>(&mut self, answer: T) -> AocResult {
+    pub fn submit_p1<T: ToString>(&mut self, answer: T) -> Result<String, Error> {
         self.submit_with_feedback(&Part::One, answer)
     }
 
-    pub fn submit_p2<T: ToString>(&mut self, answer: T) -> AocResult {
+    pub fn submit_p2<T: ToString>(&mut self, answer: T) -> Result<String, Error> {
         self.submit_with_feedback(&Part::Two, answer)
     }
 }

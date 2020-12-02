@@ -56,14 +56,14 @@ fn fill(grid: &mut Vec<Vec<Cell>>, coord: &Coord) {
 
 #[allow(unused_must_use)]
 fn main() {
-    let mut aoc = AdventOfCode::new_with_year(2018, 06);
+    let mut aoc = AdventOfCode::new(2018, 06);
     let input: String = aoc.get_input();
 
     let input = input.lines().map(|s| {
         let mut v = s.split(',');
         let t: (u16, u16) = (v.next().unwrap().parse().unwrap(),
             v.next().unwrap().trim().parse().unwrap());
-        
+
         Coord { idx: 0, x: t.0, y: t.1, count: 0, infinite: false }
     });
 

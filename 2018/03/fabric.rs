@@ -14,13 +14,13 @@ fn too_to_oot<A, B, C, D, E>((a, b, c, d, e): (Option<A>, Option<B>, Option<C>, 
 
 #[allow(unused_must_use)]
 fn main() {
-    let mut aoc = AdventOfCode::new_with_year(2018, 03);
+    let mut aoc = AdventOfCode::new(2018, 03);
     let input: String = aoc.get_input();
 
     let input = input.lines().filter_map(|l|
         too_to_oot(scan_fmt!(l, "#{d} @ {d},{d}: {d}x{d}", u16, u16, u16, u16, u16)).ok()
     );
-    /*.filter_map(|(i, x, y, w, h)| 
+    /*.filter_map(|(i, x, y, w, h)|
         i.and_then(|i| x.map(|x| (i, x)))
             .and_then(|(i, x)| y.map(|y| (i, x, y)))
                 .and_then(|(i, x, y)| w.map(|w| (i, x, y, w)))

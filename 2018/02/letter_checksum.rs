@@ -22,7 +22,7 @@ fn compare_allowing_one(a: &[&str]) -> Option<String> {
 
 #[allow(unused_must_use)]
 fn main() {
-    let mut aoc = AdventOfCode::new_with_year(2018, 02);
+    let mut aoc = AdventOfCode::new(2018, 02);
     let input: String = aoc.get_input();
 
     let counts = input.lines()
@@ -72,7 +72,7 @@ fn main() {
     // Go to your parent (abcd) and check if it has other children. Since it
     // doesn't, we know that there are no strings that only differ from us in
     // their last letter.
-    // 
+    //
     // Next let's say we're okay with our 2nd to last letter (d) being
     // different. Go to it's parent (abc) and check if it has other children.
     // Indeed, it does! For each child it has, we must compare our suffix (e)
@@ -117,11 +117,11 @@ fn main() {
     //  - abab
     //  - ABBA // <3
     //  - abbb
-    // 
+    //
     // There's only a performance win when you're able to eliminate multiple
     // strings as match candidates because the prefixes don't match. If the
     // string set is optimal:
-    // 
+    //
     //               a
     //              / \
     //             b   c
@@ -152,10 +152,10 @@ fn main() {
     //  - acfl vs. acfm, acgn, acgo
     //  - acfm vs. acgn, acgo
     //  - acgn vs. acgo
-    //  
+    //
     // All told, that's 16 comparisons to the 28 that the naive combinations
     // approach would have needed.
-    //  
+    //
     // If we had 16 strings in the set, we'd have needed 32 comparisons ~(2*n)
     // compared to the 120 the naive approach would have taken ((n * n-1) / 2).
     //
@@ -173,7 +173,7 @@ fn main() {
     // are really very good at things that are easily vectorizable like that.
     //
     // Prefix + Suffix trees also seems like a dead end.
-    //  
+    //
     // So, I don't know.
 
     // We still need a working solution though and I don't want to do it the
@@ -186,7 +186,7 @@ fn main() {
     // About 300K of additional memory for about a fifth as many operations...
     // except that HashSets aren't magic and that this is actually probably
     // slower.
-    
+
     // The bit where we go and insert '_' is gross but necessary, I think, to
     // enforce the same position requirement. Consider:
     //  - abcdefg -> abc_efg -> abcefg
@@ -221,5 +221,5 @@ fn main() {
     aoc.submit_p2(p2);
 
     // Or, as an (almost) one line monstrosity:
-    // let mut hs = HashSet::new(); aoc.submit_p2::<String>(AdventOfCode::new_with_year(2018, 02).get_input().lines().map(|inp| { Vec::<String>::from_iter((0..inp.len()).into_iter().map(|i| { let mut s = String::new(); inp.chars().enumerate().for_each(|(k, c)| { s.push(if k != i {c} else {'_'})}); s}))}).flat_map(|v| v.into_iter()).filter(|s| !hs.insert(s.clone())).next().unwrap().chars().filter(|c| *c != '_').collect());
+    // let mut hs = HashSet::new(); aoc.submit_p2::<String>(AdventOfCode::new(2018, 02).get_input().lines().map(|inp| { Vec::<String>::from_iter((0..inp.len()).into_iter().map(|i| { let mut s = String::new(); inp.chars().enumerate().for_each(|(k, c)| { s.push(if k != i {c} else {'_'})}); s}))}).flat_map(|v| v.into_iter()).filter(|s| !hs.insert(s.clone())).next().unwrap().chars().filter(|c| *c != '_').collect());
 }

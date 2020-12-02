@@ -12,7 +12,7 @@ trait ConditionalPredicate<T> {
 }
 
 impl<T> ConditionalPredicate<T> for Option<T> {
-    
+
     #[inline]
     fn if_some<U, F: FnOnce(&T) -> U>(self, f: F) -> Self {
         match self {
@@ -109,7 +109,7 @@ impl<T: Clone> Circle<T> {
 
         // In case that was our last (self-pointing) node:
         if self.count == 0 { self.position = None }
-        
+
         Some(curr.inner.clone())
     }
 
@@ -133,7 +133,7 @@ impl<T: Clone> Circle<T> {
         let node = if let Some(pos) = self.position {
             // Change current.next = {new}
             //        {current.next}.previous = {new}
-            //        new.previous = {current}        
+            //        new.previous = {current}
             //        new.next = current.next
             let next = self.pool[pos].next_id;
 
@@ -278,7 +278,7 @@ impl<T: Display + Clone> Display for Circle<T> {
 
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.iter(Direction::Clockwise).take(self.size()).fold(Ok(()), |acc, x|
-            acc.and_then(|_| { 
+            acc.and_then(|_| {
                 write!(f, "{} <> ", x)
             })
         ).and_then(|_| write!(f, "[loop]"))
@@ -298,7 +298,7 @@ fn points_naive(marbles: u32) -> Vec<u32> {
         } else {
             circle.insert(pos, i);
         }
-        
+
         pos = wheel(pos, circle.len(), 1) + 1;
     }
 
@@ -320,7 +320,7 @@ fn points_circle(marbles: u32) -> Vec<u32> {
         } else {
             circle.insert(i);
         }
-        
+
         circle.rotate_clockwise(1);
     }
 
@@ -348,9 +348,9 @@ fn winning_score(players: u32, marbles: u32, approach: DS) -> u32 {
 
 #[allow(unused_must_use)]
 fn main() {
-    let mut aoc = AdventOfCode::new_with_year(2018, 09);
+    let mut aoc = AdventOfCode::new(2018, 09);
     let input: String = aoc.get_input();
-    
+
     let (players, marbles) = scan_fmt!(input.lines().next().unwrap(),
             "{} players; last marble is worth {} points",
             u32, u32);
@@ -410,7 +410,7 @@ mod tests {
         // assert!(res.is_err());
 
         // let res = std::panic::catch_unwind(|| circle.rotate_counterclockwise(1));
-        // assert!(res.is_err());        
+        // assert!(res.is_err());
 
         // Try to insert a Node and check that it comes back right:
         let node = circle.insert(32);
@@ -455,7 +455,7 @@ mod tests {
         // We're expecting this:
         //  / 1 <-> 20 <-> 30 <-> 40 \
         //  \ <--------------------> /
-        
+
         let assert_id = |id, v: u32| {
             let val = circle.get_value_by_id(id);
             assert!(val.is_some());

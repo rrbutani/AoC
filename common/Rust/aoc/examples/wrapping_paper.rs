@@ -1,16 +1,14 @@
-extern crate aoc;
-extern crate itertools;
+use aoc::AdventOfCode;
+use itertools::Itertools;
 
-#[allow(unused_imports)]
-use aoc::{AdventOfCode, friends::*};
 use std::cmp;
 use std::u16;
 
 #[allow(unused_must_use)]
 fn main() {
-    let mut aoc = AdventOfCode::new_with_year(2015, 2);
+    let mut aoc = AdventOfCode::new(2015, 2);
     let input: String = aoc.get_input();
- 
+
     let input = input.lines()
         .map(|s| s.split('x').collect::<Vec<&str>>())
         .filter(|v| v.len() >= 3)

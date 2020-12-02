@@ -80,7 +80,7 @@ fn rounds(initial: VecDeque<bool>, notes: &Vec<([bool; 5], bool)>, num_rounds: u
 
         //     return (v, a + added_below_zero);
         // }
-    
+
         // So, let's track counts instead:
         let curr = count(staging.clone(), added_below_zero);
         let diff = curr - last_count;
@@ -105,7 +105,7 @@ fn rounds(initial: VecDeque<bool>, notes: &Vec<([bool; 5], bool)>, num_rounds: u
 
 #[allow(unused_must_use)]
 fn main() {
-    let mut aoc = AdventOfCode::new_with_year(2018, 12);
+    let mut aoc = AdventOfCode::new(2018, 12);
     let input: String = aoc.get_input();
     let mut input = input.lines();
 

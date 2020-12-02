@@ -5,15 +5,13 @@ authors = ["Rahul Butani <rr.butani@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-clap = "2.32.0"
-reqwest = "0.9.5"
-tap = "0.3.0"
-http = "0.1.14"
-select = "0.4.2"
-scan_fmt = "0.1.3"
+clap = "2.33"
+reqwest = { version = "0.10", features = ["blocking"] }
+tap = "1.0"
+http = "0.2"
+select = "0.5"
+scan_fmt = "0.2"
 
-# itertools = "0.7.11"
-# bit-set = "0.5.0"
-# bit-vec = "0.5.0"
-# md5 = "0.6.0"
-# arrayvec = "0.4.8"
+[dev-dependencies]
+itertools = "0.9"
+md5 = "0.7"

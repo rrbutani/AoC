@@ -7,7 +7,7 @@ use std::collections::HashSet;
 
 #[allow(unused_must_use)]
 fn main() {
-    let mut aoc = AdventOfCode::new_with_year(2018, 01);
+    let mut aoc = AdventOfCode::new(2018, 01);
     let input: String = aoc.get_input();
     let input = input.lines().map(|f| f.parse::<i32>().unwrap());
 

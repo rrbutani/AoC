@@ -68,7 +68,7 @@ fn position(search: &str, mut guess: usize) -> usize {
 
 #[allow(unused_must_use)]
 fn main() {
-    let mut aoc = AdventOfCode::new_with_year(2018, 14);
+    let mut aoc = AdventOfCode::new(2018, 14);
     let input: String = aoc.get_input();
 
     let num_recipes: usize = input.lines().next().unwrap().parse().unwrap();

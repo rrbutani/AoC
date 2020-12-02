@@ -6,7 +6,7 @@ use aoc::{AdventOfCode, friends::*};
 
 #[allow(unused_must_use)]
 fn main() {
-    let mut aoc = AdventOfCode::new_with_year(2018, 08);
+    let mut aoc = AdventOfCode::new(2018, 08);
     let input: String = aoc.get_input();
     let input = input.lines().next().unwrap().split(" ").map(|s| s.parse::<u32>().unwrap());
 

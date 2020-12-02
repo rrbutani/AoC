@@ -1,12 +1,9 @@
-extern crate aoc;
-extern crate md5;
-
 #[allow(unused_imports)]
 use aoc::{AdventOfCode, friends::*};
 
 #[allow(unused_must_use)]
 fn main() {
-    let mut aoc = AdventOfCode::new_with_year(2015, 5);
+    let mut aoc = AdventOfCode::new(2015, 5);
     let input: String = aoc.get_input();
 
     let num_nice_strings = input.lines().filter(|s| {
@@ -18,7 +15,7 @@ fn main() {
         ! s.contains("pq") &&
         ! s.contains("xy")
     }).count();
- 
+
     aoc.submit_p1(num_nice_strings);
 
     let num_nice_strings = input.lines().filter(|s| {

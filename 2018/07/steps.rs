@@ -106,7 +106,7 @@ impl<'a> Iterator for EventedNodeIterator<'a> {
 
 // impl<'a> Iterator for EventedNodeIterator<'a> {
 //     type Item = IteratorEvent;
-    
+
 //     fn next(&mut self) -> Option<Self::Item> {
 //         while let Some((node, idx)) = self.stack.pop() {
 //             if node.allows_for.len() >= idx { continue }
@@ -120,7 +120,7 @@ const A: usize = b'A' as usize;
 
 #[allow(unused_must_use)]
 fn main() {
-    let mut aoc = AdventOfCode::new_with_year(2018, 07);
+    let mut aoc = AdventOfCode::new(2018, 07);
     let input: String = aoc.get_input();
 
     let mut steps: [Option<Steps>; 26] = [None; 26];
@@ -154,14 +154,14 @@ fn main() {
             if visited | (1 << (s.name as usize - A)) == visited { continue }
 
             // Now check if this step actually depends on us:
-            if parent.name != '@' && s.prereqs & (1 << (parent.name as usize - A)) == 0 { continue } 
+            if parent.name != '@' && s.prereqs & (1 << (parent.name as usize - A)) == 0 { continue }
 
             // If we haven't, make a Node for this step:
             let mut n = Node { name: s.name, allows_for: Vec::new() };
 
             // Check what steps finishing our current step allows us to do:
             visited |= prop(steps, visited | (1 << (s.name as usize - A)), &mut n);
-            
+
             // And finally, add this node to it's parent:
             parent.allows_for.push(n);
         }

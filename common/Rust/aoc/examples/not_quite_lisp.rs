@@ -1,13 +1,11 @@
-extern crate aoc;
-
 #[allow(unused_imports)]
 use aoc::{AdventOfCode, friends::*};
 
 #[allow(unused_must_use)]
 fn main() {
-    let mut aoc = AdventOfCode::new_with_year(2015, 1);
+    let mut aoc = AdventOfCode::new(2015, 1);
     let input: String = aoc.get_input();
- 
+
     let input = input.chars().map(|c| match c { '(' => 1, ')' => -1, _ => 0 });
 
     let level: i64 = input.clone().sum();

@@ -110,7 +110,7 @@ impl Cart {
     /// Some(Position) if there is
     fn step(&mut self, tracks: &mut std::vec::Vec<TrackSegment>) -> Option<Position> {
         let current_track = &mut tracks[self.track_id];
-        
+
         if !self.valid {
             current_track.occupied = false;
             return None
@@ -158,7 +158,7 @@ impl Cart {
         //         let next_track = &mut tracks[id];
         //         next_track.occupied = true;
         //         self.track_id = id;
-        //         self.dir = 
+        //         self.dir =
         //     },
         //     (Vertical, Down) => {},
         //     (Horizontal, Left) => {},
@@ -499,7 +499,7 @@ fn til_the_end(tracks: &mut Vec<TrackSegment>, carts: &mut Vec<Cart>) -> Positio
 
 #[allow(unused_must_use)]
 fn main() {
-    let mut aoc = AdventOfCode::new_with_year(2018, 13);
+    let mut aoc = AdventOfCode::new(2018, 13);
     let input: String = aoc.get_input();
 
     let input: Vec<Vec<char>> = input.lines().map(|l| l.chars().collect()).collect();
@@ -646,7 +646,7 @@ impl TrackType {
     fn new_regular_track() -> Self {
         TrackType::Regular(Regular::default())
     }
-    
+
     fn default_regular_track() -> Self {
         TrackType::Regular(Regular::default())
     }

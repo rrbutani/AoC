@@ -24,7 +24,7 @@ function rust() {
 	use aoc::*;
 
 	fn main() {
-	    let mut aoc = AdventOfCode::new_with_year(${YEAR}, ${3});
+	    let mut aoc = AdventOfCode::new(${YEAR}, ${3});
 	    let input: String = aoc.get_input();
 
 	    println!("{}", input);

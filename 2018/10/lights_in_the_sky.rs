@@ -177,7 +177,7 @@ fn draw(v: &Vec<Point>) -> Option<String> {
 
 #[allow(unused_must_use)]
 fn main() {
-    let mut aoc = AdventOfCode::new_with_year(2018, 10);
+    let mut aoc = AdventOfCode::new(2018, 10);
     let input: String = aoc.get_input();
 
     let mut points = input.lines().filter_map(|l| {
