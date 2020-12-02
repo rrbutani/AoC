@@ -1,8 +1,4 @@
 #!/usr/bin/env rustr
-#![feature(nll)]
-#![feature(if_while_or_patterns)]
-
-extern crate aoc;
 
 #[allow(unused_imports)]
 use aoc::{AdventOfCode, friends::*};
@@ -208,6 +204,7 @@ impl Position {
         }
     }
 
+    #[allow(unused)]
     fn shift(&mut self, x_adj: i8, y_adj: i8) {
         self.x = ((self.x as isize) + (x_adj as isize)) as usize;
         self.y = ((self.y as isize) + (y_adj as isize)) as usize;
@@ -385,6 +382,7 @@ fn parse_map(map: Vec<Vec<char>>) -> Option<(Vec<TrackSegment>, Vec<Cart>)> {
     Some((tracks, carts))
 }
 
+#[allow(unused)]
 fn print_map(tracks: &Vec<TrackSegment>, carts: &Vec<Cart>) {
     let (mut row, mut col) = (0, 0);
 

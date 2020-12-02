@@ -1,5 +1,4 @@
 #!/usr/bin/env rustr
-extern crate aoc;
 
 #[allow(unused_imports)]
 use aoc::{AdventOfCode, friends::*};
@@ -10,7 +9,7 @@ fn main() {
     let input: String = aoc.get_input();
     let input = input.lines().next().unwrap().split(" ").map(|s| s.parse::<u32>().unwrap());
 
-    fn metadata_sum(i: &mut Iterator<Item=u32>) -> u32 {
+    fn metadata_sum(i: &mut impl Iterator<Item=u32>) -> u32 {
         let (children, metadata) = (i.next().unwrap(), i.next().unwrap());
 
         (0..children).map(|_| metadata_sum(i)).sum::<u32>()
@@ -19,7 +18,7 @@ fn main() {
 
     aoc.submit_p1(metadata_sum(&mut input.clone()));
 
-    fn sum(i: &mut Iterator<Item=u32>) -> u32 {
+    fn sum(i: &mut impl Iterator<Item=u32>) -> u32 {
         let (kid_count, metadata) = (i.next().unwrap(), i.next().unwrap());
 
         let kids: Vec<u32> = (0..kid_count).map(|_| sum(i)).collect();

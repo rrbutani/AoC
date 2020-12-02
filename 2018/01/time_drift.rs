@@ -1,5 +1,4 @@
 #!/usr/bin/env rustr
-extern crate aoc;
 
 #[allow(unused_imports)]
 use aoc::{AdventOfCode, friends::*};

@@ -1,7 +1,4 @@
 #!/usr/bin/env rustr
-#![feature(nll)]
-extern crate aoc;
-#[macro_use(scan_fmt)] extern crate scan_fmt;
 
 #[allow(unused_imports)]
 use aoc::{AdventOfCode, friends::*};

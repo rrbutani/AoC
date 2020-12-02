@@ -1,10 +1,8 @@
 #!/usr/bin/env rustr
-extern crate aoc;
-#[macro_use(scan_fmt)] extern crate scan_fmt;
 
 #[allow(unused_imports)]
-use std::fmt::Display;
 use aoc::{AdventOfCode, friends::*};
+use std::fmt::Display;
 use std::collections::VecDeque;
 
 trait ConditionalPredicate<T> {
@@ -37,13 +35,13 @@ fn wheel(pos: usize, len: usize, move_by: isize) -> usize {
 
 // Todo: Deref on CircleNode<T>
 #[derive(Debug)]
-struct CircleNode<T: Clone> {
+pub struct CircleNode<T: Clone> {
     previous_id: usize,
     next_id: usize,
     inner: T
 }
 
-struct Circle<T: Clone> {
+pub struct Circle<T: Clone> {
     count: usize,
     /// The backing data structure
     pool: Vec<CircleNode<T>>,
@@ -239,12 +237,12 @@ impl<'a, T: Clone> IntoIterator for &'a Circle<T> {
     }
 }
 
-enum Direction {
+pub enum Direction {
     Clockwise,
     Counterclockwise,
 }
 
-struct CircleIterator<'a, T: Clone> {
+pub struct CircleIterator<'a, T: Clone> {
     circle: &'a Circle<T>,
     current_pos: Option<usize>,
     direction: Direction,
@@ -328,6 +326,7 @@ fn points_circle(marbles: u32) -> Vec<u32> {
 }
 
 enum DS {
+    #[allow(unused)]
     VecDeque,
     LinkedList,
 }

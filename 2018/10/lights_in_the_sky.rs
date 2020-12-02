@@ -1,6 +1,4 @@
 #!/usr/bin/env rustr
-extern crate aoc;
-#[macro_use(scan_fmt)] extern crate scan_fmt;
 
 #[allow(unused_imports)]
 use aoc::{AdventOfCode, friends::*};
@@ -9,7 +7,7 @@ use std::i32;
 use std::io::{self, BufRead, Write};
 
 #[derive(Debug)]
-struct Point {
+pub struct Point {
     x: i32,
     y: i32,
     vx: i32,

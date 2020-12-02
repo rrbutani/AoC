@@ -1,9 +1,8 @@
 #!/usr/bin/env rustr
-extern crate aoc;
 
 #[allow(unused_imports)]
 use aoc::{AdventOfCode, friends::*};
-use std::u32::{self};
+use std::u32;
 
 #[derive(Debug, Eq, PartialEq, PartialOrd, Ord, Clone)]
 struct Coord {

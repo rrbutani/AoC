@@ -1,7 +1,4 @@
 #!/usr/bin/env rustr
-extern crate aoc;
-#[macro_use(scan_fmt)] extern crate scan_fmt;
-extern crate arrayvec;
 
 use std::collections::VecDeque;
 use arrayvec::ArrayVec;
