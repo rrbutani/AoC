@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+
+# A really bad script to make it seems like Rust has a script execution mode.
+#
+# Add '#!/usr/bin/env rustr' to the top of your .rs file and make sure `rustr` is in
+# your PATH.
+#
+# Then: ./<your_file>.rs
+# It may work!
+#
+# This has many obvious shortcomings (i.e. crates!) but it might work for simple
+# programs! We also support one bit of condition behavior: if $offline is set, we'll
+# pass the right arguments so that the program runs without hitting AoC's servers.
+
+set -eo pipefail
+
+RUSTC_CMD="rustc"
+SRC_FILE="$(realpath "${1}")"
+SRC_DIR="$(dirname "${1}")"
+
+# Use sccache if we've got it:
+if hash sccache; then
+  RUSTC_CMD="sccache ${RUSTC_CMD}"
+fi
+
+if [ -z "${offline+x}" ]; then
+    # Not offline!
+    # flags=""
+    :
+else
+    flags=(--input ../*.input)
+fi
+
+# If we're in a cargo project, use the project's deps:
+find_deps() {
+  if (cd "${SRC_DIR}"; cargo metadata &>/dev/null); then
+    metadata="$(
+      cd "${SRC_DIR}" || exit 5
+      cargo metadata --format-version 1
+    )"
+
+    # If the thing we're being asked to run is registered as a binary with Cargo,
+    # just use Cargo to run it.
+    root="$(jq -r '.resolve.root' <<< "${metadata}")"
+    bin_name="$(jq -r \
+      --arg ROOT "${root}" \
+      --arg SRC "${SRC_FILE}" \
+      ".packages[] \
+        | select(.id == \$ROOT) \
+        | .targets[] \
+        | select(.kind | contains([\"bin\"])) \
+        | select(.src_path == \$SRC) \
+        | .name" \
+      <<< "${metadata}"
+    )"
+
+    if [ "${bin_name}" ]; then
+      (
+        cd "${SRC_DIR}"
+        cargo run --release --bin "${bin_name}" -- ${flags+"${flags[@]}"}
+      )
+
+      exit $?
+    fi
+
+    target_dir="$(jq -r '.target_directory' <<< "${metadata}")"
+    # shellcheck disable=SC2207
+    deps=($(jq -r \
+      --arg ROOT "${root}" \
+      '.resolve.nodes[] | select(.id == $ROOT) | .deps[] | .name' \
+      <<< "${metadata}"
+    ))
+
+    pth="${target_dir}/release/deps"
+
+    for ((i=0; i < ${#deps[@]}; i++)); do
+        dep=${deps[i]}
+        dep=${dep//-/_}
+        p=$(
+          find "${pth}/" \
+            -regextype sed -regex ".*/lib\(${dep}-.*\.rlib\|${dep}-.*\.so\)" \
+            -print \
+            -quit |
+          grep . | # this is dumb but it's how we error when there are no matches
+          xargs ls -tr |
+          head -1
+        ) || {
+          # If we couldn't find the rlib, let's try to build the project:
+          # shellcheck disable=SC2034
+          readonly _ATTEMPT_TO_BUILD_ONLY_ONCE=1 2>/dev/null || {
+            echo "Failed to find \`${dep}\`."; exit 10;
+            # deps[i]=""
+            # continue
+          }
+          (
+            cd "${SRC_DIR}" || exit 5
+            cargo build --release --lib
+          ) || exit $?
+
+          # And then let's just try again:
+          find_deps
+          return
+        }
+
+        deps[i]="--extern ${dep}=${p}"
+    done
+
+    dep_path="-L dependency=${pth}"
+  fi
+}
+
+find_deps
+
+${RUSTC_CMD} \
+  --edition=2018 \
+  --crate-type bin \
+  "$@" \
+  ${dep_path+${dep_path}} ${deps+${deps[@]}} \
+  -o out \
+&& {
+  ./out ${flags+"${flags[@]}"}; ec=$?
+  [ -z "${keep+x}" ] && rm -f out 2>/dev/null
+
+  exit $ec
+}
