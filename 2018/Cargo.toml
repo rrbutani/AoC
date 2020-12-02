@@ -5,7 +5,7 @@ authors = ["Rahul Butani <rr.butani@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-aoc = { path = "common/Rust/aoc" }
+aoc = { path = "../common/Rust/aoc" }
 clap = "2.32.0"
 reqwest = "0.9.5"
 tap = "0.3.0"
@@ -16,63 +16,63 @@ itertools = "0.7.11"
 bit-set = "0.5.0"
 bit-vec = "0.5.0"
 arrayvec = "0.4.8"
-macros = { path = "common/Rust/macros" }
+macros = { path = "../common/Rust/macros" }
 
 [lib]
-path = "common/Rust/lib.rs"
+path = "shared.rs"
 
 [[bin]]
 name = "day01"
-path = "01/Rust/time_drift.rs"
+path = "01/time_drift.rs"
 
 [[bin]]
 name = "day02"
-path = "02/Rust/letter_checksum.rs"
+path = "02/letter_checksum.rs"
 
 [[bin]]
 name = "day03"
-path = "03/Rust/fabric.rs"
+path = "03/fabric.rs"
 
 [[bin]]
 name = "day04"
-path = "04/Rust/repose_record.rs"
+path = "04/repose_record.rs"
 
 [[bin]]
 name = "day05"
-path = "05/Rust/reductio.rs"
+path = "05/reductio.rs"
 
 [[bin]]
 name = "day06"
-path = "06/Rust/infinite_grid.rs"
+path = "06/infinite_grid.rs"
 
 [[bin]]
 name = "day07"
-path = "07/Rust/steps.rs"
+path = "07/steps.rs"
 
 [[bin]]
 name = "day08"
-path = "08/Rust/license_file.rs"
+path = "08/license_file.rs"
 
 [[bin]]
 name = "day09"
-path = "09/Rust/marble_mania.rs"
+path = "09/marble_mania.rs"
 
 [[bin]]
 name = "day10"
-path = "10/Rust/lights_in_the_sky.rs"
+path = "10/lights_in_the_sky.rs"
 
 [[bin]]
 name = "day11"
-path = "11/Rust/chronal_charge.rs"
+path = "11/chronal_charge.rs"
 
 [[bin]]
 name = "day12"
-path = "12/Rust/pots.rs"
+path = "12/pots.rs"
 
 [[bin]]
 name = "day13"
-path = "13/Rust/minecart_madness.rs"
+path = "13/minecart_madness.rs"
 
 [[bin]]
 name = "day14"
-path = "14/Rust/recipes.rs"
+path = "14/recipes.rs"
