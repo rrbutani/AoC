@@ -1,0 +1,114 @@
+[package]
+name = "aoc20"
+version = "0.0.0"
+authors = ["Rahul Butani <rrbutani@users.noreply.github.com>"]
+edition = "2021"
+
+[dependencies]
+aoc = { path = "../common/Rust/aoc" }
+dyn-clone = "*"
+genawaiter = "0.99"
+num-traits = "0.2"
+
+[lib]
+path = "lib.rs"
+
+[[bin]]
+name = "day01"
+path = "01/report_repair.rs"
+
+[[bin]]
+name = "day02"
+path = "02/password_philosophy.rs"
+
+[[bin]]
+name = "day03"
+path = "03/toboggan_trajectory.rs"
+
+[[bin]]
+name = "day04"
+path = "04/passport_processing.rs"
+
+[[bin]]
+name = "day05"
+path = "05/binary_boarding.rs"
+
+[[bin]]
+name = "day06"
+path = "06/custom_customs.rs"
+
+[[bin]]
+name = "day07"
+path = "07/handy_haversacks.rs"
+
+[[bin]]
+name = "day08"
+path = "08/handheld_halting.rs"
+
+[[bin]]
+name = "day09"
+path = "09/encoding_error.rs"
+
+[[bin]]
+name = "day10"
+path = "10/adapter_array.rs"
+
+[[bin]]
+name = "day11"
+path = "11/seating_systems.rs"
+
+[[bin]]
+name = "day12"
+path = "12/rain_risk.rs"
+
+[[bin]]
+name = "day13"
+path = "13/shuttle_search.rs"
+
+[[bin]]
+name = "day14"
+path = "14/docking_data.rs"
+
+[[bin]]
+name = "day15"
+path = "15/rambunctious_recitation.rs"
+
+[[bin]]
+name = "day16"
+path = "16/ticket_translation.rs"
+
+[[bin]]
+name = "day17"
+path = "17/conway_cubes.rs"
+
+[[bin]]
+name = "day18"
+path = "18/operation_order.rs"
+
+[[bin]]
+name = "day19"
+path = "19/monster_messages.rs"
+
+[[bin]]
+name = "day20"
+path = "20/jurassic_jigsaw.rs"
+
+[[bin]]
+name = "day21"
+path = "21/allergen_assessment.rs"
+
+[[bin]]
+name = "day22"
+path = "22/crab_combat.rs"
+
+[[bin]]
+name = "day23"
+path = "23/crab_cups.rs"
+
+[[bin]]
+name = "day24"
+path = "24/lobby_layout.rs"
+
+[[bin]]
+name = "day25"
+path = "25/combo_breaker.rs"

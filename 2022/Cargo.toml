@@ -1,0 +1,121 @@
+[package]
+name = "aoc22"
+version = "0.0.0"
+authors = ["Rahul Butani <rrbutani@users.noreply.github.com>"]
+edition = "2021"
+
+[dependencies]
+aoc = { path = "../common/Rust/aoc" }
+num-traits = "0.2"
+rayon = "1.5"
+# inkwell = { git = "https://github.com/TheDan64/inkwell", branch = "master", features = ["llvm13-0"], optional = true }
+# fxhash = "0.2"
+owo-colors = "3.2"
+# # dashmap = "5.0"
+# inline-python = { version = "0.8", optional = true }
+# plotters = { version = "0.3", optional = true }
+derive_more = "0.99"
+bimap = "0.6"
+static_assertions = "1.1"
+reqwest = "0.11"
+
+[features]
+
+[lib]
+path = "lib.rs"
+
+[[bin]]
+name = "day01"
+path = "01/calorie_counting.rs"
+
+[[bin]]
+name = "day02"
+path = "02/rps.rs"
+
+[[bin]]
+name = "day04"
+path = "04/camp_cleanup.rs"
+
+[[bin]]
+name = "day05"
+path = "05/supply_stacks.rs"
+
+[[bin]]
+name = "day06"
+path = "06/tuning_trouble.rs"
+
+[[bin]]
+name = "day07"
+path = "07/no_space_left_on_device.rs"
+
+[[bin]]
+name = "day08"
+path = "08/treetop_tree_house.rs"
+
+[[bin]]
+name = "day09"
+path = "09/rope_bridge.rs"
+
+[[bin]]
+name = "day10"
+path = "10/crt.rs"
+
+[[bin]]
+name = "day11"
+path = "11/mitm.rs"
+
+[[bin]]
+name = "day12"
+path = "12/12.rs"
+
+[[bin]]
+name = "day13"
+path = "13/distress_signal.rs"
+
+[[bin]]
+name = "day14"
+path = "14/regolith_reservoir.rs"
+
+[[bin]]
+name = "day15"
+path = "15/15.rs"
+
+[[bin]]
+name = "day16"
+path = "16/proboscidea_volcanium.rs"
+
+[[bin]]
+name = "day17"
+path = "17/pyroclastic_flow.rs"
+
+[[bin]]
+name = "day18"
+path = "18/boiling_boulders.rs"
+
+[[bin]]
+name = "day19"
+path = "19/minecraft.rs"
+
+[[bin]]
+name = "day20"
+path = "20/gps.rs"
+
+[[bin]]
+name = "day21"
+path = "21/monkey_math.rs"
+
+[[bin]]
+name = "day22"
+path = "22/monkey_map.rs"
+
+[[bin]]
+name = "day23"
+path = "23/unstable_diffusion.rs"
+
+[[bin]]
+name = "day24"
+path = "24/blizzard_basin.rs"
+
+[[bin]]
+name = "day25"
+path = "25/snafu.rs"

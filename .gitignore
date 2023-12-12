@@ -19,5 +19,11 @@
 target/
 Cargo.lock
 
+### Python ###
+__pycache__
+
 ### Misc ###
 out
+
+### Nix ###
+.direnv

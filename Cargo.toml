@@ -1,0 +1,25 @@
+[workspace]
+members = [
+  "common/Rust/aoc",
+  "common/Rust/macros",
+  "common/Python/aoc-rs-bindings",
+  "2016",
+  #"2017",
+  "2018",
+  "2020",
+  "2021",
+  "2022",
+  "2023",
+]
+resolver = "2"
+
+[profile.lto]
+inherits = "release"
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+debug = true
+
+[profile.llvm]
+inherits = "lto"
+lto = false # llvm-sys doesn't link with LTO; we don't have LLVM bitcode files

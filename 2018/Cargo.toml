@@ -1,12 +1,11 @@
 [package]
 name = "aoc18"
-version = "0.0.1"
-authors = ["Rahul Butani <rr.butani@gmail.com>"]
-edition = "2018"
+version = "0.0.0"
+authors = ["Rahul Butani <rrbutani@users.noreply.github.com"]
+edition = "2021"
 
 [dependencies]
 aoc = { path = "../common/Rust/aoc" }
-itertools = "0.9"
 bit-set = "0.5"
 bit-vec = "0.6"
 arrayvec = "0.5"
@@ -69,3 +68,7 @@ path = "13/minecart_madness.rs"
 [[bin]]
 name = "day14"
 path = "14/recipes.rs"
+
+[[bin]]
+name = "day23"
+path = "23/eet.rs"

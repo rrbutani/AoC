@@ -1,0 +1,18 @@
+{
+  // "rust-analyzer.checkOnSave.allTargets": true,
+  "rust-analyzer.cargo.features": [
+    // "llvm"
+  ],
+  "editor.formatOnSave": true,
+  "python.pythonPath": "python3.11",
+  "python.linting.pylintEnabled": false,
+  "python.linting.mypyEnabled": true,
+  "python.linting.enabled": true,
+  "python.formatting.provider": "black",
+  "rust-analyzer.checkOnSave.allTargets": false,
+  "files.watcherExclude": {
+    "**/target": true
+  },
+  "rust-analyzer.server.path": "rust-analyzer",
+  "editor.inlayHints.enabled": "onUnlessPressed",
+}

@@ -1,9 +1,9 @@
 #![recursion_limit = "128"]
 
-use syn::{AttributeArgs, DeriveInput, parse_macro_input};
 use proc_macro::TokenStream;
 use quote::quote;
 use std::iter;
+use syn::{parse_macro_input, AttributeArgs, DeriveInput};
 
 enum Looping {
     Loop,
@@ -16,7 +16,7 @@ impl Looping {
         ConfigOptions::L(match s.to_lowercase().as_str() {
             "loop" => Looping::Loop,
             "once" => Looping::Once,
-            _ => panic!("Expected either `Loop` or `Once` as the first arg.")
+            _ => panic!("Expected either `Loop` or `Once` as the first arg."),
         })
     }
 }
@@ -38,7 +38,7 @@ impl Mutability {
         ConfigOptions::M(match s.to_lowercase().as_str() {
             "val" => Mutability::DoNot,
             "mut" => Mutability::Modify,
-            _ => panic!("Expected either `Val` or `Mut` as the second arg.")
+            _ => panic!("Expected either `Val` or `Mut` as the second arg."),
         })
     }
 }
@@ -62,7 +62,7 @@ impl ImplIter {
             "iter" => ImplIter::Yes,
             "none" => ImplIter::No,
             "into" => ImplIter::Into,
-            _ => panic!("Expected either `Iter` or `Into` or `None` as the third arg.")
+            _ => panic!("Expected either `Iter` or `Into` or `None` as the third arg."),
         })
     }
 }
@@ -122,11 +122,10 @@ pub fn sequence(attr: TokenStream, item: TokenStream) -> TokenStream {
                         2 => ImplIter::into,
                         _ => unreachable!(),
                     }(&nom));
-
                 } else {
                     panic!("Invalid arg!")
                 }
-            },
+            }
             _ => {
                 // TODO: Span this correctly
                 panic!("#[sequence] accepts up to 3 args! (looping, mutability, impl_iter)")
@@ -143,25 +142,31 @@ pub fn sequence(attr: TokenStream, item: TokenStream) -> TokenStream {
 
     match item.data {
         syn::Data::Enum(ref data) => {
-            if data.variants.iter().count() == 0 { panic!("We can't handle Enums with no variants!"); }
+            if data.variants.iter().count() == 0 {
+                panic!("We can't handle Enums with no variants!");
+            }
             data.variants.iter().for_each(|v| match v.fields {
-                syn::Fields::Unit => { states.push(v.ident.clone()) },
+                syn::Fields::Unit => states.push(v.ident.clone()),
                 // TODO: Span this right (i.e. on the problematic variant)
-                _ => panic!("We can only handle Enums with Unit Variants (no fields)!")
+                _ => panic!("We can only handle Enums with Unit Variants (no fields)!"),
             })
-        },
-        _ => panic!("We can only generate StateSequence implementations for Enums!")
+        }
+        _ => panic!("We can only generate StateSequence implementations for Enums!"),
     }
 
     // for a .. d this'll give us (a, b), ... (c, d).
-    let state_transitions = states.iter()
+    let state_transitions = states
+        .iter()
         .zip(states.iter().skip(1))
         .chain(match config.looping {
             Looping::Loop => iter::once((states.last().unwrap(), states.first().unwrap())),
             Looping::Once => iter::once((states.last().unwrap(), states.last().unwrap())),
         });
 
-    let (from, to) = (state_transitions.clone().map(|(f, _)| f), state_transitions.clone().map(|(_, t)| t));
+    let (from, to) = (
+        state_transitions.clone().map(|(f, _)| f),
+        state_transitions.clone().map(|(_, t)| t),
+    );
 
     let match_block = quote! {
         match *self {
@@ -179,7 +184,7 @@ pub fn sequence(attr: TokenStream, item: TokenStream) -> TokenStream {
                     }
                 }
             }
-        },
+        }
         Mutability::Modify => {
             quote! {
                 impl crate::aoc::friends::StateSequenceMutate for self::#enum_name {
@@ -203,6 +208,8 @@ pub fn sequence(attr: TokenStream, item: TokenStream) -> TokenStream {
             quote! {
                 #trait_impl
 
+                // todo: size_hint, exactsizeiterator
+
                 impl Iterator for self::#enum_name {
                     type Item = Self;
                     fn next(&mut self) -> Option<Self> {
@@ -210,10 +217,11 @@ pub fn sequence(attr: TokenStream, item: TokenStream) -> TokenStream {
                     }
                 }
             }
-        },
+        }
         ImplIter::Into => {
             let span = enum_name.span();
-            let struct_name = syn::Ident::new(&format!("_{}{}", enum_name.to_string(), "_Iterator"), span);
+            let struct_name =
+                syn::Ident::new(&format!("_{}{}", enum_name.to_string(), "_Iterator"), span);
 
             quote! {
                 #trait_impl
@@ -234,6 +242,8 @@ pub fn sequence(attr: TokenStream, item: TokenStream) -> TokenStream {
                     }
                 }
 
+                // todo: size_hint, exactsizeiterator
+
                 impl<'a> Iterator for #struct_name<'a> {
                     type Item = self::#enum_name;
 
@@ -253,8 +263,8 @@ pub fn sequence(attr: TokenStream, item: TokenStream) -> TokenStream {
                     }
                 }
             }
-        },
-        ImplIter::No => trait_impl
+        }
+        ImplIter::No => trait_impl,
     };
 
     let all_together = quote! {

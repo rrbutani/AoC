@@ -1,0 +1,124 @@
+[package]
+name = "aoc21"
+version = "0.0.0"
+authors = ["Rahul Butani <rrbutani@users.noreply.github.com>"]
+edition = "2021"
+
+[dependencies]
+aoc = { path = "../common/Rust/aoc" }
+num-traits = "0.2"
+rayon = "1.5"
+inkwell = { git = "https://github.com/TheDan64/inkwell", branch = "master", features = ["llvm13-0"], optional = true }
+fxhash = "0.2"
+owo-colors = "3.2"
+# dashmap = "5.0"
+inline-python = { version = "0.8", optional = true }
+plotters = { version = "0.3", optional = true }
+
+[features]
+llvm = ["inkwell"]
+python = ["inline-python"] # nightly only atm
+plot = ["plotters"]
+
+[lib]
+path = "lib.rs"
+
+[[bin]]
+name = "day01"
+path = "01/sonar_sweep.rs"
+
+[[bin]]
+name = "day02"
+path = "02/dive.rs"
+
+[[bin]]
+name = "day03"
+path = "03/binary_diagnostic.rs"
+
+[[bin]]
+name = "day04"
+path = "04/giant_squid.rs"
+
+[[bin]]
+name = "day05"
+path = "05/hydrothermal_venture.rs"
+
+[[bin]]
+name = "day06"
+path = "06/lanternfish.rs"
+
+[[bin]]
+name = "day07"
+path = "07/the_treachery_of_whales.rs"
+
+[[bin]]
+name = "day08"
+path = "08/seven_segment_search.rs"
+
+[[bin]]
+name = "day09"
+path = "09/smoke_basin.rs"
+
+[[bin]]
+name = "day10"
+path = "10/syntax_scoring.rs"
+
+[[bin]]
+name = "day11"
+path = "11/dumbo_octopus.rs"
+
+[[bin]]
+name = "day12"
+path = "12/passage_pathing.rs"
+
+[[bin]]
+name = "day13"
+path = "13/transparent_origami.rs"
+
+[[bin]]
+name = "day14"
+path = "14/extended_polymerization.rs"
+
+[[bin]]
+name = "day15"
+path = "15/chiton.rs"
+
+[[bin]]
+name = "day16"
+path = "16/packet_decoder.rs"
+
+[[bin]]
+name = "day17"
+path = "17/trick_shot.rs"
+
+[[bin]]
+name = "day18"
+path = "18/snailfish.rs"
+
+[[bin]]
+name = "day19"
+path = "19/beacon_scanner.rs"
+
+# [[bin]]
+# name = "day20"
+# path = "20/.rs"
+
+[[bin]]
+name = "day21"
+path = "21/dirac_dice.rs"
+
+[[bin]]
+name = "day22"
+path = "22/reactor_reboot.rs"
+
+[[bin]]
+name = "day23"
+path = "23/amphipod.rs"
+
+[[bin]]
+name = "day24"
+path = "24/alu.rs"
+
+# [[bin]]
+# name = "day25"
+# path = "25/.rs"

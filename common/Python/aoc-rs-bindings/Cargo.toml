@@ -1,0 +1,19 @@
+[package]
+name = "aoc-rs-bindings"
+version = "0.2.0"
+authors = ["Rahul Butani <rrbutani@users.noreply.github.com>"]
+edition = "2021"
+
+[lib]
+name = "aoc_rs"
+crate-type = ["cdylib"]
+
+[build-dependencies]
+pyo3-build-config = "0.15"
+
+[dependencies]
+aoc = { path = "../../Rust/aoc" }
+
+[dependencies.pyo3]
+version = "0.15"
+features = ["extension-module"]
