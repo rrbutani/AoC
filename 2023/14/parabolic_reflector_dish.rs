@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{hash_map::Entry, HashMap};
 
 use aoc::{iterator_map_ext::IterMapExt, AdventOfCode, Display, FromStr, Itertools};
 
@@ -7,11 +7,11 @@ use aoc::{iterator_map_ext::IterMapExt, AdventOfCode, Display, FromStr, Itertool
 )]
 enum Cell {
     #[strum(serialize = ".")]
-    Empty,
+    Empty = 0,
+    #[strum(serialize = "O")]
+    Round = 1,
     #[strum(serialize = "#")]
     Cube,
-    #[strum(serialize = "O")]
-    Round,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -80,6 +80,20 @@ impl Direction {
 type Coord = (usize, usize);
 
 impl Platform {
+    // instead of this we should: count the number of rounds in the row/col and
+    // then rewrite accordingly?
+    //
+    // taking care not to move cubes..
+    //
+    // i guess something like: partition into cube separated segments; within
+    // each, hoist all the rocks to the top?
+    //
+    // but would that even be faster...
+    //
+    // the "obvious" source of parallelism is columns/rows (depending on the
+    // movement direction) but that seems too fine-grained for a thread-pool to
+    // provide any speedup
+
     fn move_cell_in_dir(&mut self, dir: Direction, (mut row, mut col): Coord) {
         let (offs_r, offs_c) = dir.as_offs();
         let (orig_row, orig_col) = (row, col);
@@ -105,6 +119,7 @@ impl Platform {
         self.grid[orig_row][orig_col] = at_dest;
     }
 
+    #[inline(always)]
     fn tilt<const D: u8>(&mut self /* , dir: Direction */) {
         use Direction::*;
         #[rustfmt::skip]
@@ -123,6 +138,8 @@ impl Platform {
         };
         let invert_outer = matches!(dir, South | East);
 
+        // 100 * 4 * 100 * 100 * (avg 1..100 -> 50)
+        // 20'000'000 -> ~70ms; ...
         for a in 0..outer {
             for b in 0..inner {
                 let a = if invert_outer { outer - 1 - a } else { a };
@@ -145,36 +162,6 @@ impl Platform {
         self.tilt::<{ East as _ }>();
     }
 
-    // fn tilt_north(&mut self) {
-    //     let (height, width) = (self.grid.len(), self.grid[0].len());
-
-    //     for r in 0..height {
-    //         for c in 0..width {
-    //             if let Cell::Round = self.grid[r][c] {
-    //                 // eprintln!("\nmoving ({r}, {c})");
-    //                 // Move upwards until we hit a cube or reach the top:
-    //                 let mut dest_r = r;
-    //                 loop {
-    //                     let Some(new_r) = dest_r.checked_sub(1) else {
-    //                         break;
-    //                     };
-    //                     if self.grid[new_r][c] == Cell::Empty {
-    //                         dest_r = new_r;
-    //                         continue;
-    //                     }
-
-    //                     break;
-    //                 }
-
-    //                 // swap
-    //                 let at_dest = self.grid[dest_r][c];
-    //                 self.grid[dest_r][c] = self.grid[r][c];
-    //                 self.grid[r][c] = at_dest;
-    //             }
-    //         }
-    //     }
-    // }
-
     fn find_load(&self) -> usize {
         self.grid
             .iter()
@@ -182,6 +169,58 @@ impl Platform {
             .enumerate()
             .map(|(r, row)| row.iter().filter(|&&c| c == Cell::Round).count() * (r + 1))
             .sum()
+    }
+}
+
+// state is uniquely defined by: log2(3 ^ (height * width)) bits
+// the input is 100 * 100, so: 15850 bits; about 2KB
+//
+// really we can do better: the location of cubes is constant so we can just
+// skip those coordinates in the output; this gets us down to around 8500 cells
+// with two states (empty, occupied) for each meaning: 8500 bits; just over 1KB
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+struct State {
+    bytes: Vec<u8>,
+}
+
+// note: since we only do around ~115 spins before we arrive at a cycle,
+// swapping this in for the hashmap's key doesn't confer much (any?) speedup:
+// we do have fewer allocations but we need to run the below for every state
+// and it's hard to compete against memcpy (even it's split up into 100
+// invocations)
+//
+// the real bottleneck, of course, it doing the spins
+//
+// with LTO this takes ~40ms in total
+//
+// going to call that good enough for now...
+impl State {
+    fn make(plat: &Platform) -> Self {
+        use Cell::*;
+        let mut b = Vec::with_capacity(plat.height * plat.width / 8);
+
+        let byte_chunks = plat
+            .grid
+            .iter()
+            .flat_map(|r| r.iter())
+            .filter(|&&c| c != Cell::Cube)
+            .chunks(8);
+        let bytes = byte_chunks.into_iter().map(|byte_chunk| {
+            byte_chunk
+                .enumerate()
+                .map(|(i, c)| {
+                    (match c {
+                        Empty => 0,
+                        Round => 1,
+                        Cube => unreachable!(),
+                    }) << i
+                })
+                .sum::<u8>()
+        });
+
+        b.extend(bytes);
+
+        Self { bytes: b }
     }
 }
 
@@ -204,12 +243,19 @@ fn main() {
         let mut states = HashMap::new();
         let mut i = 0;
         let (first, next) = loop {
-            if let Some(last_seen_at) = states.get(&plat) {
-                break (last_seen_at, i);
-            } else {
-                // TODO: borrow repr that's thinner than `Platform` so we don't
-                // need to do so much allocation!!
-                states.insert(plat.clone(), i);
+            // if let Some(last_seen_at) = states.get(&plat) {
+            //     break (last_seen_at, i);
+            // } else {
+            //     // TODO: borrow repr that's thinner than `Platform` so we don't
+            //     // need to do so much allocation!!
+            //     states.insert(plat.clone(), i);
+            // }
+
+            match states.entry(State::make(&plat)) {
+                Entry::Occupied(last_seen_at) => break (*last_seen_at.get(), i),
+                Entry::Vacant(v) => {
+                    v.insert(i);
+                }
             }
 
             plat.spin();
