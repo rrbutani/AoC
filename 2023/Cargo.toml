@@ -73,9 +73,9 @@ path = "11/cosmic_expansion.rs"
 name = "day12"
 path = "12/hot_springs.rs"
 
-# [[bin]]
-# name = "day13"
-# path = "13/distress_signal.rs"
+[[bin]]
+name = "day13"
+path = "13/point_of_incidence.rs"
 
 # [[bin]]
 # name = "day14"
