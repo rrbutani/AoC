@@ -77,9 +77,9 @@ path = "12/hot_springs.rs"
 name = "day13"
 path = "13/point_of_incidence.rs"
 
-# [[bin]]
-# name = "day14"
-# path = "14/regolith_reservoir.rs"
+[[bin]]
+name = "day14"
+path = "14/parabolic_reflector_dish.rs"
 
 # [[bin]]
 # name = "day15"
