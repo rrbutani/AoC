@@ -189,6 +189,10 @@ struct State {
 // and it's hard to compete against memcpy (even it's split up into 100
 // invocations)
 //
+// update: saves about 10ms; over 10%.
+//
+// ---
+//
 // the real bottleneck, of course, it doing the spins
 //
 // with LTO this takes ~40ms in total

@@ -81,9 +81,9 @@ path = "13/point_of_incidence.rs"
 name = "day14"
 path = "14/parabolic_reflector_dish.rs"
 
-# [[bin]]
-# name = "day15"
-# path = "15/15.rs"
+[[bin]]
+name = "day15"
+path = "15/lens_library.rs"
 
 # [[bin]]
 # name = "day16"

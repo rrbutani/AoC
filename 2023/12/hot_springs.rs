@@ -62,6 +62,8 @@ fn fmt_states(states: &[State], counts: &[NonZeroUsize]) -> String {
 //  - maybe we should be going backwards?
 //    + actually no; that doesn't help; you can still find out late that a path
 //      doesn't work
+//  - update: with some fail-fast conditions and allocation hints we're down to
+//    ~35ms
 
 impl ConditionRecord {
     fn find_arrangements<'r: 'hm, 'hm>(
@@ -284,8 +286,7 @@ fn main() {
     );
     */
     let p2: usize = records
-        // .par_iter()
-        .iter()
+        .par_iter()
         .map(|c| c.find_arrangements(None, true))
         // .iter()
         // .map(|c| c.find_arrangements(Some(&mut table), true))
