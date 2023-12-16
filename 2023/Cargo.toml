@@ -85,9 +85,9 @@ path = "14/parabolic_reflector_dish.rs"
 name = "day15"
 path = "15/lens_library.rs"
 
-# [[bin]]
-# name = "day16"
-# path = "16/proboscidea_volcanium.rs"
+[[bin]]
+name = "day16"
+path = "16/the_floor_will_be_lava.rs"
 
 # [[bin]]
 # name = "day17"
