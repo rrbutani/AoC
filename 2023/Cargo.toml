@@ -113,9 +113,9 @@ path = "16/the_floor_will_be_lava.rs"
 # name = "day22"
 # path = "22/monkey_map.rs"
 
-# [[bin]]
-# name = "day23"
-# path = "23/unstable_diffusion.rs"
+[[bin]]
+name = "day23"
+path = "23/a_long_walk.rs"
 
 # [[bin]]
 # name = "day24"
