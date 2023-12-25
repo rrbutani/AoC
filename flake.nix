@@ -68,7 +68,7 @@
 
           cargo-expand
 
-          # TODO: gate on Linux:
+          z3_4_12 # should be in sync with what's used by the Rust z3-sys crate
           pkg-config
         ];
         buildInputs = buildInputs ++ (with np; [
@@ -76,6 +76,7 @@
           openssl
 
           fontconfig
+          rustPlatform.bindgenHook
         ]);
       };
     });

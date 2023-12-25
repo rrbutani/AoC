@@ -19,6 +19,7 @@ owo-colors = "3.2"
 # static_assertions = "1.1"
 # reqwest = "0.11"
 strum = { version = "0.25", features = ["derive"] }
+z3 = "0.12.1"
 
 [features]
 
@@ -117,9 +118,9 @@ path = "16/the_floor_will_be_lava.rs"
 name = "day23"
 path = "23/a_long_walk.rs"
 
-# [[bin]]
-# name = "day24"
-# path = "24/blizzard_basin.rs"
+[[bin]]
+name = "day24"
+path = "24/never_tell_me_the_odds.rs"
 
 # [[bin]]
 # name = "day25"
