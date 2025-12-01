@@ -43,10 +43,7 @@ fn animate(state: &[Option<char>; 8], count: usize) {
             if let Some(c) = c {
                 format!("{}", c.fg::<Green>())
             } else {
-                format!(
-                    "{}",
-                    ((((idx * count) + idx) % 93 + 33) as u8 as char).fg::<Grey>()
-                )
+                format!("{}", ((((idx * count) + idx) % 93 + 33) as u8 as char).fg::<Grey>())
             }
         })
         .map(|s| format!("{}{}", s, ('\u{0332}').fg::<Grey>()))

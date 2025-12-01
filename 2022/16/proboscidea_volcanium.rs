@@ -29,12 +29,7 @@ impl Report<'_> {
         let mut seen = HashSet::new();
 
         let mut buf = String::new();
-        writeln!(
-            buf,
-            "{} tunnels {{",
-            if directed { "digraph" } else { "graph " }
-        )
-        .unwrap();
+        writeln!(buf, "{} tunnels {{", if directed { "digraph" } else { "graph " }).unwrap();
         buf.write_str("  forcelabels=true\n").unwrap();
 
         for (src, links) in self.map.iter() {
@@ -94,20 +89,12 @@ impl<'s> Report<'s> {
                 .map(|v| (v, Vec::from([Action::Travel(v)])))
                 .collect();
 
-            let res = map.insert(
-                Valve(source),
-                Link {
-                    flow_rate: flow_rate.parse().unwrap(),
-                    leads_to,
-                },
-            );
+            let res =
+                map.insert(Valve(source), Link { flow_rate: flow_rate.parse().unwrap(), leads_to });
             assert_eq!(res, None);
         }
 
-        let mut out = Report {
-            map,
-            shortest_paths: HashMap::new(),
-        };
+        let mut out = Report { map, shortest_paths: HashMap::new() };
         if prune {
             out.prune();
         } else {
@@ -297,10 +284,7 @@ impl<'s> Report<'s> {
     ) -> (LinkedList<Action<'s>>, usize) {
         // eprintln!("next: {next:?} @ {time_remaining} | visited: {opened:?}");
         if table.len() % 100_000 == 0 {
-            eprintln!(
-                "time_remaining: {time_remaining}; table len: {}",
-                table.len()
-            );
+            eprintln!("time_remaining: {time_remaining}; table len: {}", table.len());
         }
         if time_remaining == 0 {
             return (LinkedList::new(), 0);
@@ -360,11 +344,7 @@ impl<'s> Report<'s> {
                 self.max_path_inner(next, opened, time_remaining, table, all_nonzero);
             opened.remove(&next);
 
-            (
-                LinkedList::from([Action::Open(next)]),
-                steps,
-                score + next_score,
-            )
+            (LinkedList::from([Action::Open(next)]), steps, score + next_score)
         } else {
             // // Alternatively we can just do nothing this minute.
             // let (steps, next_score) =
@@ -382,11 +362,7 @@ impl<'s> Report<'s> {
             // This also gets taken when there are no places (non-corridor
             // places) that we can travel in the time remaining.
 
-            (
-                LinkedList::from([]),
-                repeat(Action::Nothing).take(time_remaining).collect(),
-                0,
-            )
+            (LinkedList::from([]), repeat(Action::Nothing).take(time_remaining).collect(), 0)
         };
 
         // The other option is to spend this minute moving:
@@ -404,11 +380,7 @@ impl<'s> Report<'s> {
                     table,
                     all_nonzero,
                 );
-                (
-                    LinkedList::from_iter(steps.iter().copied()),
-                    steps_next,
-                    next_score,
-                )
+                (LinkedList::from_iter(steps.iter().copied()), steps_next, next_score)
             });
 
         // We want to pick whatever option gets us the best score:
@@ -972,10 +944,7 @@ impl<'s> Report<'s> {
         }
 
         if table.len() % 1_000_000 == 0 {
-            eprintln!(
-                "time_remaining: {time_remaining:?}; table len: {}",
-                table.len()
-            );
+            eprintln!("time_remaining: {time_remaining:?}; table len: {}", table.len());
         }
         if time_remaining == (0, 0) {
             return ((Vec::new(), Vec::new()), 0);

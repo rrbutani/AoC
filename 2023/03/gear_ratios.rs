@@ -56,10 +56,7 @@ fn line(
     start: (usize, usize),
 ) -> impl Iterator<Item = (usize, usize)> + Clone {
     (-left_right_pad..(len as isize + left_right_pad)).filter_map(move |col_offs| {
-        Some((
-            start.0.checked_add_signed(row_offs)?,
-            start.1.checked_add_signed(col_offs)?,
-        ))
+        Some((start.0.checked_add_signed(row_offs)?, start.1.checked_add_signed(col_offs)?))
     })
 }
 

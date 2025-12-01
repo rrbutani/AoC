@@ -1,7 +1,7 @@
 #!/usr/bin/env rustr
 
 #[allow(unused_imports)]
-use aoc::{AdventOfCode, friends::*};
+use aoc::{friends::*, AdventOfCode};
 
 fn power_level(serial_number: i32, x: u16, y: u16) -> i32 {
     let rack_id = x as i32 + 10;
@@ -15,25 +15,36 @@ fn power_level(serial_number: i32, x: u16, y: u16) -> i32 {
 }
 
 fn max_in_grid_of_size(serial_number: i32, square_size: u16) -> ((u16, u16), i32) {
-    (1..=(300 - square_size + 1)).map(|x| {
-        (1..=(300 - square_size + 1)).map(move |y| {
-            let s: i32 = (x..=(x + square_size - 1)).map(|x| {
-                (y..=(y + square_size - 1)).map(|y| {
-                    power_level(serial_number, x, y)
-                }).sum::<i32>()
-            }).sum::<i32>();
+    (1..=(300 - square_size + 1))
+        .map(|x| {
+            (1..=(300 - square_size + 1))
+                .map(move |y| {
+                    let s: i32 = (x..=(x + square_size - 1))
+                        .map(|x| {
+                            (y..=(y + square_size - 1))
+                                .map(|y| power_level(serial_number, x, y))
+                                .sum::<i32>()
+                        })
+                        .sum::<i32>();
 
-            ((x, y), s)
-        }).max_by_key(|(_, s)| s.clone()).unwrap()
-    }).max_by_key(|(_, s)| s.clone()).unwrap()
+                    ((x, y), s)
+                })
+                .max_by_key(|(_, s)| s.clone())
+                .unwrap()
+        })
+        .max_by_key(|(_, s)| s.clone())
+        .unwrap()
 }
 
 fn max_in_grid(serial_number: i32) -> ((u16, u16, u16), i32) {
-    (1..=300).map(|s| {
-        println!("{}", s);
-        let ((x, y), pl) = max_in_grid_of_size(serial_number, s);
-        ((x, y, s), pl)
-    }).max_by_key(|(_, s)| s.clone()).unwrap()
+    (1..=300)
+        .map(|s| {
+            println!("{}", s);
+            let ((x, y), pl) = max_in_grid_of_size(serial_number, s);
+            ((x, y, s), pl)
+        })
+        .max_by_key(|(_, s)| s.clone())
+        .unwrap()
 }
 
 #[allow(unused_must_use)]

@@ -1,7 +1,7 @@
 #!/usr/bin/env rustr
 
 #[allow(unused_imports)]
-use aoc::{AdventOfCode, friends::*};
+use aoc::{friends::*, AdventOfCode};
 
 fn recipe_sequence(len: usize) -> Vec<u8> {
     let mut recipes = Vec::with_capacity(len);
@@ -40,10 +40,12 @@ fn recipe_sequence(len: usize) -> Vec<u8> {
 }
 
 fn scores(skip: usize, count: usize) -> String {
-    recipe_sequence(skip + count).iter()
+    recipe_sequence(skip + count)
+        .iter()
         .skip(skip)
         .take(count)
-        .map(|r| format!("{}", r)).collect()
+        .map(|r| format!("{}", r))
+        .collect()
 }
 
 fn position(search: &str, mut guess: usize) -> usize {
@@ -52,9 +54,11 @@ fn position(search: &str, mut guess: usize) -> usize {
 
     loop {
         println!("Trying with {}", guess);
-        recipes = recipe_sequence(guess).iter()
+        recipes = recipe_sequence(guess)
+            .iter()
             .skip(last_guess.saturating_sub(search.len()))
-            .map(|r| format!("{}", r)).collect();
+            .map(|r| format!("{}", r))
+            .collect();
 
         if let Some(l) = recipes.find(search) {
             return l + last_guess.saturating_sub(search.len());
@@ -75,7 +79,6 @@ fn main() {
     aoc.submit_p1(scores(num_recipes, 10));
     aoc.submit_p2(position(&format!("{}", num_recipes), 1000000));
 }
-
 
 #[cfg(test)]
 mod tests {

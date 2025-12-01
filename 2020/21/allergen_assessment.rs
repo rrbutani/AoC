@@ -175,10 +175,7 @@ fn main() {
         // for a in solve_states.iter().filter()
 
         if previously_solved.is_empty() {
-            panic!(
-                "We seem to be stuck! (unsolved = {})\n{:?}",
-                unsolved, solve_states
-            );
+            panic!("We seem to be stuck! (unsolved = {})\n{:?}", unsolved, solve_states);
         }
 
         // First apply the things we just solved:

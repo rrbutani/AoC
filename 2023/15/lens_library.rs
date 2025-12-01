@@ -21,9 +21,7 @@ struct HashMap<'l> {
 
 impl<'l> HashMap<'l> {
     fn new() -> Self {
-        Self {
-            boxes: [(); 256].map(|()| Vec::new()),
-        }
+        Self { boxes: [(); 256].map(|()| Vec::new()) }
     }
 
     fn add(&mut self, label: &'l str, val: u8) -> Option<u8> {

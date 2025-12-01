@@ -191,20 +191,13 @@ fn main() {
     let input: String = aoc.get_input();
     let instructions = input.lines().map(|l| l.parse().unwrap());
 
-    let mut s = Ship {
-        pos: (0, 0),
-        dir: Direction::East,
-    };
+    let mut s = Ship { pos: (0, 0), dir: Direction::East };
     instructions.clone().for_each(|i| s.step(i));
 
     let p1 = s.abs_dist();
     let _ = aoc.submit_p1(p1);
 
-    let mut s = ShipWithWaypoint {
-        waypoint: (10, 1),
-        ship: (0, 0),
-        dir: Direction::East,
-    };
+    let mut s = ShipWithWaypoint { waypoint: (10, 1), ship: (0, 0), dir: Direction::East };
     instructions.for_each(|i| s.step(i));
 
     let p2 = s.abs_dist();

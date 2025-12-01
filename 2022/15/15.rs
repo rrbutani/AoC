@@ -47,10 +47,7 @@ impl FromStr for Report {
             .parse()
             .unwrap();
 
-        Ok(Report {
-            sensor,
-            closest_beacon: beacon,
-        })
+        Ok(Report { sensor, closest_beacon: beacon })
     }
 }
 

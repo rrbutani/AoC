@@ -17,9 +17,7 @@ impl FromStr for Instruction {
             "noop" => Ok(Nop),
             l if l.starts_with("addx") => {
                 let (_, num) = l.split_once(' ').ok_or(())?;
-                Ok(Instruction::Addx {
-                    imm: num.parse().map_err(|_| ())?,
-                })
+                Ok(Instruction::Addx { imm: num.parse().map_err(|_| ())? })
             }
             _ => Err(()),
         }

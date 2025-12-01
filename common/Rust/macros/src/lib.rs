@@ -163,10 +163,8 @@ pub fn sequence(attr: TokenStream, item: TokenStream) -> TokenStream {
             Looping::Once => iter::once((states.last().unwrap(), states.last().unwrap())),
         });
 
-    let (from, to) = (
-        state_transitions.clone().map(|(f, _)| f),
-        state_transitions.clone().map(|(_, t)| t),
-    );
+    let (from, to) =
+        (state_transitions.clone().map(|(f, _)| f), state_transitions.clone().map(|(_, t)| t));
 
     let match_block = quote! {
         match *self {

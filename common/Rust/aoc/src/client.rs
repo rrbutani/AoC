@@ -321,9 +321,7 @@ pub fn submit_answer(
                 // to the answer we just tried to upload:
                 if let Ok(Some(correct_answer)) = get_answer(year, day, token, part) {
                     if answer == correct_answer {
-                        Ok(CorrectSubmission::Resubmitted {
-                            answer: correct_answer,
-                        })
+                        Ok(CorrectSubmission::Resubmitted { answer: correct_answer })
                     } else {
                         Err(AocError::IncorrectResubmission {
                             correct: correct_answer,
@@ -712,10 +710,7 @@ impl Config {
             if path.exists() {
                 InputSource::File(input.to_string())
             } else {
-                panic!(
-                    "`{}` doesn't exist! Please specify a valid input file.",
-                    input
-                );
+                panic!("`{}` doesn't exist! Please specify a valid input file.", input);
             }
         } else if matches.is_present("stdin-input") {
             InputSource::Stdin
@@ -754,20 +749,12 @@ impl Config {
 
         // Finally, emit a warning if we were given a token but didn't use it.
         if token_was_explicitly_specified
-            && !matches!(
-                (&input, &output),
-                (InputSource::Web(_), _) | (_, OutputSink::Web(_))
-            )
+            && !matches!((&input, &output), (InputSource::Web(_), _) | (_, OutputSink::Web(_)))
         {
             dprintln!("Warning: The given token is not being used for anything.")
         }
 
-        Config {
-            year,
-            day,
-            input,
-            output,
-        }
+        Config { year, day, input, output }
     }
 }
 
@@ -786,11 +773,7 @@ pub enum Error {
 
 impl AdventOfCode {
     pub fn new(year: u16, day: u8) -> Self {
-        Self {
-            config: Config::get_config(year, day),
-            input: None,
-            last_event: None,
-        }
+        Self { config: Config::get_config(year, day), input: None, last_event: None }
     }
 
     pub fn new_with_token(year: u16, day: u8, token: &str) -> Self {
@@ -802,11 +785,7 @@ impl AdventOfCode {
     }
 
     pub fn new_from_config(config: Config) -> Self {
-        Self {
-            config,
-            input: None,
-            last_event: None,
-        }
+        Self { config, input: None, last_event: None }
     }
 
     pub fn get_input(&mut self) -> String {

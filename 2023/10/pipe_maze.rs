@@ -43,10 +43,7 @@ impl Cell {
 
         let apply_offs = |(row_offs, col_offs)| {
             row.checked_add_signed(row_offs)
-                .and_then(|r| {
-                    col.checked_add_signed(col_offs)
-                        .map(|c| (r, c))
-                })
+                .and_then(|r| col.checked_add_signed(col_offs).map(|c| (r, c)))
         };
 
         [apply_offs(offs1), apply_offs(offs2)]
@@ -72,12 +69,7 @@ impl FromStr for Grid {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let width = s
-            .lines()
-            .next()
-            .unwrap()
-            .chars()
-            .count();
+        let width = s.lines().next().unwrap().chars().count();
         let mut start = None;
         let grid = s
             .lines()
@@ -114,13 +106,11 @@ impl FromStr for Grid {
 }
 
 fn coord_iter<T: Copy>(grid: &Vec<Vec<T>>) -> impl Iterator<Item = (Coord, T)> + '_ {
-    grid.iter()
-        .enumerate()
-        .flat_map(|(row_idx, row)| {
-            row.iter()
-                .enumerate()
-                .map(move |(col_idx, &cell)| ((row_idx, col_idx), cell))
-        })
+    grid.iter().enumerate().flat_map(|(row_idx, row)| {
+        row.iter()
+            .enumerate()
+            .map(move |(col_idx, &cell)| ((row_idx, col_idx), cell))
+    })
 }
 
 #[rustfmt::skip]
@@ -157,10 +147,7 @@ impl fmt::Display for Grid {
         for (row_idx, row) in self.grid.iter().enumerate() {
             for (col_idx, cell) in row.iter().enumerate() {
                 // If on path, color by distance from start:
-                let dist = &self
-                    .distances
-                    .as_ref()
-                    .and_then(|d| d[row_idx][col_idx]);
+                let dist = &self.distances.as_ref().and_then(|d| d[row_idx][col_idx]);
                 if let Some(dist) = dist {
                     // scale 0..furthest to 200..0
                     let intensity = 200 - (200 * dist / furthest.unwrap());
@@ -231,11 +218,7 @@ impl Grid {
             );
 
             // use the above to infer the starting cell's true kind:
-            let start_adjacent = queue
-                .iter()
-                .map(|&(c, _)| c)
-                .sorted()
-                .collect_vec();
+            let start_adjacent = queue.iter().map(|&(c, _)| c).sorted().collect_vec();
             for kind in [Vert, Horz, NorthEast, NorthWest, SouthEast, SouthWest]
                 .into_iter()
                 .chain(iter::from_fn(|| panic!("no match for start")))
@@ -279,9 +262,7 @@ impl Grid {
                     // eprintln!("\u{001b}[2J");
                     eprintln!("{self}");
                     let mut s = String::new();
-                    std::io::stdin()
-                        .read_line(&mut s)
-                        .unwrap();
+                    std::io::stdin().read_line(&mut s).unwrap();
                 }
             }
 

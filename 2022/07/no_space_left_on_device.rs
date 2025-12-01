@@ -39,11 +39,7 @@ enum Entry<'a> {
 
 impl Entry<'_> {
     fn dir(name: &str) -> Ent<'_> {
-        Arc::new(RefCell::new(Entry::Dir {
-            name,
-            entries: vec![],
-            size_sum: None,
-        }))
+        Arc::new(RefCell::new(Entry::Dir { name, entries: vec![], size_sum: None }))
     }
     fn file(name: &str, size: usize) -> Ent<'_> {
         Arc::new(RefCell::new(Entry::File { name, size }))
@@ -72,18 +68,13 @@ impl Entry<'_> {
     }
 
     fn display<'s>(this: &'s Ent<'s>) -> impl Display + 's {
-        EntryDisplayHelper {
-            inner: this,
-            level: 0,
-        }
+        EntryDisplayHelper { inner: this, level: 0 }
     }
 
     fn size(this: &Ent<'_>) -> usize {
         let mut this = this.borrow_mut();
         match &mut *this {
-            Entry::Dir {
-                entries, size_sum, ..
-            } => {
+            Entry::Dir { entries, size_sum, .. } => {
                 if let Some(s) = size_sum {
                     *s
                 } else {
@@ -116,14 +107,7 @@ impl<'e, 'p> Display for EntryDisplayHelper<'e, 'p> {
             Entry::Dir { name, entries, .. } => {
                 writeln!(f, "{name} (dir)")?;
                 for e in entries {
-                    write!(
-                        f,
-                        "{}",
-                        EntryDisplayHelper {
-                            inner: &e,
-                            level: self.level + 1
-                        }
-                    )?;
+                    write!(f, "{}", EntryDisplayHelper { inner: &e, level: self.level + 1 })?;
                 }
             }
             Entry::File { name, size } => {

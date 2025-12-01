@@ -1,7 +1,7 @@
 #!/usr/bin/env rustr
 
 #[allow(unused_imports)]
-use aoc::{AdventOfCode, friends::*};
+use aoc::{friends::*, AdventOfCode};
 use std::collections::HashSet;
 
 fn main() {
@@ -39,7 +39,7 @@ fn triple(entries: &HashSet<u32>) -> Option<(u32, u32, u32)> {
         for dos in entries.iter().filter(|v| *v != uno) {
             if let Some(complement) = 2020u32.checked_sub(uno + dos) {
                 if entries.contains(&complement) {
-                    return Some((*uno, *dos, complement))
+                    return Some((*uno, *dos, complement));
                 }
             }
         }

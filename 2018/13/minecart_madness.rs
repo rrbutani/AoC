@@ -1,7 +1,7 @@
 #!/usr/bin/env rustr
 
 #[allow(unused_imports)]
-use aoc::{AdventOfCode, friends::*};
+use aoc::{friends::*, AdventOfCode};
 use std::collections::{HashMap, HashSet};
 use std::fmt::{self, Display, Formatter};
 
@@ -94,12 +94,7 @@ struct Cart {
 
 impl Cart {
     fn new(track_id: TrackId, dir: Direction) -> Self {
-        Cart {
-            valid: true,
-            track_id,
-            dir,
-            turn_history: TurnHistory::new(),
-        }
+        Cart { valid: true, track_id, dir, turn_history: TurnHistory::new() }
     }
 
     /// None if there is no collision
@@ -109,7 +104,7 @@ impl Cart {
 
         if !self.valid {
             current_track.occupied = false;
-            return None
+            return None;
         }
 
         // Get direction to move in (based on our _current_ track)
@@ -122,22 +117,35 @@ impl Cart {
             Right => current_track.right,
             Down => current_track.below,
             Left => current_track.left,
-        } { id }
-        else { println!("{:?} -> {:?}", self, current_track); panic!("ahh!") };
+        } {
+            id
+        } else {
+            println!("{:?} -> {:?}", self, current_track);
+            panic!("ahh!")
+        };
 
         current_track.occupied = false;
         self.track_id = id;
 
         let next_track = &mut tracks[id];
-        if next_track.occupied { next_track.occupied = false; return Some(next_track.pos) }
-        else { next_track.occupied = true }
-
+        if next_track.occupied {
+            next_track.occupied = false;
+            return Some(next_track.pos);
+        } else {
+            next_track.occupied = true
+        }
 
         self.dir = match (next_track.track_type, self.dir) {
-            (Vertical, dir) | (Horizontal, dir) => { dir },
-            (TopRight, dir @ Right) | (TopLeft, dir @ Up) | (BottomLeft, dir @ Left) | (BottomRight, dir @ Down) => { dir.clockwise() },
-            (TopRight, dir @ Up) | (TopLeft, dir @ Left) | (BottomLeft, dir @ Down) | (BottomRight, dir @ Right) => { dir.counterclockwise() },
-            (Intersection, dir) => { dir.intersection_turn(&mut self.turn_history) },
+            (Vertical, dir) | (Horizontal, dir) => dir,
+            (TopRight, dir @ Right)
+            | (TopLeft, dir @ Up)
+            | (BottomLeft, dir @ Left)
+            | (BottomRight, dir @ Down) => dir.clockwise(),
+            (TopRight, dir @ Up)
+            | (TopLeft, dir @ Left)
+            | (BottomLeft, dir @ Down)
+            | (BottomRight, dir @ Right) => dir.counterclockwise(),
+            (Intersection, dir) => dir.intersection_turn(&mut self.turn_history),
             // (Vertical, Left) | (Vertical, Right) | (Horizontal, Up) | (Horizontal, Down) => unreachable!(),
             // (TopRight, Left) | (TopRight, Down) | (TopLeft, Right) | (TopLeft, Down) => unreachable!(),
             // (BottomRight, Left) | (BottomRight, Up) | (BottomLeft, Right) | (BottomLeft, Up) => unreachable!(),
@@ -193,8 +201,7 @@ impl Position {
     fn with_offset(&self, x_adj: i8, y_adj: i8) -> Option<Self> {
         // This is lazy but good enough for now..
 
-        if (self.x as isize + x_adj as isize) < 0 ||
-                (self.y as isize + y_adj as isize) < 0 {
+        if (self.x as isize + x_adj as isize) < 0 || (self.y as isize + y_adj as isize) < 0 {
             None
         } else {
             Some(Position {
@@ -214,21 +221,20 @@ impl Position {
 #[derive(Copy, Clone, Debug)]
 enum TrackLink {
     Position(Position),
-    Id(TrackId)
+    Id(TrackId),
 }
 
 impl TrackLink {
     fn into_id(&self, hm: &HashMap<Position, (TrackId, TrackType)>) -> Option<Self> {
         match self {
-            TrackLink::Position(pos) => {
-                hm.get(&pos).map(|(i, _)| TrackLink::Id(*i))
-            },
-            a => Some((*a).clone())
+            TrackLink::Position(pos) => hm.get(&pos).map(|(i, _)| TrackLink::Id(*i)),
+            a => Some((*a).clone()),
         }
     }
 
     fn from_pos(base: &Position, x_adj: i8, y_adj: i8) -> Option<Self> {
-        base.with_offset(x_adj, y_adj).map(|p| TrackLink::Position(p))
+        base.with_offset(x_adj, y_adj)
+            .map(|p| TrackLink::Position(p))
     }
 }
 
@@ -265,12 +271,15 @@ struct TrackSegment {
 /// If tl is None -> Some(())
 /// If tl is Some that maps to an id -> Some(())
 /// If tl is Some that doesn't map -> None
-fn option_to_id(tl: &mut Option<TrackLink>, hm: &HashMap<Position, (TrackId, TrackType)>) -> Option<()> {
+fn option_to_id(
+    tl: &mut Option<TrackLink>,
+    hm: &HashMap<Position, (TrackId, TrackType)>,
+) -> Option<()> {
     match tl {
         Some(p) => {
             *tl = Some(p.into_id(hm)?);
             Some(())
-        },
+        }
         None => Some(()),
     }
 }
@@ -278,9 +287,9 @@ fn option_to_id(tl: &mut Option<TrackLink>, hm: &HashMap<Position, (TrackId, Tra
 impl TrackSegment {
     fn new(track_type: TrackType, id: TrackId, pos: Position, occupied: bool) -> Self {
         let above = TrackLink::from_pos(&pos, 0, -1);
-        let right = TrackLink::from_pos(&pos, 1,  0);
-        let below = TrackLink::from_pos(&pos, 0,  1);
-        let left = TrackLink::from_pos(&pos, -1,  0);
+        let right = TrackLink::from_pos(&pos, 1, 0);
+        let below = TrackLink::from_pos(&pos, 0, 1);
+        let left = TrackLink::from_pos(&pos, -1, 0);
 
         let s = |o: Option<TrackLink>| Some(o.unwrap());
 
@@ -295,16 +304,7 @@ impl TrackSegment {
             Intersection => (s(above), s(right), s(below), s(left)),
         };
 
-        TrackSegment {
-            track_type,
-            pos,
-            id: id,
-            occupied,
-            above,
-            right,
-            below,
-            left,
-        }
+        TrackSegment { track_type, pos, id: id, occupied, above, right, below, left }
     }
 
     fn to_id(&mut self, hm: &HashMap<Position, (TrackId, TrackType)>) -> Option<()> {
@@ -334,39 +334,47 @@ fn parse_map(map: Vec<Vec<char>>) -> Option<(Vec<TrackSegment>, Vec<Cart>)> {
                 '\\' | '/' => {
                     // We need some context; if there's a vertical track or an intersection above
                     // us we're a Bottom* track, otherwise Top*.
-                    if let Some((_, Vertical)) | Some((_, Intersection)) = pos.with_offset(0, -1).as_ref().and_then(|p| hm.get(p)) {
-                        match *c { '\\' => BottomLeft, '/' => BottomRight, _ => unreachable!() }
+                    if let Some((_, Vertical)) | Some((_, Intersection)) =
+                        pos.with_offset(0, -1).as_ref().and_then(|p| hm.get(p))
+                    {
+                        match *c {
+                            '\\' => BottomLeft,
+                            '/' => BottomRight,
+                            _ => unreachable!(),
+                        }
                     } else {
-                        match *c { '\\' => TopRight, '/' => TopLeft, _ => unreachable!() }
+                        match *c {
+                            '\\' => TopRight,
+                            '/' => TopLeft,
+                            _ => unreachable!(),
+                        }
                     }
-                },
-                _ => continue
+                }
+                _ => continue,
             };
 
             let id = tracks.len();
             let occupied = match *c {
                 '^' | '>' | 'v' | '<' => {
-
                     use self::Direction::*;
                     let dir = match *c {
                         '^' => Up,
                         '>' => Right,
                         'v' => Down,
                         '<' => Left,
-                        _ => unreachable!()
+                        _ => unreachable!(),
                     };
 
                     carts.push(Cart::new(id, dir));
                     true
-                },
-                _ => false
+                }
+                _ => false,
             };
 
             tracks.push(TrackSegment::new(track_type, id, pos, occupied));
             hm.insert(pos, (id, track_type));
         }
     }
-
 
     // And now link them up:
     for ts in tracks.iter_mut() {
@@ -389,34 +397,46 @@ fn print_map(tracks: &Vec<TrackSegment>, carts: &Vec<Cart>) {
     for track in tracks {
         let pos = track.pos;
 
-        while pos.y > row { println!(""); row += 1; col = 0; }
-        while pos.x > col { print!(" "); col += 1 }
+        while pos.y > row {
+            println!("");
+            row += 1;
+            col = 0;
+        }
+        while pos.x > col {
+            print!(" ");
+            col += 1
+        }
 
         if track.occupied {
             // Find the cart:
             use self::Direction::*;
-            print!("{}", match
-                carts.iter()
+            print!(
+                "{}",
+                match carts
+                    .iter()
                     .filter(|c| c.track_id == track.id)
                     .next()
                     .unwrap()
                     .dir
-            {
-                Up => '^',
-                Right => '>',
-                Down => 'v',
-                Left => '<',
-            });
-        }
-        else {
+                {
+                    Up => '^',
+                    Right => '>',
+                    Down => 'v',
+                    Left => '<',
+                }
+            );
+        } else {
             use self::TrackType::*;
-            print!("{}", match track.track_type {
-                Vertical => '|',
-                Horizontal => '-',
-                TopLeft | BottomRight => '/',
-                TopRight | BottomLeft => '\\',
-                Intersection => '+',
-            })
+            print!(
+                "{}",
+                match track.track_type {
+                    Vertical => '|',
+                    Horizontal => '-',
+                    TopLeft | BottomRight => '/',
+                    TopRight | BottomLeft => '\\',
+                    Intersection => '+',
+                }
+            )
         }
         col += 1;
     }
@@ -428,10 +448,10 @@ fn sort_carts<'a>(tracks: &Vec<TrackSegment>, carts: &'a mut Vec<Cart>) -> Vec<&
     let mut carts_sorted: Vec<&mut Cart> = carts.iter_mut().collect();
 
     carts_sorted.sort_by(|c1, c2| {
-            let p1 = tracks[c1.track_id].pos;
-            let p2 = tracks[c2.track_id].pos;
+        let p1 = tracks[c1.track_id].pos;
+        let p2 = tracks[c2.track_id].pos;
 
-            (p1.y, p1.x).cmp(&(p2.y, p2.x))
+        (p1.y, p1.x).cmp(&(p2.y, p2.x))
     });
 
     carts_sorted
@@ -439,7 +459,6 @@ fn sort_carts<'a>(tracks: &Vec<TrackSegment>, carts: &'a mut Vec<Cart>) -> Vec<&
 
 fn run_until_collision(tracks: &mut Vec<TrackSegment>, carts: &mut Vec<Cart>) -> Position {
     loop {
-
         let mut carts_sorted = sort_carts(tracks, carts);
 
         for cart in carts_sorted.iter_mut() {
@@ -512,7 +531,6 @@ fn main() {
 
     aoc.submit_p2(last_one_standing);
 }
-
 
 /*
 enum TurnHistory {

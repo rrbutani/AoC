@@ -20,9 +20,7 @@ impl Aoc {
         // We skip the first arg since that's the Python interpreter!
         let config = Config::get_config_with_custom_args(year, day, None, args_os().skip(1));
 
-        Self {
-            inner: AdventOfCode::new_from_config(config),
-        }
+        Self { inner: AdventOfCode::new_from_config(config) }
     }
 
     /// Grabs the input for the problem.

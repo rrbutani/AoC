@@ -56,12 +56,7 @@ impl FromStr for Part {
             }
         }
 
-        Ok(Self {
-            x: x.unwrap(),
-            m: m.unwrap(),
-            a: a.unwrap(),
-            s: s.unwrap(),
-        })
+        Ok(Self { x: x.unwrap(), m: m.unwrap(), a: a.unwrap(), s: s.unwrap() })
     }
 }
 
@@ -167,11 +162,7 @@ impl FromStr for Workflows {
             .collect();
 
         assert!(map.contains_key("in"));
-        Ok(Self {
-            map,
-            module: None,
-            func_id: None,
-        })
+        Ok(Self { map, module: None, func_id: None })
     }
 }
 
@@ -316,9 +307,7 @@ impl Workflows {
             // Fill in the entrypoint:
             fb.switch_to_block(entry);
             fb.append_block_params_for_function_params(entry);
-            let &[x, m, a, s] = fb.block_params(entry) else {
-                unreachable!()
-            };
+            let &[x, m, a, s] = fb.block_params(entry) else { unreachable!() };
             let all_args = [x, m, a, s];
             fb.ins().jump(blocks[&SmolStr::new("in")], &[]);
 
@@ -365,10 +354,7 @@ impl Workflows {
         // Print disasm:
         #[cfg(target_arch = "x86_64")]
         if DEBUG {
-            eprintln!(
-                "disasm: {}",
-                ctx.compiled_code().unwrap().vcode.as_ref().unwrap()
-            );
+            eprintln!("disasm: {}", ctx.compiled_code().unwrap().vcode.as_ref().unwrap());
 
             // eprintln!("\n\nDisasm:");
             // let code = ctx.compiled_code().unwrap().code_buffer();
@@ -403,10 +389,8 @@ impl Workflows {
 fn print_ir<'s, 'f>(func: &'f Function, block_map: HashMap<&'s SmolStr, Block>) {
     let mut ir = func.display().to_string();
     for (name, block) in block_map {
-        ir = ir.replace(
-            &format!("block{}", block.as_u32()),
-            &format!("b{}_{name}", block.as_u32()),
-        );
+        ir =
+            ir.replace(&format!("block{}", block.as_u32()), &format!("b{}_{name}", block.as_u32()));
     }
 
     eprintln!("func: {}", ir);
@@ -613,10 +597,8 @@ fn main() {
     // let inp = INP;
     // let inp = INP_SMALL;
     let (workflows, parts) = inp.split_once("\n\n").unwrap();
-    let (mut workflows, parts) = (
-        workflows.parse::<Workflows>().unwrap(),
-        parts.lines().map_parse::<Part>().collect_vec(),
-    );
+    let (mut workflows, parts) =
+        (workflows.parse::<Workflows>().unwrap(), parts.lines().map_parse::<Part>().collect_vec());
     event("parse");
 
     let filter = workflows.jit();

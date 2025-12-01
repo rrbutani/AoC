@@ -48,9 +48,7 @@ impl FromStr for Droplet {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Droplet {
-            cubes: s.lines().map(|l| l.parse().unwrap()).collect(),
-        })
+        Ok(Droplet { cubes: s.lines().map(|l| l.parse().unwrap()).collect() })
     }
 }
 
@@ -77,11 +75,7 @@ impl Droplet {
         let outside = {
             // naïve overestimate of the space the droplet occupies but it'll do
             let range = |func: fn(&Coord) -> isize| {
-                let MinMaxResult::MinMax(min, max) = self.cubes
-                    .iter()
-                    .map(func)
-                    .minmax()
-                else {
+                let MinMaxResult::MinMax(min, max) = self.cubes.iter().map(func).minmax() else {
                     unreachable!()
                 };
 
@@ -93,11 +87,7 @@ impl Droplet {
             let z = range(|c| c.z);
 
             let mut outside = HashSet::with_capacity(self.cubes.len());
-            let mut queued = vec![Coord {
-                x: *x.start(),
-                y: *y.start(),
-                z: *z.start(),
-            }];
+            let mut queued = vec![Coord { x: *x.start(), y: *y.start(), z: *z.start() }];
             outside.insert(queued[0]);
             let mut new = vec![];
 

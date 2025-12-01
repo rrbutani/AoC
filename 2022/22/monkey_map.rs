@@ -21,10 +21,7 @@ impl<T: Mul + Clone> Mul<T> for Coord<T> {
     type Output = Coord<<T as Mul<T>>::Output>;
 
     fn mul(self, rhs: T) -> Self::Output {
-        Coord {
-            x: self.x * rhs.clone(),
-            y: self.y * rhs,
-        }
+        Coord { x: self.x * rhs.clone(), y: self.y * rhs }
     }
 }
 
@@ -64,10 +61,8 @@ impl<T: Clone> Coord<T> {
         x: impl Iterator<Item = T> + Clone,
         y: impl Iterator<Item = T> + Clone,
     ) -> impl Iterator<Item = Coord<T>> + Clone {
-        y.cartesian_product(x).map(|(y, x)| Coord {
-            y: y.clone(),
-            x: x.clone(),
-        })
+        y.cartesian_product(x)
+            .map(|(y, x)| Coord { y: y.clone(), x: x.clone() })
     }
 }
 
@@ -496,10 +491,7 @@ impl Transformation {
     }
 
     pub const fn spin(self) -> Self {
-        Transformation {
-            spin: !self.spin,
-            rotate: self.rotate.invert(),
-        }
+        Transformation { spin: !self.spin, rotate: self.rotate.invert() }
     }
 
     pub const fn flip(self) -> Self {
@@ -578,39 +570,15 @@ impl Transformation {
 }
 
 impl Transformation {
-    pub const NONE: Self = Transformation {
-        spin: false,
-        rotate: Rotate::None,
-    };
-    pub const CW: Self = Transformation {
-        spin: false,
-        rotate: Rotate::Clockwise,
-    };
-    pub const DOUBLE: Self = Transformation {
-        spin: false,
-        rotate: Rotate::Double,
-    };
-    pub const CCW: Self = Transformation {
-        spin: false,
-        rotate: Rotate::CounterClockwise,
-    };
+    pub const NONE: Self = Transformation { spin: false, rotate: Rotate::None };
+    pub const CW: Self = Transformation { spin: false, rotate: Rotate::Clockwise };
+    pub const DOUBLE: Self = Transformation { spin: false, rotate: Rotate::Double };
+    pub const CCW: Self = Transformation { spin: false, rotate: Rotate::CounterClockwise };
 
-    pub const SPIN_NONE: Self = Transformation {
-        spin: true,
-        rotate: Rotate::None,
-    };
-    pub const SPIN_CW: Self = Transformation {
-        spin: true,
-        rotate: Rotate::Clockwise,
-    };
-    pub const SPIN_DOUBLE: Self = Transformation {
-        spin: true,
-        rotate: Rotate::Double,
-    };
-    pub const SPIN_CCW: Self = Transformation {
-        spin: true,
-        rotate: Rotate::CounterClockwise,
-    };
+    pub const SPIN_NONE: Self = Transformation { spin: true, rotate: Rotate::None };
+    pub const SPIN_CW: Self = Transformation { spin: true, rotate: Rotate::Clockwise };
+    pub const SPIN_DOUBLE: Self = Transformation { spin: true, rotate: Rotate::Double };
+    pub const SPIN_CCW: Self = Transformation { spin: true, rotate: Rotate::CounterClockwise };
 
     pub const FLIP: Self = Self::NONE.flip();
     pub const SPIN: Self = Self::NONE.spin();
@@ -1215,15 +1183,10 @@ fn construct_face_mapping(
                     //     rotate: transformation.rotate.plus(Rotate::Clockwise),
                     // };
                     let Transformation { spin, rotate } = transformation;
-                    let transformation = Transformation {
-                        spin: !spin,
-                        rotate: rotate.plus(*adj_rot),
-                    };
+                    let transformation =
+                        Transformation { spin: !spin, rotate: rotate.plus(*adj_rot) };
 
-                    let trans_info = TransformationInfo {
-                        trans: transformation,
-                        to: face_idx,
-                    };
+                    let trans_info = TransformationInfo { trans: transformation, to: face_idx };
                     // eprintln!("success! @ {idx}, {f:?} via path {path:?}");
                     face_mapping[idx][*f as usize] = Some(trans_info);
 
@@ -1938,14 +1901,8 @@ mod test_path_relations {
 
                 let trans = patch_func(trans);
 
-                eq(
-                    EXAMPLE_TRANSLATE_INFO[face][equiv_dir as usize].trans,
-                    trans,
-                );
-                eq_face(
-                    EXAMPLE_TRANSLATE_INFO[face][equiv_dir as usize].to,
-                    dest_face,
-                );
+                eq(EXAMPLE_TRANSLATE_INFO[face][equiv_dir as usize].trans, trans);
+                eq_face(EXAMPLE_TRANSLATE_INFO[face][equiv_dir as usize].to, dest_face);
             }
         }
 
@@ -2106,10 +2063,7 @@ pub mod trans_info_helpers {
         },
     }
 
-    pub const EMPTY: TransformationInfo = TransformationInfo {
-        to: 10,
-        trans: T::NONE,
-    };
+    pub const EMPTY: TransformationInfo = TransformationInfo { to: 10, trans: T::NONE };
 
     impl Step {
         pub const fn round(self) -> usize {
@@ -2195,12 +2149,8 @@ pub mod trans_info_helpers {
         pub const fn expected_dest_side(self) -> Option<Facing> {
             match self {
                 /* Step::Relative { expected_dest_side, .. } | */
-                Step::Imm {
-                    expected_dest_side, ..
-                }
-                | Step::Computed {
-                    expected_dest_side, ..
-                } => expected_dest_side,
+                Step::Imm { expected_dest_side, .. }
+                | Step::Computed { expected_dest_side, .. } => expected_dest_side,
             }
         }
 
@@ -2216,38 +2166,18 @@ pub mod trans_info_helpers {
             self */
             match self {
                 // x @ Relative { expected_dest_side: Option::None, round, src, src_side, to, tacked_on_transformations } => Relative { expected_dest_side: Some(exp), round, src, src_side, to, tacked_on_transformations },
-                Imm {
-                    expected_dest_side: Option::None,
-                    round,
-                    to,
-                    info,
-                } => Imm {
-                    expected_dest_side: Some(exp),
-                    round,
-                    to,
-                    info,
-                },
-                /* Relative { expected_dest_side: Some(_), .. } | */
-                Computed {
-                    expected_dest_side: Option::None,
-                    round,
-                    directions,
-                    to,
-                } => Computed {
-                    round,
-                    directions,
-                    to,
-                    expected_dest_side: Some(exp),
-                },
-
-                Imm {
-                    expected_dest_side: Some(_),
-                    ..
+                Imm { expected_dest_side: Option::None, round, to, info } => {
+                    Imm { expected_dest_side: Some(exp), round, to, info }
                 }
-                | Computed {
-                    expected_dest_side: Some(_),
-                    ..
-                } => panic!("expected_dest_side is already set!"),
+                /* Relative { expected_dest_side: Some(_), .. } | */
+                Computed { expected_dest_side: Option::None, round, directions, to } => {
+                    Computed { round, directions, to, expected_dest_side: Some(exp) }
+                }
+
+                Imm { expected_dest_side: Some(_), .. }
+                | Computed { expected_dest_side: Some(_), .. } => {
+                    panic!("expected_dest_side is already set!")
+                }
             }
         }
 
@@ -2294,12 +2224,7 @@ pub mod trans_info_helpers {
         out
     }
     pub const fn imm(iteration_round: usize, to: usize, trans: T) -> Step {
-        Step::Imm {
-            round: iteration_round,
-            info: trans,
-            to,
-            expected_dest_side: Option::None,
-        }
+        Step::Imm { round: iteration_round, info: trans, to, expected_dest_side: Option::None }
     }
     pub const fn R(to: usize, t: T) -> Step {
         imm(0, to, t)
@@ -2324,12 +2249,7 @@ pub mod trans_info_helpers {
     // const fn _3(src: (usize, Facing), ts: &'static [TransformationRepr], to: usize) -> Step { rel(3, src, ts, to) }
 
     pub const fn com(round: usize, to: usize, directions: &'static [Facing]) -> Step {
-        Step::Computed {
-            round,
-            directions,
-            to,
-            expected_dest_side: Option::None,
-        }
+        Step::Computed { round, directions, to, expected_dest_side: Option::None }
     }
 
     pub const fn _1(to: usize, dir: &'static [Facing]) -> Step {
@@ -2342,12 +2262,8 @@ pub mod trans_info_helpers {
         com(3, to, dir)
     }
 
-    pub const X: Step = Step::Imm {
-        round: 1,
-        to: 10,
-        info: T::NONE,
-        expected_dest_side: Option::None,
-    };
+    pub const X: Step =
+        Step::Imm { round: 1, to: 10, info: T::NONE, expected_dest_side: Option::None };
 }
 
 /// ```ignore
@@ -2840,10 +2756,7 @@ impl Map {
 
                 // note: this is a good place to introduce some caching..
 
-                let Coord {
-                    x: mut nx,
-                    y: mut ny,
-                } = pos;
+                let Coord { x: mut nx, y: mut ny } = pos;
                 use Facing::*;
                 match self.dir {
                     // snap to left; i.e. x = 0

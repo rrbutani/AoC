@@ -172,10 +172,7 @@ impl FromStr for Blueprint {
             }
         }
 
-        Ok(Self {
-            costs,
-            max_cost_by_kind,
-        })
+        Ok(Self { costs, max_cost_by_kind })
     }
 }
 
@@ -188,9 +185,7 @@ impl FromStr for Blueprints {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Self {
-            inner: s.lines().map(|l| l.parse().unwrap()).collect(),
-        })
+        Ok(Self { inner: s.lines().map(|l| l.parse().unwrap()).collect() })
     }
 }
 
@@ -280,17 +275,11 @@ impl State<'static> {
         //       plausible that investing in a clay robot or w/e can ultimately
         //       lead you to be able to build more geode bots?) but it seems to
         //       hold for our inputs...
-        greedy(possibilites_for_kind(
-            Default::default(),
-            res,
-            rbt,
-            bp,
-            Geode,
-        )) // always build Geodes if we can..
-        .flat_map(move |(b, r)| possibilites_for_kind(b, r, rbt, bp, Obsidian))
-        .flat_map(move |(b, r)| possibilites_for_kind(b, r, rbt, bp, Clay))
-        // .flat_map(|(bought, resources)| possibilites_for_kind(bought, resources, blueprint, Ore))
-        .flat_map(move |(b, r)| possibilites_for_kind(b, r, rbt, bp, Ore))
+        greedy(possibilites_for_kind(Default::default(), res, rbt, bp, Geode)) // always build Geodes if we can..
+            .flat_map(move |(b, r)| possibilites_for_kind(b, r, rbt, bp, Obsidian))
+            .flat_map(move |(b, r)| possibilites_for_kind(b, r, rbt, bp, Clay))
+            // .flat_map(|(bought, resources)| possibilites_for_kind(bought, resources, blueprint, Ore))
+            .flat_map(move |(b, r)| possibilites_for_kind(b, r, rbt, bp, Ore))
 
         /* // most expensive first
         possibilites_for_kind(Default::default(), resources, blueprint, Geode)
@@ -491,14 +480,7 @@ impl State<'static> {
                 //     "had: {:?} | produced: {produced:?} => resources: {resources:?}",
                 //     self.resources
                 // );
-                (
-                    (purchased, resources),
-                    Self {
-                        robots,
-                        resources,
-                        blueprint: self.blueprint,
-                    },
-                )
+                ((purchased, resources), Self { robots, resources, blueprint: self.blueprint })
             })
             /******************************************************************/
             /*
@@ -563,12 +545,10 @@ impl State<'static> {
             .map(|((purchased, have), state)| ((purchased, have), state.search(time - 1)))
             // and finally take the best possibility:
             .max_by_key(|(_state_tracking, (/* _moves,  */ resources, _robots))| resources[Geode])
-            .map(
-                |((purchased, have), (/* mut moves,  */ resources, robots))| {
-                    // moves.push((purchased, have));
-                    (/* moves,  */ resources, robots)
-                },
-            )
+            .map(|((purchased, have), (/* mut moves,  */ resources, robots))| {
+                // moves.push((purchased, have));
+                (/* moves,  */ resources, robots)
+            })
             .unwrap();
 
         CACHE.with(|c| c.borrow_mut().insert((*self, time), ret.clone()));

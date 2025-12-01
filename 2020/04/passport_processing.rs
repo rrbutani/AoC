@@ -88,9 +88,7 @@ impl FromStr for HairColor {
 
     fn from_str(s: &str) -> Result<Self, ()> {
         if let Some(hex_string) = s.strip_prefix("#") {
-            Ok(HairColor(
-                u32::from_str_radix(hex_string, 16).map_err(|_| ())?,
-            ))
+            Ok(HairColor(u32::from_str_radix(hex_string, 16).map_err(|_| ())?))
         } else {
             Err(())
         }

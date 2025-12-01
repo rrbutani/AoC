@@ -1,5 +1,5 @@
 #[allow(unused_imports)]
-use aoc::{AdventOfCode, friends::*};
+use aoc::{friends::*, AdventOfCode};
 use std::collections::HashSet;
 
 #[allow(unused_must_use)]
@@ -17,32 +17,38 @@ fn main() {
                 'v' => y -= 1,
                 '<' => x -= 1,
                 '^' => y += 1,
-                 _  => (),
+                _ => (),
             };
 
             hs.insert((x, y));
         });
     }
 
-    let houses: usize = input.lines().map(|l|{
-        let mut hs = HashSet::<(i16, i16)>::new();
-        do_the_steps(&mut hs, l);
+    let houses: usize = input
+        .lines()
+        .map(|l| {
+            let mut hs = HashSet::<(i16, i16)>::new();
+            do_the_steps(&mut hs, l);
 
-        hs.iter().count() as usize
-    }).sum();
+            hs.iter().count() as usize
+        })
+        .sum();
 
     aoc.submit_p1(houses);
 
-    let houses_p2: usize = input.lines().map(|l|{
-        let mut hs = HashSet::<(i16, i16)>::new();
-        do_the_steps(&mut hs, &l.chars().step_by(2).collect::<String>());
+    let houses_p2: usize = input
+        .lines()
+        .map(|l| {
+            let mut hs = HashSet::<(i16, i16)>::new();
+            do_the_steps(&mut hs, &l.chars().step_by(2).collect::<String>());
 
-        let mut robo = l.chars();
-        robo.next();
-        do_the_steps(&mut hs, &robo.step_by(2).collect::<String>());
+            let mut robo = l.chars();
+            robo.next();
+            do_the_steps(&mut hs, &robo.step_by(2).collect::<String>());
 
-        hs.iter().count() as usize
-    }).sum();
+            hs.iter().count() as usize
+        })
+        .sum();
 
     aoc.submit_p2(houses_p2);
 }

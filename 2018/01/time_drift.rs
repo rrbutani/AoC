@@ -1,7 +1,7 @@
 #!/usr/bin/env rustr
 
 #[allow(unused_imports)]
-use aoc::{AdventOfCode, friends::*};
+use aoc::{friends::*, AdventOfCode};
 use std::collections::HashSet;
 
 #[allow(unused_must_use)]
@@ -10,7 +10,6 @@ fn main() {
     let input: String = aoc.get_input();
     let input = input.lines().map(|f| f.parse::<i32>().unwrap());
 
-
     let p1: i32 = input.clone().sum();
     aoc.submit_p1(p1);
 
@@ -18,7 +17,7 @@ fn main() {
     let p2: i32 = input
         .cycle()
         .accumulate_sum()
-        .filter(|f| ! hs.insert(*f))
+        .filter(|f| !hs.insert(*f))
         .next()
         .unwrap();
 

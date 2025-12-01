@@ -49,9 +49,7 @@ where
     [Coord; K]: Default,
 {
     fn default() -> Self {
-        Self {
-            knots: Default::default(),
-        }
+        Self { knots: Default::default() }
     }
 }
 

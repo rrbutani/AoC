@@ -1,7 +1,7 @@
 #!/usr/bin/env rustr
 
 #[allow(unused_imports)]
-use aoc::{AdventOfCode, friends::*};
+use aoc::{friends::*, AdventOfCode};
 
 fn letter_counts(s: &str) -> (bool, bool) {
     let mut chars = [0u8; 256]; // We are making an assumption here..
@@ -16,7 +16,9 @@ fn compare_allowing_one(a: &[&str]) -> Option<String> {
 
     if v.clone().filter(|(a, b)| a != b).count() == 1 {
         Some(v.filter(|(a, b)| a == b).map(|(a, _)| a).collect())
-    } else { None }
+    } else {
+        None
+    }
 }
 
 #[allow(unused_must_use)]
@@ -24,7 +26,8 @@ fn main() {
     let mut aoc = AdventOfCode::new(2018, 02);
     let input: String = aoc.get_input();
 
-    let counts = input.lines()
+    let counts = input
+        .lines()
         .map(letter_counts)
         .fold((0, 0), |a, x| (a.0 + x.0 as u32, a.1 + x.1 as u32));
 
@@ -36,7 +39,8 @@ fn main() {
     // abcde meaning that abcde and abcbe wouldn't be compared.
     let mut p2 = input.lines().collect::<Vec<&str>>();
     p2.sort();
-    let p2 = p2.as_slice()
+    let p2 = p2
+        .as_slice()
         .windows(2)
         .find_map(compare_allowing_one)
         .unwrap();
@@ -196,20 +200,18 @@ fn main() {
 
     let mut hs = HashSet::new();
 
-    let p2: String = input.lines().map(|inp| {
-        Vec::<String>::from_iter((0..inp.len())
-            .into_iter()
-            .map(|i| {
+    let p2: String = input
+        .lines()
+        .map(|inp| {
+            Vec::<String>::from_iter((0..inp.len()).into_iter().map(|i| {
                 let mut s = String::new();
                 inp.chars()
                     .enumerate()
-                    .for_each(|(k, c)| {
-                        s.push(if k != i {c} else {'_'})
-                    });
-                    s
-            })
-        )
-    }).flat_map(|v| v.into_iter())
+                    .for_each(|(k, c)| s.push(if k != i { c } else { '_' }));
+                s
+            }))
+        })
+        .flat_map(|v| v.into_iter())
         .filter(|s| !hs.insert(s.clone()))
         .next()
         .unwrap()

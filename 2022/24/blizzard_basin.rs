@@ -127,11 +127,9 @@ impl Display for Cell {
                 many @ [..] => match many.len() {
                     0 => unreachable!(),
                     n @ 0..=9 => write!(f, "{}", n.underline()),
-                    n @ 10..=35 => write!(
-                        f,
-                        "{}",
-                        ((n as u8 - 10 + b'A') as char).yellow().underline()
-                    ),
+                    n @ 10..=35 => {
+                        write!(f, "{}", ((n as u8 - 10 + b'A') as char).yellow().underline())
+                    }
                     _ => write!(f, "{}", '∞'.red().bold()),
                 },
             },
@@ -178,12 +176,7 @@ impl FromStr for Map {
             .map(|(r, row)| (first_free_in_row(row), r))
             .unwrap();
 
-        Ok(Self {
-            inner: grid,
-            curr: start,
-            end,
-            dim: (cols, rows),
-        })
+        Ok(Self { inner: grid, curr: start, end, dim: (cols, rows) })
     }
 }
 

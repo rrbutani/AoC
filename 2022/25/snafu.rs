@@ -104,9 +104,7 @@ impl FromStr for Snafu {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Snafu {
-            digits: s.chars().rev().map(|c| c.try_into().unwrap()).collect_vec(),
-        })
+        Ok(Snafu { digits: s.chars().rev().map(|c| c.try_into().unwrap()).collect_vec() })
     }
 }
 
@@ -162,9 +160,7 @@ impl From<usize> for Snafu {
         };
 
         if value == 0 {
-            return Self {
-                digits: to_digits(value),
-            };
+            return Self { digits: to_digits(value) };
         }
 
         // let's just do it iteratively:

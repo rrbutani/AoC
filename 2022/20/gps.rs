@@ -46,21 +46,12 @@ impl<'a> List<'a> {
         store.reserve(it.size_hint().1.unwrap_or(100));
 
         let root = store.len();
-        store.push(LinkedListNode {
-            val: it.next().unwrap(),
-            id: root,
-            prev: None,
-            next: None,
-        });
+        store.push(LinkedListNode { val: it.next().unwrap(), id: root, prev: None, next: None });
         let mut prev_id = root;
 
         for num in it {
-            let node = LinkedListNode {
-                val: num,
-                id: store.len(),
-                prev: Some(prev_id),
-                next: None,
-            };
+            let node =
+                LinkedListNode { val: num, id: store.len(), prev: Some(prev_id), next: None };
 
             store[prev_id].next = Some(node.id);
 
@@ -71,10 +62,7 @@ impl<'a> List<'a> {
         store[prev_id].next = Some(root);
         store[root].prev = Some(prev_id);
 
-        List {
-            store,
-            root_id: root,
-        }
+        List { store, root_id: root }
     }
 }
 
@@ -109,12 +97,7 @@ impl List<'_> {
                 eprintln!();
             }
             // remove this node; set prev->next to next, next->prev to prev:
-            let LinkedListNode {
-                prev,
-                next,
-                val,
-                id: id2,
-            } = self.store[id];
+            let LinkedListNode { prev, next, val, id: id2 } = self.store[id];
             assert_eq!(id, id2);
             let prev = prev.unwrap();
             let next = next.unwrap();
@@ -178,12 +161,7 @@ impl List<'_> {
             }
 
             // insert before `curr`:
-            let node = LinkedListNode {
-                next: Some(curr),
-                prev: self.store[curr].prev,
-                id,
-                val,
-            };
+            let node = LinkedListNode { next: Some(curr), prev: self.store[curr].prev, id, val };
 
             // prev -> new
             self.store[node.prev.unwrap()].next = Some(id);

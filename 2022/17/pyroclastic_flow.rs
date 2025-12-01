@@ -46,9 +46,7 @@ impl FromStr for JetPatterns {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(JetPatterns {
-            pattern: s.chars().map(|c| c.try_into().unwrap()).collect_vec(),
-        })
+        Ok(JetPatterns { pattern: s.chars().map(|c| c.try_into().unwrap()).collect_vec() })
     }
 }
 
@@ -225,10 +223,7 @@ impl Display for Grid {
 
 impl Grid {
     fn new() -> Self {
-        Grid {
-            top: 0,
-            inner: Vec::with_capacity(1_000_000),
-        }
+        Grid { top: 0, inner: Vec::with_capacity(1_000_000) }
     }
 
     fn width(&self) -> usize {

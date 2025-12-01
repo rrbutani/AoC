@@ -14,9 +14,8 @@ zoneight234
 
 fn digits_in_string(mut remaining: &str) -> impl Iterator<Item = usize> + Clone + '_ {
     iter::from_fn(move || {
-        const DIGITS: &[&str] = &[
-            "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
-        ];
+        const DIGITS: &[&str] =
+            &["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
 
         // note: always only jump forward one character; letter digits are
         // allowed to overlap!

@@ -60,11 +60,7 @@ struct Map {
 fn range_overlap_components(
     a: Range<usize>,
     b: Range<usize>,
-) -> (
-    Option<Range<usize>>,
-    Option<Range<usize>>,
-    Option<Range<usize>>,
-) {
+) -> (Option<Range<usize>>, Option<Range<usize>>, Option<Range<usize>>) {
     let left = b.start..((a.start).min(b.end));
     let overlap = (a.start.max(b.start))..(a.end.min(b.end));
     let right = (a.end.max(b.start))..b.end;
@@ -261,10 +257,7 @@ impl FromStr for Almanac {
             let from = map.from;
             let ret = mappings.insert(from, map);
             if let Some(prev) = ret {
-                panic!(
-                    "Duplicate mapping for {from:?}:\n  - {prev:?}\n  - {:?}",
-                    &mappings[&from]
-                );
+                panic!("Duplicate mapping for {from:?}:\n  - {prev:?}\n  - {:?}", &mappings[&from]);
             }
         }
 

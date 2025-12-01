@@ -63,11 +63,7 @@ impl Game {
     fn min_required_cube_counts(&self) -> Reveal {
         let min = |func: fn(&Reveal) -> usize| self.reveals.iter().map(func).max().unwrap();
 
-        Reveal {
-            red: min(|r| r.red),
-            green: min(|r| r.green),
-            blue: min(|r| r.blue),
-        }
+        Reveal { red: min(|r| r.red), green: min(|r| r.green), blue: min(|r| r.blue) }
     }
 }
 
@@ -83,11 +79,7 @@ fn main() {
     let inp = aoc.get_input();
     let games = inp.lines().map_parse::<Game>().collect_vec();
 
-    let p1_threshold = Reveal {
-        red: 12,
-        green: 13,
-        blue: 14,
-    };
+    let p1_threshold = Reveal { red: 12, green: 13, blue: 14 };
     let p1: usize = games
         .iter()
         .filter(|g| p1_threshold.can_fit(g.min_required_cube_counts()))

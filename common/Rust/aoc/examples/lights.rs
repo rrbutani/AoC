@@ -1,8 +1,7 @@
-
 use std::{ops::RangeInclusive, str::FromStr};
 
 #[allow(unused_imports)]
-use aoc::{AdventOfCode, friends::*};
+use aoc::{friends::*, AdventOfCode};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 enum Command {
@@ -49,10 +48,7 @@ impl FromStr for Instruction {
 
         assert!(x2 >= x1 && y2 >= y1);
 
-        Ok(Self {
-            cmd,
-            range: (x1..=x2, y1..=y2),
-        })
+        Ok(Self { cmd, range: (x1..=x2, y1..=y2) })
     }
 }
 
@@ -82,7 +78,10 @@ impl Exec<u8> for Command {
     }
 }
 
-impl<T> Exec<Vec<Vec<T>>> for Instruction where Command: Exec<T> {
+impl<T> Exec<Vec<Vec<T>>> for Instruction
+where
+    Command: Exec<T>,
+{
     fn exec(&self, grid: &mut Vec<Vec<T>>) {
         for x in self.range.0.clone() {
             for y in self.range.1.clone() {
@@ -112,6 +111,9 @@ fn main() {
         insn.exec(&mut grid);
     }
 
-    let p2: usize = grid.iter().map(|r| (*r).iter().map(|l| *l as usize).sum::<usize>()).sum();
+    let p2: usize = grid
+        .iter()
+        .map(|r| (*r).iter().map(|l| *l as usize).sum::<usize>())
+        .sum();
     aoc.submit_p2(p2);
 }

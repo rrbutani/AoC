@@ -77,13 +77,7 @@ impl FromStr for Grid {
             })
             .collect_vec();
 
-        Ok(Grid {
-            grid,
-            start: start.unwrap(),
-            end: end.unwrap(),
-            height,
-            width,
-        })
+        Ok(Grid { grid, start: start.unwrap(), end: end.unwrap(), height, width })
     }
 }
 

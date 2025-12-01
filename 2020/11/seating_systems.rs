@@ -92,11 +92,7 @@ impl FromStr for WaitingArea {
         };
 
         let staging = grid.clone();
-        Ok(Self {
-            dimensions: (grid.len(), cols),
-            grid,
-            staging,
-        })
+        Ok(Self { dimensions: (grid.len(), cols), grid, staging })
     }
 }
 

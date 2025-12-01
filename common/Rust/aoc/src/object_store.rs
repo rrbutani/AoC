@@ -216,10 +216,7 @@ impl<'s, T: Eq + Hash, U> ObjectStore<'s, T, U> {
         if !store.is_empty() {
             Err(())
         } else {
-            Ok(Self {
-                store,
-                map: HashSet::new(),
-            })
+            Ok(Self { store, map: HashSet::new() })
         }
     }
 
@@ -289,11 +286,7 @@ mod tests {
 
         impl<'a> Node<'a> {
             fn new(num: u8) -> Self {
-                Self {
-                    prev: None,
-                    next: None,
-                    num,
-                }
+                Self { prev: None, next: None, num }
             }
 
             fn set_prev(&mut self, prev: Ref<'a, Node<'a>>) -> &mut Self {
@@ -343,10 +336,7 @@ mod tests {
             }
         }
 
-        assert_eq!(
-            NodeIterator(&s, c).skip(3000).map(|n| n.num).next(),
-            Some(0)
-        );
+        assert_eq!(NodeIterator(&s, c).skip(3000).map(|n| n.num).next(), Some(0));
     }
 
     #[test]

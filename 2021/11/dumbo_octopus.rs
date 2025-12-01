@@ -174,11 +174,7 @@ impl<T, X, Y, D, P> TwoDGrid<T, X, Y, D, P> {
             assert!(grid.iter().map(|row| row.len()).all_equal())
         }
 
-        Self {
-            inner: grid,
-            _idx: PhantomData,
-            _disp: PhantomData,
-        }
+        Self { inner: grid, _idx: PhantomData, _disp: PhantomData }
     }
 
     pub fn from_char(grid: &str, func: impl Fn(char) -> T) -> Self {
@@ -245,7 +241,7 @@ pub const fn rad_to_adj_arr_len(rad: usize) -> usize {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Adj<T, const RADIUS: usize>(pub [Option<T>; rad_to_adj_arr_len(RADIUS)])
 where
-    [(); rad_to_adj_arr_len(RADIUS)]: ;
+    [(); rad_to_adj_arr_len(RADIUS)]:;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Dir {
@@ -261,7 +257,7 @@ pub enum Dir {
 
 impl<T, const R: usize> Deref for Adj<T, R>
 where
-    [(); rad_to_adj_arr_len(R)]: ,
+    [(); rad_to_adj_arr_len(R)]:,
 {
     type Target = [Option<T>; rad_to_adj_arr_len(R)];
 
@@ -272,7 +268,7 @@ where
 
 impl<T, const R: usize> Adj<T, R>
 where
-    [(); rad_to_adj_arr_len(R)]: ,
+    [(); rad_to_adj_arr_len(R)]:,
 {
     fn iter(&self) -> impl Iterator<Item = &T> + '_ {
         self.0.iter().filter_map(|i| i.as_ref())
@@ -289,10 +285,7 @@ impl<T> Index<Dir> for Adj<T, 1> {
 
 impl<T, X, Y, D, P> TwoDGrid<T, X, Y, D, P> {
     pub fn dim(&self) -> (usize, usize) {
-        let (yl, xl) = (
-            self.inner.len(),
-            self.inner.last().map(|l| l.len()).unwrap_or_default(),
-        );
+        let (yl, xl) = (self.inner.len(), self.inner.last().map(|l| l.len()).unwrap_or_default());
         (xl, yl)
     }
 
@@ -303,7 +296,7 @@ impl<T, X, Y, D, P> TwoDGrid<T, X, Y, D, P> {
 
     pub fn adj_iter<const RADIUS: usize>(&self) -> impl Iterator<Item = (&T, Adj<&T, RADIUS>)>
     where
-        [(); rad_to_adj_arr_len(RADIUS)]: ,
+        [(); rad_to_adj_arr_len(RADIUS)]:,
     {
         let (xl, yl) = self.dim();
         let radius: isize = RADIUS.to();
@@ -422,9 +415,7 @@ impl Step for Grid {
 fn main() {
     let mut aoc = AdventOfCode::new(2021, 11);
     let inp = aoc.get_input();
-    let mut g = Grid::from_char(&inp, |c| {
-        Cell::new((char::to_digit(c, 10).unwrap().to(), false))
-    });
+    let mut g = Grid::from_char(&inp, |c| Cell::new((char::to_digit(c, 10).unwrap().to(), false)));
 
     let flashes: usize = {
         let mut g = g.clone();

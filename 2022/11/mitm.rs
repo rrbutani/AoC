@@ -124,12 +124,7 @@ impl FromStr for Monkey {
             .unwrap();
 
         assert_eq!(s.next(), None);
-        Ok(Monkey {
-            items,
-            op,
-            test: (cond, if_true, if_false),
-            inspected_count: 0,
-        })
+        Ok(Monkey { items, op, test: (cond, if_true, if_false), inspected_count: 0 })
     }
 }
 

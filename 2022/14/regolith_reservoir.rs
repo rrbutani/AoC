@@ -18,10 +18,7 @@ impl FromStr for Pos {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let (x, y) = s.split_once(',').ok_or(())?;
-        Ok(Self {
-            x: x.parse().unwrap(),
-            y: y.parse().unwrap(),
-        })
+        Ok(Self { x: x.parse().unwrap(), y: y.parse().unwrap() })
     }
 }
 
@@ -34,9 +31,7 @@ impl FromStr for Path {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Path {
-            segments: s.split(" -> ").map(|p| p.parse().unwrap()).collect_vec(),
-        })
+        Ok(Path { segments: s.split(" -> ").map(|p| p.parse().unwrap()).collect_vec() })
     }
 }
 
@@ -96,9 +91,7 @@ impl Cave {
         let MinMaxResult::MinMax(min_x, max_x) = it().map(|Pos { x, .. }| x).minmax() else {
             panic!()
         };
-        let MinMaxResult::MinMax(_, max_y) = it().map(|Pos { y, .. }| y).minmax() else {
-            panic!()
-        };
+        let MinMaxResult::MinMax(_, max_y) = it().map(|Pos { y, .. }| y).minmax() else { panic!() };
         let max_x = max_x.max(500);
 
         let (x, y) = (max_x + 500, max_y + 5); // fudge factor
@@ -109,12 +102,7 @@ impl Cave {
             grid[y][x] = Some(Cell::Rock)
         }
 
-        Self {
-            grid,
-            lowest_y: max_y,
-            min_x,
-            max_x,
-        }
+        Self { grid, lowest_y: max_y, min_x, max_x }
     }
 }
 

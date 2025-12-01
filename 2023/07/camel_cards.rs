@@ -119,11 +119,7 @@ impl<const J: bool> FromStr for Hand<J> {
             .try_into()
             .unwrap();
 
-        Ok(Hand {
-            freq: Self::make_frequency_list(&cards),
-            cards,
-            bid: bid.parse().unwrap(),
-        })
+        Ok(Hand { freq: Self::make_frequency_list(&cards), cards, bid: bid.parse().unwrap() })
     }
 }
 

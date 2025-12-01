@@ -24,11 +24,7 @@ impl FromStr for Line {
 
 impl Display for Line {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{},{} -> {}{}",
-            self.start.0, self.start.1, self.end.0, self.end.1
-        )
+        write!(f, "{},{} -> {}{}", self.start.0, self.start.1, self.end.0, self.end.1)
     }
 }
 
@@ -38,10 +34,7 @@ impl Line {
     }
 
     fn stride_and_len(&self) -> Option<((isize, isize), usize)> {
-        let Self {
-            start: (x1, y1),
-            end: (x2, y2),
-        } = *self;
+        let Self { start: (x1, y1), end: (x2, y2) } = *self;
 
         let (x1, y1): (isize, isize) = (x1.to(), y1.to());
         let (x2, y2) = (x2.to(), y2.to());
