@@ -19,5 +19,11 @@ aoc-macros = { path = "../macros" }
 paste = "1"
 num-traits = "0.2"
 
+rayon = "1.10"
+smallvec = "1.11"
+smol_str = "0.2"
+strum = { version = "0.26.3", features = ["derive"] }
+
+
 [dev-dependencies]
 md5 = "0.7"

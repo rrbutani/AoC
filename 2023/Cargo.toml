@@ -18,7 +18,15 @@ owo-colors = "3.2"
 # bimap = "0.6"
 # static_assertions = "1.1"
 # reqwest = "0.11"
-strum = { version = "0.25", features = ["derive"] }
+iced-x86 = "1.20"
+strum = { version = "0.26.3", features = ["derive"] }
+smol_str = "0.2"
+smallvec = "1.11"
+
+cranelift-jit = "0.102.1"
+cranelift-module = "0.102.1"
+cranelift = "0.102.1"
+
 z3 = "0.12.1"
 
 [features]
@@ -94,25 +102,25 @@ path = "16/the_floor_will_be_lava.rs"
 # name = "day17"
 # path = "17/pyroclastic_flow.rs"
 
-# [[bin]]
-# name = "day18"
-# path = "18/boiling_boulders.rs"
+[[bin]]
+name = "day18"
+path = "18/lavaduct_lagoon.rs"
 
-# [[bin]]
-# name = "day19"
-# path = "19/minecraft.rs"
+[[bin]]
+name = "day19"
+path = "19/aplenty.rs"
 
-# [[bin]]
-# name = "day20"
-# path = "20/gps.rs"
+[[bin]]
+name = "day20"
+path = "20/pulse_propagation.rs"
 
-# [[bin]]
-# name = "day21"
-# path = "21/monkey_math.rs"
+[[bin]]
+name = "day21"
+path = "21/step_counter.rs"
 
-# [[bin]]
-# name = "day22"
-# path = "22/monkey_map.rs"
+[[bin]]
+name = "day22"
+path = "22/sand_slabs.rs"
 
 [[bin]]
 name = "day23"
@@ -122,6 +130,6 @@ path = "23/a_long_walk.rs"
 name = "day24"
 path = "24/never_tell_me_the_odds.rs"
 
-# [[bin]]
-# name = "day25"
-# path = "25/snafu.rs"
+[[bin]]
+name = "day25"
+path = "25/snowverload.rs"

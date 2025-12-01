@@ -16,6 +16,7 @@ enum Cell {
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct Platform {
+    // TODO: use Grid from common
     grid: Vec<Vec<Cell>>,
     height: usize,
     width: usize,
@@ -36,11 +37,7 @@ impl FromStr for Platform {
             assert_eq!(width, r.len());
         }
 
-        Ok(Self {
-            grid,
-            height,
-            width,
-        })
+        Ok(Self { grid, height, width })
     }
 }
 
@@ -57,6 +54,7 @@ impl Display for Platform {
     }
 }
 
+// TODO: factor out into common
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 enum Direction {
     North = 0,
@@ -278,3 +276,5 @@ fn main() {
     };
     _ = aoc.submit_p2(p2);
 }
+
+// TODO: complex numbers...

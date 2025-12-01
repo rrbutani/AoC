@@ -1,0 +1,129 @@
+[package]
+name = "aoc24"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+aoc = { path = "../common/Rust/aoc" }
+derive_more = { version = "1.0.0", features = ["full"] }
+fxhash = "0.2"
+owo-colors = "3.2"
+rand = "0.8.5"
+rayon = "1.8"
+strum = { version = "0.26.3", features = ["derive"] }
+typed-arena = "2"
+
+# iced-x86 = "1.20"
+# smol_str = "0.2"
+# smallvec = "1.11"
+
+# cranelift-jit = "0.102.1"
+# cranelift-module = "0.102.1"
+# cranelift = "0.102.1"
+
+# z3 = "0.12.1"
+
+[features]
+
+[lib]
+path = "lib.rs"
+
+[[bin]]
+name = "day01"
+path = "01/historian_hysteria.rs"
+
+[[bin]]
+name = "day02"
+path = "02/red_nosed_reports.rs"
+
+[[bin]]
+name = "day03"
+path = "03/mull_it_over.rs"
+
+[[bin]]
+name = "day04"
+path = "04/ceres_search.rs"
+
+[[bin]]
+name = "day05"
+path = "05/print_queue.rs"
+
+[[bin]]
+name = "day06"
+path = "06/guard_gallivant.rs"
+
+[[bin]]
+name = "day07"
+path = "07/bridge_repair.rs"
+
+[[bin]]
+name = "day08"
+path = "08/resonant_collinearity.rs"
+
+[[bin]]
+name = "day09"
+path = "09/disk_fragmenter.rs"
+
+[[bin]]
+name = "day10"
+path = "10/hoof_it.rs"
+
+[[bin]]
+name = "day11"
+path = "11/plutonian_pebbles.rs"
+
+[[bin]]
+name = "day12"
+path = "12/garden_groups.rs"
+
+[[bin]]
+name = "day13"
+path = "13/claw_contraption.rs"
+
+[[bin]]
+name = "day14"
+path = "14/restroom_redoubt.rs"
+
+[[bin]]
+name = "day15"
+path = "15/warehouse_woes.rs"
+
+[[bin]]
+name = "day16"
+path = "16/reindeer_maze.rs"
+
+[[bin]]
+name = "day17"
+path = "17/chronospatial_computer.rs"
+
+[[bin]]
+name = "day18"
+path = "18/ram_run.rs"
+
+[[bin]]
+name = "day19"
+path = "19/linen_layout.rs"
+
+[[bin]]
+name = "day20"
+path = "20/race_condition.rs"
+
+[[bin]]
+name = "day21"
+path = "21/keypad_conundrum.rs"
+
+[[bin]]
+name = "day22"
+path = "22/monkey_market.rs"
+
+[[bin]]
+name = "day23"
+path = "23/lan_party.rs"
+
+[[bin]]
+name = "day24"
+path = "24/crossed_wires.rs"
+
+[[bin]]
+name = "day25"
+path = "25/code_chronicle.rs"

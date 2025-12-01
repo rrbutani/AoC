@@ -66,7 +66,10 @@
           python311
           bashInteractive
 
-          cargo-expand
+          cargo-expand cargo-flamegraph irust
+          hyperfine
+
+          graphviz
 
           z3_4_12 # should be in sync with what's used by the Rust z3-sys crate
           pkg-config

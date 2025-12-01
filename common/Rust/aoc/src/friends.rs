@@ -1,20 +1,27 @@
-use core::iter::Iterator;
-use core::iter::Sum;
+use core::fmt::Debug;
+use core::iter::{Iterator, Sum};
 use core::mem::take;
 use core::ops::{Add, Deref, DerefMut, Div};
+
+use itertools::Itertools;
 
 use crate::iterator_collect_ext::IterCollectExt;
 #[doc(inline)]
 pub use crate::sequence;
 
-pub use ::scan_fmt as sf;
-pub use scan_fmt::scan_fmt_some as scan_fmt;
+pub mod reexports {
+    pub use ::scan_fmt as sf;
+    pub use scan_fmt::scan_fmt_some as scan_fmt;
 
-pub use itertools::{self, Itertools};
+    pub use itertools::{self, Itertools};
 
-pub use std::convert::{TryFrom, TryInto};
-pub use std::fmt::{self, Debug, Display};
-pub use std::str::FromStr;
+    pub use std::convert::{TryFrom, TryInto};
+    pub use std::fmt::{self, Debug, Display};
+    pub use std::str::FromStr;
+
+    pub use smallvec::SmallVec;
+    pub use smol_str::SmolStr;
+}
 
 pub trait TryConvert {
     fn try_to<T>(self) -> Result<T, <Self as TryInto<T>>::Error>
@@ -275,11 +282,7 @@ pub trait Accumulator: Iterator {
         A: FnMut(&B, Self::Item) -> B,
         B: Default + Clone,
     {
-        Accumulate {
-            iter: self,
-            f,
-            acc: B::default(),
-        }
+        Accumulate { iter: self, f, acc: B::default() }
     }
 
     #[inline]
@@ -289,11 +292,7 @@ pub trait Accumulator: Iterator {
         A: FnMut(&B, Self::Item) -> B,
         B: Default + Clone,
     {
-        Accumulate {
-            iter: self,
-            f,
-            acc: initial,
-        }
+        Accumulate { iter: self, f, acc: initial }
     }
 
     #[inline]
@@ -305,11 +304,7 @@ pub trait Accumulator: Iterator {
     {
         let addf: Box<dyn FnMut(&B, Self::Item) -> B> =
             Box::new(|acc: &B, i: Self::Item| acc.clone() + i);
-        AccumulateBoxed {
-            iter: self,
-            f: addf,
-            acc: B::default(),
-        }
+        AccumulateBoxed { iter: self, f: addf, acc: B::default() }
     }
 }
 

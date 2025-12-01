@@ -77,17 +77,8 @@ fn main() {
 
     let directions = input
         .split(",")
-        .filter_map(|i| sf::scan_fmt!(i.trim(), "{[RL]}{}", char, isize).ok())
-        .map(|(c, m)| {
-            (
-                if c == 'R' {
-                    Rotate::Right
-                } else {
-                    Rotate::Left
-                },
-                m,
-            )
-        });
+        .filter_map(|i| aoc::scan_fmt!(i.trim(), "{[RL]}{}", char, isize).ok())
+        .map(|(c, m)| (if c == 'R' { Rotate::Right } else { Rotate::Left }, m));
 
     let mut hist = HashSet::new();
     let mut p2 = None;

@@ -350,7 +350,7 @@ fn main() {
     let mut aoc = AdventOfCode::new(2018, 09);
     let input: String = aoc.get_input();
 
-    let (players, marbles) = scan_fmt!(input.lines().next().unwrap(),
+    let (players, marbles) = aoc::scan_fmt!(input.lines().next().unwrap(),
             "{} players; last marble is worth {} points",
             u32, u32);
     let (players, marbles) = (players.unwrap(), marbles.unwrap());

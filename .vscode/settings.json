@@ -14,5 +14,8 @@
     "**/target": true
   },
   "rust-analyzer.server.path": "rust-analyzer",
-  "editor.inlayHints.enabled": "onUnlessPressed",
+  // "editor.inlayHints.enabled": "onUnlessPressed",
+  "editor.inlayHints.enabled": "offUnlessPressed",
+  "cSpell.enabled": false,
+  "python.defaultInterpreterPath": "python3",
 }

@@ -1,4 +1,4 @@
-use std::mem::MaybeUninit;
+use std::{marker::PhantomData, mem::MaybeUninit};
 
 use crate::macros::{cdr, count, triangle};
 
@@ -11,7 +11,7 @@ trait ArrCollect: Iterator {
     fn arr_collect<const N: usize>(self) -> [Self::Item; N];
 }
 
-struct Uninit<T>(*const T);
+struct Uninit<T>(PhantomData<T>);
 impl<T> Uninit<T> {
     const UNINIT: MaybeUninit<T> = MaybeUninit::uninit();
 }
@@ -45,10 +45,7 @@ impl<It: Iterator> ArrCollect for It {
                 // Previously extracted elements will also have their destructors run correctly when `self`
                 // is destructed.
                 if self.consumed == N {
-                    panic!(
-                        "too many elements in the source iterator! expected: {} elements",
-                        N
-                    );
+                    panic!("too many elements in the source iterator! expected: {} elements", N);
                 }
 
                 self.arr[self.consumed].write(i);
@@ -93,11 +90,8 @@ impl<It: Iterator> ArrCollect for It {
             }
         }
 
-        let mut sink = PartiallyConsumedIteratorDropGuard {
-            consumed: 0,
-            finished: false,
-            arr: &mut arr,
-        };
+        let mut sink =
+            PartiallyConsumedIteratorDropGuard { consumed: 0, finished: false, arr: &mut arr };
         self.for_each(|i| sink.put(i));
         sink.finished = true;
 

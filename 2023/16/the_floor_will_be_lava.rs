@@ -20,6 +20,7 @@ enum Cell {
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct Contraption {
+    // TODO: use from common
     grid: Vec<Vec<Cell>>,
     width: usize,
 }
@@ -41,6 +42,7 @@ impl FromStr for Contraption {
     }
 }
 
+// TODO: use from common
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 enum Direction {
     North = 0,

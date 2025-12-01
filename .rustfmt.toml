@@ -1,1 +1,8 @@
+# https://github.com/rust-lang/rustfmt/issues/3358
 fn_single_line = true
+
+# https://rust-lang.github.io/rustfmt/?version=v1.5.1&search=#use_small_heuristics
+use_small_heuristics = "max"
+chain_width = 60
+array_width = 70
+single_line_if_else_max_width = 60

@@ -22,7 +22,7 @@ fn main() {
 
         let idx = room.rfind("-").unwrap();
         let (sector_id, chksum) =
-            sf::scan_fmt!(&room[(idx + 1)..], "{}[{}]", usize, String).unwrap();
+            aoc::scan_fmt!(&room[(idx + 1)..], "{}[{}]", usize, String).unwrap();
         let encrypted_name = &room[..idx];
 
         for c in encrypted_name.chars().filter(|c| *c != '-') {

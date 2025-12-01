@@ -14,6 +14,7 @@ enum Cell {
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct Pattern {
+    // TODO: use Grid from common
     grid: Vec<Vec<Cell>>,
 }
 

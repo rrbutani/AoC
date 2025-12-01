@@ -11,7 +11,7 @@ fn main() {
 
     let p1 = input
         .lines()
-        .filter_map(|l| sf::scan_fmt!(l, "{}{}{}", usize, usize, usize).ok())
+        .filter_map(|l| aoc::scan_fmt!(l, "{}{}{}", usize, usize, usize).ok())
         .filter(|(a, b, c)| (a + b) > *c && (a + c) > *b && (b + c) > *a)
         .count();
     let _ = aoc.submit_p1(p1);

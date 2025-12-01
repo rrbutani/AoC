@@ -16,6 +16,7 @@ type Coord = (usize, usize);
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct Snapshot {
+    // TODO: use Grid from common
     grid: Vec<Vec<Cell>>,
     empty_cols: BTreeSet<usize>,
     empty_rows: BTreeSet<usize>,

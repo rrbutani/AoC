@@ -88,6 +88,14 @@ pub trait IterMapExt: Sized + Iterator {
         MapTryIntoIter(PhantomData, self)
     }
 
+    fn map_to<T>(self) -> MapTryIntoIter<Self, T>
+    where
+        T: TryFrom<Self::Item>,
+        T::Error: Debug,
+    {
+        MapTryIntoIter(PhantomData, self)
+    }
+
     fn map_try<T, U, F: FnMut(T) -> U>(self, func: F) -> Map<MapTryIntoIter<Self, T>, F>
     where
         T: TryFrom<Self::Item>,

@@ -1,10 +1,11 @@
 #!/usr/bin/env rustr
 
 #[allow(unused_imports)]
-use aoc::{friends::*, AdventOfCode};
-
-use std::fmt::{self, Display};
-use std::{convert::TryInto, fmt::Debug};
+use aoc::{
+    friends::*,
+    num_utils::{extended_gcd, gcd},
+    AdventOfCode,
+};
 
 // ((a * N) + 0) == ((b * N) + 1) == ((c * N) + 2) == ... == ((z * N) + S)
 //
@@ -41,12 +42,7 @@ fn main() {
     let next = buses
         .clone()
         .filter_map(|b| b)
-        .map(|b| {
-            (
-                ((((earliest as f64 / b as f64).ceil() as usize) * b) - earliest),
-                b,
-            )
-        })
+        .map(|b| (((((earliest as f64 / b as f64).ceil() as usize) * b) - earliest), b))
         .min()
         .unwrap();
     let p1 = next.0 * next.1;
@@ -112,46 +108,6 @@ fn main() {
     let p2 = solve(&congruences).unwrap();
     println!("{}", p2);
     let _ = aoc.submit_p2(p2);
-}
-
-/// Extended Euclidean Algorithm
-///
-/// Returns (gcd, x, y) such that: `a*x + b*y = gcd`.
-///
-/// Lifted nearly verbatim from [here][wp].
-///
-/// [wp]: https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm#Example
-//
-// The recursive version actually stack overflows without `--release`!
-#[allow(clippy::clippy::many_single_char_names)]
-fn extended_gcd(a: usize, b: usize) -> (usize, isize, isize) {
-    let (mut x, mut old_x) = (0isize, 1isize);
-    let (mut r, mut old_r) = (b, a);
-
-    while r != 0 {
-        let quot = old_r / r;
-
-        let (n_old_r, n_r) = (r, old_r - quot * r);
-        let (n_old_x, n_x) = (x, old_x - quot.to::<isize>() * x);
-
-        x = n_x;
-        old_x = n_old_x;
-        r = n_r;
-        old_r = n_old_r;
-    }
-
-    let gcd = old_r;
-    let x = old_x;
-
-    let y = (r.to::<isize>() - x * a.to::<isize>())
-        .checked_div(b.to())
-        .unwrap_or(0);
-
-    (gcd, x, y)
-}
-
-fn gcd(a: usize, b: usize) -> usize {
-    extended_gcd(a, b).0
 }
 
 fn modular_inverse(mul: usize, modulo: usize) -> Option<usize> {

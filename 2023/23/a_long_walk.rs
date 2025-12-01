@@ -4,7 +4,7 @@ use std::{
 };
 
 use aoc::{
-    grid::{Direction, FloodfillFuncNextCoords},
+    grid::{Direction, NextCoords},
     AdventOfCode, Coord, Display, Grid,
 };
 use smallvec::SmallVec;

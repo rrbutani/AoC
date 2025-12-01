@@ -7,40 +7,40 @@ pub trait TupleGet<const N: usize> {
 
 macro_rules! mapping_macro {
     () => {
-        _0
+        $crate::tuple_idx::num_structs::_0
     };
     ($A:tt) => {
-        _1
+        $crate::tuple_idx::num_structs::_1
     };
     ($A:tt $B:tt) => {
-        _2
+        $crate::tuple_idx::num_structs::_2
     };
     ($A:tt $B:tt $C:tt) => {
-        _3
+        $crate::tuple_idx::num_structs::_3
     };
     ($A:tt $B:tt $C:tt $D:tt) => {
-        _4
+        $crate::tuple_idx::num_structs::_4
     };
     ($A:tt $B:tt $C:tt $D:tt $E:tt) => {
-        _5
+        $crate::tuple_idx::num_structs::_5
     };
     ($A:tt $B:tt $C:tt $D:tt $E:tt $F:tt) => {
-        _6
+        $crate::tuple_idx::num_structs::_6
     };
     ($A:tt $B:tt $C:tt $D:tt $E:tt $F:tt $G:tt) => {
-        _7
+        $crate::tuple_idx::num_structs::_7
     };
     ($A:tt $B:tt $C:tt $D:tt $E:tt $F:tt $G:tt $H:tt) => {
-        _8
+        $crate::tuple_idx::num_structs::_8
     };
     ($A:tt $B:tt $C:tt $D:tt $E:tt $F:tt $G:tt $H:tt $I:tt) => {
-        _9
+        $crate::tuple_idx::num_structs::_9
     };
     ($A:tt $B:tt $C:tt $D:tt $E:tt $F:tt $G:tt $H:tt $I:tt $J:tt) => {
-        _10
+        $crate::tuple_idx::num_structs::_10
     };
     ($A:tt $B:tt $C:tt $D:tt $E:tt $F:tt $G:tt $H:tt $I:tt $J:tt $K:tt) => {
-        _11
+        $crate::tuple_idx::num_structs::_11
     };
 }
 
@@ -142,8 +142,6 @@ pub mod num_structs {
     use super::*;
     num_structs! { 0 1 2 3 4 5 6 7 8 9 10 11 }
 }
-
-use num_structs::*;
 
 pub trait TupleGetExt {
     fn ref_to<const N: usize>(&self) -> &<Self as TupleGet<N>>::X
