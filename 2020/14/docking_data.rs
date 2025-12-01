@@ -1,10 +1,9 @@
 #!/usr/bin/env rustr
 
-#[allow(unused_imports)]
-use aoc::{friends::*, AdventOfCode};
+use aoc::{sf::scan_fmt_some, AdventOfCode};
 
-use itertools::Itertools;
-use std::collections::HashMap;
+use aoc::Itertools;
+use std::{collections::HashMap, str::FromStr};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 enum Instruction {
@@ -16,9 +15,9 @@ impl FromStr for Instruction {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, ()> {
-        if let Some(val) = scan_fmt!(s, "mask = {}", String) {
+        if let Some(val) = scan_fmt_some!(s, "mask = {}", String) {
             Ok(Instruction::Mask(val.parse()?))
-        } else if let (Some(addr), Some(val)) = scan_fmt!(s, "mem[{}] = {}", u64, u64) {
+        } else if let (Some(addr), Some(val)) = scan_fmt_some!(s, "mem[{}] = {}", u64, u64) {
             Ok(Instruction::Write { addr, val })
         } else {
             Err(())
@@ -73,11 +72,7 @@ impl Mask {
                     }
                 }
 
-                Mask {
-                    ones,
-                    zeros,
-                    raw: None,
-                }
+                Mask { ones, zeros, raw: None }
             })
         // .inspect(|mask| {
         //     dbg!(mask);
@@ -91,11 +86,7 @@ impl Mask {
 
 impl Default for Mask {
     fn default() -> Self {
-        Self {
-            ones: 0,
-            zeros: u64::max_value(),
-            raw: None,
-        }
+        Self { ones: 0, zeros: u64::max_value(), raw: None }
     }
 }
 
@@ -111,11 +102,7 @@ impl FromStr for Mask {
         let ones = u64::from_str_radix(&s.replace('X', "0"), 2).map_err(|_| ())?;
         let zeros = u64::from_str_radix(&s.replace('X', "1"), 2).map_err(|_| ())?;
 
-        Ok(Mask {
-            ones,
-            zeros,
-            raw: Some(s.to_string()),
-        })
+        Ok(Mask { ones, zeros, raw: Some(s.to_string()) })
     }
 }
 
@@ -349,7 +336,7 @@ fn main() {
 ///
 /// [inc-exc]: https://en.wikipedia.org/wiki/Inclusion%E2%80%93exclusion_principle
 /// [sum-seq-squares]: https://proofwiki.org/wiki/Sum_of_Sequence_of_Squares
-fn seemingly_better_but_probably_actually_worse() {}
+pub fn seemingly_better_but_probably_actually_worse() {}
 
 // 101010
 // Mask: X1001X

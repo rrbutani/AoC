@@ -5,18 +5,17 @@ authors = ["Rahul Butani <rrbutani@users.noreply.github.com>"]
 edition = "2021"
 
 [dependencies]
-aoc = { path = "../common/Rust/aoc" }
-num-traits = "0.2"
-rayon = "1.5"
+aoc.workspace = true
+num-traits.workspace = true
+rayon.workspace = true
 inkwell = { git = "https://github.com/TheDan64/inkwell", branch = "master", features = [
     "llvm13-0",
 ], optional = true }
-fxhash = "0.2"
-owo-colors = "3.2"
-# dashmap = "5.0"
+fxhash.workspace = true
+owo-colors.workspace = true
 inline-python = { version = "0.8", optional = true }
 plotters = { version = "0.3", optional = true }
-derive_more = { version = "1", features = ["full"] }
+derive_more.workspace = true
 
 [features]
 llvm = ["inkwell"]
@@ -82,9 +81,9 @@ path = "13/transparent_origami.rs"
 name = "day14"
 path = "14/extended_polymerization.rs"
 
-[[bin]]
-name = "day15"
-path = "15/chiton.rs"
+# [[bin]]
+# name = "day15"
+# path = "15/chiton.rs"
 
 [[bin]]
 name = "day16"
@@ -94,9 +93,9 @@ path = "16/packet_decoder.rs"
 name = "day17"
 path = "17/trick_shot.rs"
 
-[[bin]]
-name = "day18"
-path = "18/snailfish.rs"
+# [[bin]]
+# name = "day18"
+# path = "18/snailfish.rs"
 
 [[bin]]
 name = "day19"

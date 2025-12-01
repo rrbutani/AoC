@@ -1,16 +1,15 @@
 #!/usr/bin/env rustr
 
 use aoc::*;
-// use dashmap::{DashMap, DashSet};
-use fxhash::{FxHashMap, FxHashSet};
+use fxhash::FxHashSet;
 use num_traits::{One, Zero};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 use std::{
     borrow::Cow,
-    collections::{HashMap, HashSet},
+    collections::HashMap,
     fmt,
-    hash::{BuildHasherDefault, Hash},
+    hash::Hash,
     iter,
     ops::{Add, Div, Mul, Rem},
 };
@@ -154,9 +153,7 @@ where
         let mut n = || it.next().ok_or(());
 
         let res = match n()? {
-            "inp" => Inp {
-                dest: n()?.parse().map_err(|_| ())?,
-            },
+            "inp" => Inp { dest: n()?.parse().map_err(|_| ())? },
             other => {
                 let dest = n()?.parse().map_err(|_| ())?;
                 let src = n()?.parse().map_err(|_| ())?;
@@ -194,9 +191,7 @@ impl<Imm: FromStr> FromStr for Program<Imm> {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Self {
-            insns: s.lines().map(|l| l.parse()).collect::<Result<_, ()>>()?,
-        })
+        Ok(Self { insns: s.lines().map(|l| l.parse()).collect::<Result<_, ()>>()? })
     }
 }
 
@@ -634,10 +629,7 @@ impl<
             }
         }
 
-        let mut e = Evaluate {
-            old_reg_vals,
-            inputs,
-        };
+        let mut e = Evaluate { old_reg_vals, inputs };
         // no table since we expect to only be dealing with inlined exprs!
         //
         // if we weren't in a rust we'd make a `InlinedExpr` newtype that's only
@@ -731,11 +723,7 @@ mod llvm {
             let n = function.get_nth_param(1).unwrap().into_int_value();
 
             let mut table = HashMap::from_iter(
-                [
-                    (Expr::Input(InpRef { n: 0 }), n),
-                    (Expr::ExistingReg(Reg::Z), z),
-                ]
-                .into_iter(),
+                [(Expr::Input(InpRef { n: 0 }), n), (Expr::ExistingReg(Reg::Z), z)].into_iter(),
             );
             struct Jit<'a, 'b, I> {
                 context: &'a Context<'a>,
@@ -795,11 +783,7 @@ mod llvm {
                 }
             }
 
-            let mut j = Jit {
-                context: ctx,
-                table: &mut table,
-                imm_type,
-            };
+            let mut j = Jit { context: ctx, table: &mut table, imm_type };
             // no table since we expect to only be dealing with inlined exprs!
             //
             // if we weren't in a rust we'd make a `InlinedExpr` newtype that's only
@@ -962,10 +946,8 @@ fn main() {
             .flat_map_iter(move |z| {
                 (1..=9).map(move |inp| {
                     #[cfg(not(feature = "llvm"))]
-                    let new_z = stage.eval(
-                        &HashMap::from_iter([(Reg::Z, z)].into_iter()),
-                        &[inp as isize],
-                    );
+                    let new_z =
+                        stage.eval(&HashMap::from_iter([(Reg::Z, z)].into_iter()), &[inp as isize]);
 
                     #[cfg(feature = "llvm")]
                     let new_z = unsafe { func.call(z, inp as isize) };
@@ -1041,7 +1023,7 @@ fn main() {
     >| {
         let mut picked = Vec::with_capacity(stages.len());
         let mut z = 0;
-        for (idx, map) in output_maps.iter().enumerate() {
+        for (_idx, map) in output_maps.iter().enumerate() {
             let possible = map
                 .iter()
                 .filter(move |(old_z, _)| **old_z == z)

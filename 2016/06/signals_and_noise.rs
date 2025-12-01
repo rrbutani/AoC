@@ -2,23 +2,6 @@ use aoc::AdventOfCode;
 
 use itertools::Itertools;
 
-const INP: &str = "eedadn
-drvtee
-eandsr
-raavrd
-atevrs
-tsrnev
-sdttsa
-rasrtv
-nssdts
-ntnada
-svetve
-tesnvt
-vntsnd
-vrdear
-dvrsen
-enarar";
-
 fn main() {
     let mut aoc = AdventOfCode::new(2016, 6);
     let inp = aoc.get_input();
@@ -35,11 +18,7 @@ fn main() {
                     .map(|(_f, c)| c)
                     .rev();
 
-                let char = if most_frequent {
-                    by_freq.next()
-                } else {
-                    by_freq.last()
-                };
+                let char = if most_frequent { by_freq.next() } else { by_freq.last() };
 
                 char.unwrap()
             })

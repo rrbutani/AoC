@@ -4,6 +4,7 @@
 use aoc::{friends::*, AdventOfCode};
 use std::collections::{HashMap, HashSet};
 use std::ops::RangeInclusive;
+use std::str::FromStr;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 struct Field /* <'a> */ {
@@ -56,9 +57,7 @@ impl FromStr for Ticket {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, ()> {
-        Ok(Ticket {
-            field_vals: s.split(',').map(|f| f.parse().unwrap()).collect(),
-        })
+        Ok(Ticket { field_vals: s.split(',').map(|f| f.parse().unwrap()).collect() })
     }
 }
 

@@ -3,6 +3,7 @@
 #[allow(unused_imports)]
 use aoc::{friends::*, AdventOfCode};
 
+#[allow(bad_style)]
 fn transformN(mut value: usize, subject: usize, loop_count: usize) -> usize {
     for _ in 0..loop_count {
         value = (value * subject) % 2020_1227;
@@ -20,9 +21,7 @@ fn transform(value: usize, subject: usize) -> usize {
 fn find_loop_size(pub_key: usize, initial_subject: usize) -> usize {
     let mut it = 0..;
     // .inspect(|l| println!("Trying {}", l))
-    it.try_fold(1, |val, _| {
-        Some(transform(val, initial_subject)).filter(|v| *v != pub_key)
-    });
+    it.try_fold(1, |val, _| Some(transform(val, initial_subject)).filter(|v| *v != pub_key));
 
     it.next().unwrap()
 }

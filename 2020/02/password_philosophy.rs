@@ -156,7 +156,7 @@ impl FromStr for Policy {
 }
 */
 
-use aoc::{friends::*, AdventOfCode};
+use aoc::{sf, AdventOfCode};
 
 fn main() {
     let mut aoc = AdventOfCode::new(2020, 2);
@@ -173,7 +173,6 @@ fn main() {
         .filter(|(l, u, c, pass)| (*l..=*u).contains(&pass.matches(*c).count()))
         .count();
     let _ = aoc.submit_p1(dbg!(p1));
-
 
     let p2 = list
         .iter()

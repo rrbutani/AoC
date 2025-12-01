@@ -1,17 +1,36 @@
 #!/usr/bin/env rustr
 
-use std::collections::VecDeque;
-use arrayvec::ArrayVec;
 #[allow(unused_imports)]
-use aoc::{AdventOfCode, friends::*};
+use aoc::{friends::*, sf, AdventOfCode};
+use arrayvec::ArrayVec;
+use std::collections::VecDeque;
 
 fn count(pots: VecDeque<bool>, num_negatives: usize) -> isize {
-    pots.iter().enumerate().filter(|(_, v)| **v).map(|(i, _)| i as isize - num_negatives as isize).sum::<isize>()
+    pots.iter()
+        .enumerate()
+        .filter(|(_, v)| **v)
+        .map(|(i, _)| i as isize - num_negatives as isize)
+        .sum::<isize>()
 }
 
-fn rounds(initial: VecDeque<bool>, notes: &Vec<([bool; 5], bool)>, num_rounds: usize, print: bool) -> isize {
-    if print { print!("{:2}: ", 0); for c in initial.iter() { print!("{}", if *c == true { '#' } else { '.' }); } print!("\n"); }
-    let _prin = |k: &[bool]| k.iter().map(|b| if *b == true { '#' } else { '.' }).collect::<String>();
+fn rounds(
+    initial: VecDeque<bool>,
+    notes: &Vec<([bool; 5], bool)>,
+    num_rounds: usize,
+    print: bool,
+) -> isize {
+    if print {
+        print!("{:2}: ", 0);
+        for c in initial.iter() {
+            print!("{}", if *c == true { '#' } else { '.' });
+        }
+        print!("\n");
+    }
+    let _prin = |k: &[bool]| {
+        k.iter()
+            .map(|b| if *b == true { '#' } else { '.' })
+            .collect::<String>()
+    };
 
     let mut staging = initial.clone();
     let mut added_below_zero: usize = 0;
@@ -28,7 +47,9 @@ fn rounds(initial: VecDeque<bool>, notes: &Vec<([bool; 5], bool)>, num_rounds: u
         state.extend(staging.iter());
         (0..4).for_each(|_| state.push(false));
         // for _ in 0..4 { state.push_front(false); state.push_back(false); }
-        for i in 0..staging.len() { staging[i] = false; }
+        for i in 0..staging.len() {
+            staging[i] = false;
+        }
 
         let mut round_adjustment = 0;
 
@@ -63,7 +84,13 @@ fn rounds(initial: VecDeque<bool>, notes: &Vec<([bool; 5], bool)>, num_rounds: u
                 }
             }
         }
-        if print { print!("{:2}: ", i + 1); for c in staging.iter() { print!("{}", if *c == true { '#' } else { '.' }); } print!("\n"); }
+        if print {
+            print!("{:2}: ", i + 1);
+            for c in staging.iter() {
+                print!("{}", if *c == true { '#' } else { '.' });
+            }
+            print!("\n");
+        }
 
         // We keep growing, so this didn't work:
 
@@ -106,20 +133,18 @@ fn main() {
     let input: String = aoc.get_input();
     let mut input = input.lines();
 
-    let initial = scan_fmt!(input.next().unwrap(), "initial state: {}", String).unwrap();
-    let initial = initial.chars().map(|c| c == '#').collect::<VecDeque<bool>>();
+    let initial = sf::scan_fmt_some!(input.next().unwrap(), "initial state: {}", String).unwrap();
+    let initial = initial
+        .chars()
+        .map(|c| c == '#')
+        .collect::<VecDeque<bool>>();
 
-    let notes = input.filter_map(|l| {
-        let (s, r) = scan_fmt!(l, "{[#.]} => {[#.]}", String, char);
-
-        Some((s?, r?))
-    }).filter(|(s, _)| s.len() == 5)
-    .map(|(s, r)|
-        (s.chars().map(|c| c == '#').collect::<ArrayVec<[bool; 5]>>(), r == '#')
-    ).filter_map(|(s, r)| {
-        Some((s.into_inner().ok()?, r))
-    }).collect::<Vec<([bool; 5], bool)>>();
-
+    let notes = input
+        .filter_map(|l| sf::scan_fmt!(l, "{[#.]} => {[#.]}", String, char).ok())
+        .filter(|(s, _)| s.len() == 5)
+        .map(|(s, r)| (s.chars().map(|c| c == '#').collect::<ArrayVec<[bool; 5]>>(), r == '#'))
+        .filter_map(|(s, r)| Some((s.into_inner().ok()?, r)))
+        .collect::<Vec<([bool; 5], bool)>>();
 
     aoc.submit_p1(rounds(initial.clone(), &notes, 20, false));
 

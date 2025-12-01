@@ -3,7 +3,10 @@
 #[allow(unused_imports)]
 use aoc::{friends::*, AdventOfCode};
 
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::{
+    collections::{HashMap, HashSet, VecDeque},
+    str::FromStr,
+};
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 struct Deck {
@@ -20,9 +23,7 @@ impl FromStr for Deck {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, ()> {
-        Ok(Self {
-            inner: s.lines().skip(1).map(|l| l.parse().unwrap()).collect(),
-        })
+        Ok(Self { inner: s.lines().skip(1).map(|l| l.parse().unwrap()).collect() })
     }
 }
 
@@ -32,7 +33,7 @@ impl Deck {
             .iter()
             .rev()
             .enumerate()
-            .map(|(idx, val)| ((idx + 1) * (*val as usize)))
+            .map(|(idx, val)| (idx + 1) * (*val as usize))
             .sum()
     }
 
@@ -116,11 +117,7 @@ struct RecursiveCombat {
 
 impl RecursiveCombat {
     fn new(p1: Deck, p2: Deck) -> Self {
-        Self {
-            previous_games: HashMap::new(),
-            p1,
-            p2,
-        }
+        Self { previous_games: HashMap::new(), p1, p2 }
     }
 
     fn play(mut self) -> (Player, Deck) {

@@ -2,12 +2,15 @@
 
 // 10:10AM
 
+use aoc::Itertools;
 #[allow(unused_imports)]
 use aoc::{friends::*, AdventOfCode};
 use num_traits::{ops::checked::CheckedSub, Num};
 
+use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::ops::{RangeFrom, RangeInclusive};
+use std::str::FromStr;
 use std::{
     collections::{LinkedList, VecDeque},
     iter::FromIterator,
@@ -19,7 +22,7 @@ struct Small;
 #[derive(Debug)]
 struct Big;
 
-trait GameNum: Num + Copy + CheckedSub + Ord + From<u8> + TryFrom<usize> {
+pub trait GameNum: Num + Copy + CheckedSub + Ord + From<u8> + TryFrom<usize> {
     type R: Iterator<Item = Self>;
     fn new_range(lower: Self, upper: Self) -> Self::R;
 
@@ -182,7 +185,7 @@ where
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-struct Cursor<'a, T: GameNum + TryInto<usize>>(usize, &'a ArrayPretendingToBeALinkedList<T>)
+pub struct Cursor<'a, T: GameNum + TryInto<usize>>(usize, &'a ArrayPretendingToBeALinkedList<T>)
 where
     <T as TryInto<usize>>::Error: Debug,
     <usize as TryInto<T>>::Error: Debug;
@@ -192,48 +195,48 @@ where
     <T as TryInto<usize>>::Error: Debug,
     <usize as TryInto<T>>::Error: Debug,
 {
-    fn next(&self) -> Self {
+    pub fn next(&self) -> Self {
         let next_idx = self.1.inner[self.0].unwrap().1;
 
         Cursor(next_idx, self.1)
     }
 
-    fn prev(&self) -> Self {
+    pub fn prev(&self) -> Self {
         let prev_idx = self.1.inner[self.0].unwrap().0;
 
         Cursor(prev_idx, self.1)
     }
 
-    fn iter<D: IterDir>(&self) -> IteratorForArrayPretendingToBeALinkedList<'a, T, D> {
+    pub fn iter<D: IterDir>(&self) -> IteratorForArrayPretendingToBeALinkedList<'a, T, D> {
         IteratorForArrayPretendingToBeALinkedList(*self, PhantomData)
     }
 
-    fn iter_forwards(&self) -> IteratorForArrayPretendingToBeALinkedList<'a, T, Forward> {
+    pub fn iter_forwards(&self) -> IteratorForArrayPretendingToBeALinkedList<'a, T, Forward> {
         self.iter()
     }
 
-    fn iter_backwards(&self) -> IteratorForArrayPretendingToBeALinkedList<'a, T, Backward> {
+    pub fn iter_backwards(&self) -> IteratorForArrayPretendingToBeALinkedList<'a, T, Backward> {
         self.iter()
     }
 
-    fn hop_forward(&mut self) {
+    pub fn hop_forward(&mut self) {
         *self = self.next();
     }
 
-    fn hop_backward(&mut self) {
+    pub fn hop_backward(&mut self) {
         *self = self.next();
     }
 
-    fn idx(self) -> usize {
+    pub fn idx(self) -> usize {
         self.0
     }
 
-    fn val(self) -> T {
+    pub fn val(self) -> T {
         self.0.to()
     }
 }
 
-trait IterDir {
+pub trait IterDir {
     fn step<'a, T: GameNum + TryInto<usize>>(cursor: &mut Cursor<'a, T>)
     where
         <T as TryInto<usize>>::Error: Debug,
@@ -241,10 +244,10 @@ trait IterDir {
 }
 
 #[derive(Debug)]
-struct Forward;
+pub struct Forward;
 
 #[derive(Debug)]
-struct Backward;
+pub struct Backward;
 
 impl IterDir for Forward {
     fn step<'a, T: GameNum + TryInto<usize>>(cursor: &mut Cursor<'a, T>)
@@ -266,7 +269,7 @@ impl IterDir for Backward {
     }
 }
 
-struct IteratorForArrayPretendingToBeALinkedList<'a, T: GameNum + TryInto<usize>, Dir: IterDir>(
+pub struct IteratorForArrayPretendingToBeALinkedList<'a, T: GameNum + TryInto<usize>, Dir: IterDir>(
     Cursor<'a, T>,
     PhantomData<Dir>,
 )
@@ -316,11 +319,7 @@ where
             inner[num] = Some((nums[prev_idx].to(), nums[next_idx].to()));
         }
 
-        Self {
-            inner,
-            front: nums[0].to(),
-            _t: PhantomData,
-        }
+        Self { inner, front: nums[0].to(), _t: PhantomData }
     }
 }
 

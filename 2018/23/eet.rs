@@ -1,6 +1,6 @@
 #!/usr/bin/env rustr
 #[allow(unused_imports)]
-use aoc::{friends::*, AdventOfCode};
+use aoc::{friends::*, sf, AdventOfCode};
 
 #[derive(Clone, Copy)]
 struct Position {
@@ -28,6 +28,7 @@ impl NanoBot {
         self.pos.dist(&bot.pos) <= self.rad
     }
 
+    #[allow(unused)]
     fn within_range(&self, pos: &Position) -> bool {
         self.pos.dist(pos) <= self.rad
     }
@@ -41,15 +42,9 @@ fn main() {
     let mut nanobots: Vec<NanoBot> = input
         .lines()
         .filter_map(|l| {
-            let (x, y, z, r) = scan_fmt!(l, "pos=<{},{},{}>, r={}", isize, isize, isize, usize);
-            Some(NanoBot {
-                pos: Position {
-                    x: x?,
-                    y: y?,
-                    z: z?,
-                },
-                rad: r?,
-            })
+            let (x, y, z, r) =
+                sf::scan_fmt_some!(l, "pos=<{},{},{}>, r={}", isize, isize, isize, usize);
+            Some(NanoBot { pos: Position { x: x?, y: y?, z: z? }, rad: r? })
         })
         .collect();
 

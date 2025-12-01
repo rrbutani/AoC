@@ -5,10 +5,10 @@ authors = ["Rahul Butani <rrbutani@users.noreply.github.com>"]
 edition = "2021"
 
 [dependencies]
-aoc = { path = "../common/Rust/aoc" }
+aoc.workspace = true
 md5 = "0.7.0"
-owo-colors = "1.2.0"
-itertools = "0.10"
+owo-colors.workspace = true
+itertools.workspace = true
 
 [lib]
 path = "lib.rs"

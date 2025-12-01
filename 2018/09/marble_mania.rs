@@ -1,21 +1,23 @@
 #!/usr/bin/env rustr
 
 #[allow(unused_imports)]
-use aoc::{AdventOfCode, friends::*};
-use std::fmt::Display;
+use aoc::{friends::*, AdventOfCode};
 use std::collections::VecDeque;
+use std::fmt::Display;
 
 trait ConditionalPredicate<T> {
     fn if_some<U, F: FnOnce(&T) -> U>(self, f: F) -> Self;
 }
 
 impl<T> ConditionalPredicate<T> for Option<T> {
-
     #[inline]
     fn if_some<U, F: FnOnce(&T) -> U>(self, f: F) -> Self {
         match self {
-            Some(ref v) => { f(v); self},
-            None => None
+            Some(ref v) => {
+                f(v);
+                self
+            }
+            None => None,
         }
     }
 }
@@ -27,7 +29,7 @@ impl<T> ConditionalPredicate<T> for Option<T> {
 #[inline]
 fn wheel(pos: usize, len: usize, move_by: isize) -> usize {
     match (pos as isize + move_by) % (len as isize) {
-        r if r <  0 => (len as isize + r) as usize,
+        r if r < 0 => (len as isize + r) as usize,
         r if r >= 0 => r as usize,
         _ => unreachable!(),
     }
@@ -38,7 +40,7 @@ fn wheel(pos: usize, len: usize, move_by: isize) -> usize {
 pub struct CircleNode<T: Clone> {
     previous_id: usize,
     next_id: usize,
-    inner: T
+    inner: T,
 }
 
 pub struct Circle<T: Clone> {
@@ -55,12 +57,7 @@ impl<T: Clone> Circle<T> {
     }
 
     pub fn with_capacity(size: usize) -> Self {
-        Self {
-            count: 0,
-            pool: Vec::with_capacity(size),
-            position: None,
-            cleanup: None,
-        }
+        Self { count: 0, pool: Vec::with_capacity(size), position: None, cleanup: None }
     }
 
     pub fn get_node_by_id(&self, id: usize) -> Option<&CircleNode<T>> {
@@ -81,8 +78,11 @@ impl<T: Clone> Circle<T> {
 
     pub fn remove(&mut self) -> Option<T> {
         // If we're empty, return None:
-        let pos = if let Some(pos) = self.position { pos }
-            else { return None };
+        let pos = if let Some(pos) = self.position {
+            pos
+        } else {
+            return None;
+        };
 
         // Mark the id for reuse if we're doing that:
         if let Some(ref mut to_reuse) = &mut self.cleanup {
@@ -106,7 +106,9 @@ impl<T: Clone> Circle<T> {
         curr.next_id = pos;
 
         // In case that was our last (self-pointing) node:
-        if self.count == 0 { self.position = None }
+        if self.count == 0 {
+            self.position = None
+        }
 
         Some(curr.inner.clone())
     }
@@ -138,18 +140,10 @@ impl<T: Clone> Circle<T> {
             self.pool[pos].next_id = id;
             self.pool[next].previous_id = id;
 
-            CircleNode {
-                previous_id: pos,
-                next_id: next,
-                inner: val,
-            }
+            CircleNode { previous_id: pos, next_id: next, inner: val }
         } else {
             // If we're empty, just make a Node that points to itself:
-            CircleNode {
-                previous_id: id,
-                next_id: id,
-                inner: val
-            }
+            CircleNode { previous_id: id, next_id: id, inner: val }
         };
 
         self.pool.insert(id, node);
@@ -173,7 +167,9 @@ impl<T: Clone> Circle<T> {
     pub fn rotate_clockwise(&mut self, steps: usize) -> &mut Self {
         let mut pos = self.position.expect("Can't rotate an empty Circle!");
 
-        for _ in 0..steps { pos = self.pool[pos].next_id; }
+        for _ in 0..steps {
+            pos = self.pool[pos].next_id;
+        }
 
         self.position = Some(pos);
         self
@@ -182,7 +178,9 @@ impl<T: Clone> Circle<T> {
     pub fn rotate_counterclockwise(&mut self, steps: usize) -> &mut Self {
         let mut pos = self.position.expect("Can't rotate an empty Circle!");
 
-        for _ in 0..steps { pos = self.pool[pos].previous_id; }
+        for _ in 0..steps {
+            pos = self.pool[pos].previous_id;
+        }
 
         self.position = Some(pos);
         self
@@ -199,27 +197,22 @@ impl<T: Clone> Circle<T> {
     /// cause problems, but we currently have no mechanism to recoup the
     /// space used by the elements we've marked.
     pub fn disable_cleanup(&mut self) -> &mut Self {
-        if let Some(ref mut v) = &mut self.cleanup {
+        if let Some(v) = self.cleanup.take() {
             drop(v)
         }
 
-        self.cleanup = None;
         self
     }
 
-    pub fn iter(&self, direction: Direction) -> CircleIterator<T> {
-        CircleIterator {
-            circle: self,
-            current_pos: self.position,
-            direction,
-        }
+    pub fn iter(&self, direction: Direction) -> CircleIterator<'_, T> {
+        CircleIterator { circle: self, current_pos: self.position, direction }
     }
 
-    pub fn clockwise_iter(&self) -> CircleIterator<T> {
+    pub fn clockwise_iter(&self) -> CircleIterator<'_, T> {
         self.iter(Direction::Clockwise)
     }
 
-    pub fn counterclockwise_iter(&self) -> CircleIterator<T> {
+    pub fn counterclockwise_iter(&self) -> CircleIterator<'_, T> {
         self.iter(Direction::Counterclockwise)
     }
 }
@@ -229,11 +222,7 @@ impl<'a, T: Clone> IntoIterator for &'a Circle<T> {
     type IntoIter = CircleIterator<'a, T>;
 
     fn into_iter(self) -> CircleIterator<'a, T> {
-        CircleIterator {
-            circle: self,
-            current_pos: self.position,
-            direction: Direction::Clockwise,
-        }
+        CircleIterator { circle: self, current_pos: self.position, direction: Direction::Clockwise }
     }
 }
 
@@ -265,7 +254,7 @@ impl<'a, T: Clone> Iterator for CircleIterator<'a, T> {
                 });
 
                 Some(node.inner.clone())
-            },
+            }
             None => None,
         }
     }
@@ -273,13 +262,11 @@ impl<'a, T: Clone> Iterator for CircleIterator<'a, T> {
 
 use std::fmt;
 impl<T: Display + Clone> Display for Circle<T> {
-
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.iter(Direction::Clockwise).take(self.size()).fold(Ok(()), |acc, x|
-            acc.and_then(|_| {
-                write!(f, "{} <> ", x)
-            })
-        ).and_then(|_| write!(f, "[loop]"))
+        self.iter(Direction::Clockwise)
+            .take(self.size())
+            .fold(Ok(()), |acc, x| acc.and_then(|_| write!(f, "{} <> ", x)))
+            .and_then(|_| write!(f, "[loop]"))
     }
 }
 
@@ -291,7 +278,7 @@ fn points_naive(marbles: u32) -> Vec<u32> {
     let mut pos = 1;
     for i in 1..=marbles {
         if i % 23 == 0 {
-            pos = wheel(pos, circle.len(), - 9);
+            pos = wheel(pos, circle.len(), -9);
             points.push(circle.remove(pos).unwrap() + i as u32);
         } else {
             circle.insert(pos, i);
@@ -311,7 +298,6 @@ fn points_circle(marbles: u32) -> Vec<u32> {
 
     circle.insert(0);
     for i in 1..=marbles {
-
         if i % 23 == 0 {
             circle.rotate_counterclockwise(8);
             points.push(circle.remove().unwrap() + i as u32);
@@ -334,12 +320,14 @@ enum DS {
 fn winning_score(players: u32, marbles: u32, approach: DS) -> u32 {
     let points = match approach {
         DS::VecDeque => points_naive,
-        DS::LinkedList => points_circle
+        DS::LinkedList => points_circle,
     }(marbles);
 
     let mut scores = (0..players).map(|_| 0u32).collect::<Vec<u32>>();
 
-    points.iter().enumerate()
+    points
+        .iter()
+        .enumerate()
         .for_each(|(idx, p)| scores[(23 * idx) % players as usize] += p);
 
     *scores.iter().max().unwrap()
@@ -350,9 +338,12 @@ fn main() {
     let mut aoc = AdventOfCode::new(2018, 09);
     let input: String = aoc.get_input();
 
-    let (players, marbles) = aoc::scan_fmt!(input.lines().next().unwrap(),
-            "{} players; last marble is worth {} points",
-            u32, u32);
+    let (players, marbles) = aoc::sf::scan_fmt_some!(
+        input.lines().next().unwrap(),
+        "{} players; last marble is worth {} points",
+        u32,
+        u32
+    );
     let (players, marbles) = (players.unwrap(), marbles.unwrap());
 
     aoc.submit_p1(winning_score(players, marbles, DS::LinkedList));
@@ -367,9 +358,9 @@ mod tests {
     fn wheel_tests() {
         assert_eq!(wheel(1, 3, 0), 1);
         assert_eq!(wheel(1, 3, 1), 2);
-        assert_eq!(wheel(1, 3,-1), 0);
+        assert_eq!(wheel(1, 3, -1), 0);
 
-        assert_eq!(wheel(1, 3,-2), 2);
+        assert_eq!(wheel(1, 3, -2), 2);
         assert_eq!(wheel(5, 86, -9), 82);
 
         for (i, v) in (-20..20).enumerate() {
@@ -437,7 +428,8 @@ mod tests {
         assert_eq!(circle.size(), 0);
 
         // Try multiple nodes:
-        circle.insert_tap(1)
+        circle
+            .insert_tap(1)
             .insert_tap(20)
             .insert_tap(30)
             .insert_tap(40);
@@ -506,24 +498,36 @@ mod tests {
             assert_eq!(node.unwrap().inner, expected_val);
         };
 
-        assert_current(&circle, 40); circle.rotate_clockwise(1);
-        assert_current(&circle, 1);  circle.rotate_clockwise(1);
-        assert_current(&circle, 20); circle.rotate_clockwise(1);
-        assert_current(&circle, 30); circle.rotate_clockwise(1);
+        assert_current(&circle, 40);
+        circle.rotate_clockwise(1);
+        assert_current(&circle, 1);
+        circle.rotate_clockwise(1);
+        assert_current(&circle, 20);
+        circle.rotate_clockwise(1);
+        assert_current(&circle, 30);
+        circle.rotate_clockwise(1);
         assert_current(&circle, 40);
 
         // And now counterclockwise:
-        assert_current(&circle, 40); circle.rotate_counterclockwise(1);
-        assert_current(&circle, 30); circle.rotate_counterclockwise(1);
-        assert_current(&circle, 20); circle.rotate_counterclockwise(1);
-        assert_current(&circle, 1);  circle.rotate_counterclockwise(1);
+        assert_current(&circle, 40);
+        circle.rotate_counterclockwise(1);
+        assert_current(&circle, 30);
+        circle.rotate_counterclockwise(1);
+        assert_current(&circle, 20);
+        circle.rotate_counterclockwise(1);
+        assert_current(&circle, 1);
+        circle.rotate_counterclockwise(1);
         assert_current(&circle, 40);
 
         // And now multiple rotates:
-        assert_current(&circle, 40); circle.rotate_counterclockwise(4);
-        assert_current(&circle, 40); circle.rotate_clockwise(40);
-        assert_current(&circle, 40); circle.rotate_clockwise(42);
-        assert_current(&circle, 20); circle.rotate(-2);
+        assert_current(&circle, 40);
+        circle.rotate_counterclockwise(4);
+        assert_current(&circle, 40);
+        circle.rotate_clockwise(40);
+        assert_current(&circle, 40);
+        circle.rotate_clockwise(42);
+        assert_current(&circle, 20);
+        circle.rotate(-2);
         assert_current(&circle, 40);
 
         // TODO: Regression test for when a node is removed but other
@@ -533,7 +537,6 @@ mod tests {
     #[test]
     fn naive_tests_full() {
         p1_tests(|a, b| winning_score(a, b, DS::VecDeque))
-
     }
 
     #[test]

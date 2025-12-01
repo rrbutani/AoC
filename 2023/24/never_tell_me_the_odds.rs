@@ -1,8 +1,5 @@
 use aoc::{iterator_map_ext::IterMapExt, AdventOfCode, FromStr, Itertools, Triple};
-use z3::{
-    ast::{Ast, Int},
-    Config, Context, SatResult, Solver,
-};
+use z3::{ast::Int, SatResult, Solver};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 struct Hailstone {
@@ -267,11 +264,10 @@ fn p2(hailstones: &[Hailstone]) -> (Triple<isize>, Triple<isize>) {
     let [t1, t2, t3] = ["t1", "t2", "t3"].map(|n| Int::new_const(&ctx, n));
     */
 
-    let ctx = Context::new(&Config::new());
-    let solver = Solver::new(&ctx);
+    let solver = Solver::new();
 
-    let [rx, ry, rz] = ["rx", "ry", "rz"].map(|n| Int::new_const(&ctx, n));
-    let [rv_x, rv_y, rv_z] = ["rv_x", "rv_y", "rv_z"].map(|n| Int::new_const(&ctx, n));
+    let [rx, ry, rz] = ["rx", "ry", "rz"].map(|n| Int::new_const(n));
+    let [rv_x, rv_y, rv_z] = ["rv_x", "rv_y", "rv_z"].map(|n| Int::new_const(n));
 
     // #[rustfmt::skip]
     for (n, &Hailstone {
@@ -285,7 +281,7 @@ fn p2(hailstones: &[Hailstone]) -> (Triple<isize>, Triple<isize>) {
         hailstones[0..(30.min(hailstones.len()))].iter().enumerate()
     {
         let n = n + 1;
-        let t = Int::new_const(&ctx, format!("t_{n}"));
+        let t = Int::new_const(format!("t_{n}"));
 
         for (vel, pos, r_vel, r_pos) in [
             (v_x, x, &rv_x, &rx),
@@ -295,7 +291,7 @@ fn p2(hailstones: &[Hailstone]) -> (Triple<isize>, Triple<isize>) {
             let lhs = &t * (vel as i64) + (pos as i64);
             let rhs = &t * r_vel + r_pos;
 
-            let eq = lhs._safe_eq(&rhs).unwrap();
+            let eq = lhs.safe_eq(&rhs).unwrap();
             solver.assert(&eq);
         }
     }
@@ -313,7 +309,7 @@ fn p2(hailstones: &[Hailstone]) -> (Triple<isize>, Triple<isize>) {
         eprintln!("  - {}: {:?}", stat.key, stat.value);
     }
 
-    let resolve_triple = |a: Int<'_>, b, c| {
+    let resolve_triple = |a: Int, b, c| {
         let [a, b, c] = [a, b, c]
             .map(|v| model.get_const_interp(&v).unwrap())
             .map(|v| v.as_i64().unwrap())

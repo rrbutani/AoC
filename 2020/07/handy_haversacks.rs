@@ -1,8 +1,6 @@
 #!/usr/bin/env rustr
 
-
-#[allow(unused_imports)]
-use aoc::{friends::*, AdventOfCode};
+use aoc::{sf, AdventOfCode};
 use std::{collections::HashMap, str::FromStr};
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -31,11 +29,8 @@ impl FromStr for Rule {
             let allowed = rule
                 .split(", ")
                 .map(|s| {
-                    let (q, c1, c2) = scan_fmt!(s, "{} {} {} bag", u32, String, String);
-                    (
-                        BagColor(format!("{} {}", c1.unwrap(), c2.unwrap())),
-                        q.unwrap(),
-                    )
+                    let (q, c1, c2) = sf::scan_fmt_some!(s, "{} {} {} bag", u32, String, String);
+                    (BagColor(format!("{} {}", c1.unwrap(), c2.unwrap())), q.unwrap())
                 })
                 .collect();
 

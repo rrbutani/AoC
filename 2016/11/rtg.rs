@@ -1,6 +1,6 @@
 #!/usr/bin/env rustr
+#![allow(unused_imports, unused)]
 
-#[allow(unused_imports)]
 use aoc::{
     friends::*,
     object_store::{ObjectStore, Ref},
@@ -121,12 +121,7 @@ impl<'n> State<'n> {
             //     HashSet::new(),
             //     HashSet::new(),
             // ],
-            levels: [
-                BTreeSet::new(),
-                BTreeSet::new(),
-                BTreeSet::new(),
-                BTreeSet::new(),
-            ],
+            levels: [BTreeSet::new(), BTreeSet::new(), BTreeSet::new(), BTreeSet::new()],
         };
 
         for (level, line) in inp.lines().enumerate() {
@@ -324,10 +319,7 @@ struct StateSpace<'store, 'names, U = ()> {
 
 impl<'s, 'n, U> StateSpace<'s, 'n, U> {
     fn new(input: &'n str, store: &'s mut Vec<State<'n>>) -> Result<Self, ()> {
-        let mut s = Self {
-            state_store: ObjectStore::<_, U>::new(store)?,
-            graph: HashMap::new(),
-        };
+        let mut s = Self { state_store: ObjectStore::<_, U>::new(store)?, graph: HashMap::new() };
 
         let initial_state = State::from_input(input)?;
         let initial_state = s.state_store.insert(initial_state).ok().unwrap();

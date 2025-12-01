@@ -11,7 +11,7 @@ pub use crate::sequence;
 
 pub mod reexports {
     pub use ::scan_fmt as sf;
-    pub use scan_fmt::scan_fmt_some as scan_fmt;
+    pub use scan_fmt::scan_fmt;
 
     pub use itertools::{self, Itertools};
 

@@ -1,11 +1,14 @@
 #!/usr/bin/env rustr
 
+use aoc::Itertools;
 #[allow(unused_imports)]
 use aoc::{friends::*, AdventOfCode};
 
 use std::collections::{HashMap, HashSet};
+use std::fmt::Display;
 use std::hash::{Hash, Hasher};
-use std::iter;
+use std::str::FromStr;
+use std::{fmt, iter};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 struct Tile {
@@ -126,17 +129,9 @@ impl Edge {
         let reversed: [char; 10] = inner.iter().rev().copied().collect::<Vec<_>>().to();
 
         if reversed > dbg!(inner) {
-            Edge {
-                lower: inner,
-                higher: reversed,
-                lower_is_actual: true,
-            }
+            Edge { lower: inner, higher: reversed, lower_is_actual: true }
         } else {
-            Edge {
-                lower: reversed,
-                higher: inner,
-                lower_is_actual: false,
-            }
+            Edge { lower: reversed, higher: inner, lower_is_actual: false }
         }
     }
 
@@ -187,6 +182,7 @@ impl Tile {
         *self.edges().iter().nth(idx).unwrap()
     }
 
+    #[allow(unused)]
     fn actual_edge(&self, dir: Side) -> [char; 10] {
         self.edge(dir).actual()
     }
@@ -331,116 +327,6 @@ impl Tile {
 fn main() {
     let mut aoc = AdventOfCode::new(2020, 20);
     let input: String = aoc.get_input();
-
-    let input2 = "
-Tile 2311:
-..##.#..#.
-##..#.....
-#...##..#.
-####.#...#
-##.##.###.
-##...#.###
-.#.#.#..##
-..#....#..
-###...#.#.
-..###..###
-
-Tile 1951:
-#.##...##.
-#.####...#
-.....#..##
-#...######
-.##.#....#
-.###.#####
-###.##.##.
-.###....#.
-..#.#..#.#
-#...##.#..
-
-Tile 1171:
-####...##.
-#..##.#..#
-##.#..#.#.
-.###.####.
-..###.####
-.##....##.
-.#...####.
-#.##.####.
-####..#...
-.....##...
-
-Tile 1427:
-###.##.#..
-.#..#.##..
-.#.##.#..#
-#.#.#.##.#
-....#...##
-...##..##.
-...#.#####
-.#.####.#.
-..#..###.#
-..##.#..#.
-
-Tile 1489:
-##.#.#....
-..##...#..
-.##..##...
-..#...#...
-#####...#.
-#..#.#.#.#
-...#.#.#..
-##.#...##.
-..##.##.##
-###.##.#..
-
-Tile 2473:
-#....####.
-#..#.##...
-#.##..#...
-######.#.#
-.#...#.#.#
-.#########
-.###.#..#.
-########.#
-##...##.#.
-..###.#.#.
-
-Tile 2971:
-..#.#....#
-#...###...
-#.#.###...
-##.##..#..
-.#####..##
-.#..####.#
-#..#.#..#.
-..####.###
-..#.#.###.
-...#.#.#.#
-
-Tile 2729:
-...#.#.#.#
-####.#....
-..#.#.....
-....#..#.#
-.##..##.#.
-.#.####...
-####.#.#..
-##.####...
-##..#.##..
-#.##...##.
-
-Tile 3079:
-#.#.#####.
-.#..######
-..#.......
-######....
-####.#..#.
-.#...#.##.
-#.#####.##
-..#.###...
-..#.......
-..#.###...";
-
     let tiles: Vec<Tile> = input
         .trim()
         .split("\n\n")
@@ -600,7 +486,7 @@ Tile 3079:
     // know the relative placement of all four of our corners *and* our height
     // and width.
     let (mut top_left, mut top_left_borders) = corners_with_border_edges.pop().unwrap();
-    let tile = displaced.remove(&top_left.id).unwrap();
+    let _tile = displaced.remove(&top_left.id).unwrap();
 
     assert_eq!(top_left_borders.len(), 2);
     let border1 = top_left_borders.pop().unwrap();
@@ -929,10 +815,7 @@ Tile 3079:
     {
         println!("Searching:\n{}\n\n", sea);
         if let Some((monsters, rough, sea)) = sea.search_for_monster(&monster) {
-            println!(
-                "Found {} monsters (roughness of {}) in this sea:\n{}",
-                monsters, rough, sea
-            );
+            println!("Found {} monsters (roughness of {}) in this sea:\n{}", monsters, rough, sea);
             roughness = Some(rough);
             break;
         }
@@ -974,6 +857,7 @@ fn grid_to_string(grid: &HashMap<(usize, usize), Tile>, height: usize, width: us
         .collect()
 }
 
+#[allow(unused)]
 fn grid_to_string_degapped(
     grid: &HashMap<(usize, usize), Tile>,
     height: usize,
@@ -1007,11 +891,7 @@ impl Monster {
 
         let width = inner.iter().map(|l| l.len()).max().unwrap();
 
-        Self {
-            height: inner.len(),
-            width,
-            inner,
-        }
+        Self { height: inner.len(), width, inner }
     }
 }
 
@@ -1061,11 +941,7 @@ impl Sea {
             // chars.push(vec![]);
         }
 
-        Self {
-            inner: chars,
-            height: height * (Tile::LEN - 2),
-            width: width * (Tile::LEN - 2),
-        }
+        Self { inner: chars, height: height * (Tile::LEN - 2), width: width * (Tile::LEN - 2) }
     }
 
     #[inline]
@@ -1252,22 +1128,16 @@ mod tile_tests {
     #[test]
     fn no_adj() {
         let mut t = TILE;
-        t.adjust_to(
-            Edge::new(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']),
-            Side::Top,
-        )
-        .unwrap();
+        t.adjust_to(Edge::new(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']), Side::Top)
+            .unwrap();
         assert_eq!(t, TILE);
     }
 
     #[test]
     fn adj_rot_right() {
         let mut t = TILE;
-        t.adjust_to(
-            Edge::new(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']),
-            Side::Right,
-        )
-        .unwrap();
+        t.adjust_to(Edge::new(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']), Side::Right)
+            .unwrap();
         assert_eq!(t, RIGHT);
     }
 
@@ -1288,11 +1158,8 @@ mod tile_tests {
             ],
             id: 0,
         };
-        t.adjust_to(
-            Edge::new(['#', '.', '#', '#', '.', '.', '.', '#', '#', '.']),
-            Side::Top,
-        )
-        .unwrap();
+        t.adjust_to(Edge::new(['#', '.', '#', '#', '.', '.', '.', '#', '#', '.']), Side::Top)
+            .unwrap();
 
         assert_eq!(
             t,
@@ -1356,11 +1223,8 @@ mod tile_tests {
             id: 0,
         };
 
-        t.adjust_to(
-            ['.', '.', '.', '#', '#', '.', '.', '.', '.', '.'],
-            Side::Left,
-        )
-        .unwrap();
+        t.adjust_to(['.', '.', '.', '#', '#', '.', '.', '.', '.', '.'], Side::Left)
+            .unwrap();
 
         assert_eq!(
             t.edge(Side::Right).actual(),

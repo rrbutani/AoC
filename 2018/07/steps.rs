@@ -1,7 +1,7 @@
 #!/usr/bin/env rustr
 
 #[allow(unused_imports)]
-use aoc::{AdventOfCode, friends::*};
+use aoc::{friends::reexports::sf::scan_fmt_some as scan_fmt, friends::*, AdventOfCode};
 use std::slice::Iter;
 
 #[derive(Clone, Copy)]
@@ -18,8 +18,9 @@ struct Node {
 
 #[derive(Debug, Copy, Clone)]
 enum IteratorEvent<'a> {
-    Added(&'a Node), // Useful for BFS
+    Added(&'a Node),   // Useful for BFS
     Entered(&'a Node), // Preorder DFS
+    #[allow(unused)]
     Exited(&'a Node), // Postorder DFS
 }
 
@@ -32,7 +33,7 @@ struct EventedNodeIterator<'a> {
 }
 
 impl Node {
-    fn iter(&self) -> EventedNodeIterator {
+    fn iter(&self) -> EventedNodeIterator<'_> {
         EventedNodeIterator { current: Some(&self), inner: None, iter: None }
     }
 }
@@ -48,7 +49,7 @@ impl<'a> Iterator for EventedNodeIterator<'a> {
                 self.iter = Some(c.allows_for.iter());
                 self.inner = Some(Vec::with_capacity(c.allows_for.len()));
                 Some(IteratorEvent::Entered(c))
-            },
+            }
             (Some(_), Some(ref mut v), Some(ref mut i)) => {
                 // Sweeping it's children:
                 if let Some(n) = i.next() {
@@ -66,22 +67,21 @@ impl<'a> Iterator for EventedNodeIterator<'a> {
                     None => {
                         self.current = None;
                         Some(IteratorEvent::Exited(c))
-                    },
+                    }
                     Some(ref mut n) => {
                         match n.next() {
                             None => {
                                 // This iterator is finished; onto the next!
                                 v.pop();
                                 self.next()
-                            },
+                            }
                             Some(e) => Some(e),
                         }
                     }
                 }
             }
             (None, _, None) => None,
-            _ => unreachable!()
-
+            _ => unreachable!(),
         }
     }
 }
@@ -131,26 +131,39 @@ fn main() {
         steps[c as usize - A].as_mut().unwrap()
     }
 
-    input.lines().map(|s|{
-        let (start, finish) = scan_fmt!(s, "Step {[A-Z]} must be finished before step {[A-Z]} can begin.",
-            char, char);
+    input
+        .lines()
+        .map(|s| {
+            let (start, finish) = scan_fmt!(
+                s,
+                "Step {[A-Z]} must be finished before step {[A-Z]} can begin.",
+                char,
+                char
+            );
 
-        (start.unwrap(), finish.unwrap())
-    }).for_each(|(s, e)| {
-        find_or_create(&mut steps, e, &mut total).prereqs |= 1 << (s as usize - A);
-        find_or_create(&mut steps, s, &mut total);
-    });
+            (start.unwrap(), finish.unwrap())
+        })
+        .for_each(|(s, e)| {
+            find_or_create(&mut steps, e, &mut total).prereqs |= 1 << (s as usize - A);
+            find_or_create(&mut steps, s, &mut total);
+        });
 
     fn prop(steps: &[Option<Steps>], mut visited: u32, parent: &mut Node) -> u32 {
         for s in steps.iter().filter_map(|s| *s) {
             // Given the steps we've completed, check if we can complete this step:
-            if s.prereqs | visited != visited { continue }
+            if s.prereqs | visited != visited {
+                continue;
+            }
 
             // Check that we haven't already done this step:
-            if visited | (1 << (s.name as usize - A)) == visited { continue }
+            if visited | (1 << (s.name as usize - A)) == visited {
+                continue;
+            }
 
             // Now check if this step actually depends on us:
-            if parent.name != '@' && s.prereqs & (1 << (parent.name as usize - A)) == 0 { continue }
+            if parent.name != '@' && s.prereqs & (1 << (parent.name as usize - A)) == 0 {
+                continue;
+            }
 
             // If we haven't, make a Node for this step:
             let mut n = Node { name: s.name, allows_for: Vec::new() };
@@ -165,23 +178,21 @@ fn main() {
         visited
     }
 
-
     let mut root: Node = Node { name: '@', allows_for: Vec::new() };
-    while curr != total { curr = prop(&steps, curr, &mut root) }
+    while curr != total {
+        curr = prop(&steps, curr, &mut root)
+    }
 
-    let mut iter = root.iter().filter_map(|e|
-        match e {
-            IteratorEvent::Entered(n) => Some(n),
-            _ => None
-        });
+    let mut iter = root.iter().filter_map(|e| match e {
+        IteratorEvent::Entered(n) => Some(n),
+        _ => None,
+    });
     iter.next();
 
     let order: String = iter.map(|n| n.name).collect();
 
-
     // P1: DFS except you have to check that all incoming edges are traversed
     aoc.submit_p1(order);
-
 
     #[derive(Debug)]
     enum Next<'a> {
@@ -228,14 +239,18 @@ fn main() {
             if *t == 0 {
                 // Try to find some new work for this node, if we still
                 // have work:
-                if tranches.len() == 0 { continue }
+                if tranches.len() == 0 {
+                    continue;
+                }
 
                 // If we've got a stall condition:
                 if let Next::Stall(n) = tranches[0] {
                     // See if we can resolve it:
                     if curr | 1 << (n.name as usize - A) == curr {
                         tranches.remove(0);
-                        if tranches.len() == 0 { continue }
+                        if tranches.len() == 0 {
+                            continue;
+                        }
                     }
                 }
 

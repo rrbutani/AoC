@@ -13,7 +13,26 @@ members = [
   "2024",
   "2025",
 ]
-resolver = "2"
+resolver = "3"
+
+[workspace.dependencies]
+aoc.path = "common/Rust/aoc"
+derive_more = { version = "2", features = ["full"] }
+fxhash = "0.2"
+genawaiter = "0.99"
+http = "1.4"
+itertools = "0.14"
+num-traits = "0.2"
+owo-colors = "4.2"
+rand = "0.9"
+rayon = "1.11"
+reqwest = "0.12"
+smallvec = "1.15"
+smol_str = "0.3"
+strum = { version = "0.27", features = ["derive"] }
+static_assertions = "1.1.0"
+typed-arena = "2"
+z3 = "0.19.5"
 
 [profile.release]
 debug = true

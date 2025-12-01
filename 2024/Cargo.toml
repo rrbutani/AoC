@@ -4,24 +4,14 @@ version = "0.0.0"
 edition = "2021"
 
 [dependencies]
-aoc = { path = "../common/Rust/aoc" }
-derive_more = { version = "1.0.0", features = ["full"] }
-fxhash = "0.2"
-owo-colors = "3.2"
-rand = "0.8.5"
-rayon = "1.8"
-strum = { version = "0.26.3", features = ["derive"] }
-typed-arena = "2"
-
-# iced-x86 = "1.20"
-# smol_str = "0.2"
-# smallvec = "1.11"
-
-# cranelift-jit = "0.102.1"
-# cranelift-module = "0.102.1"
-# cranelift = "0.102.1"
-
-# z3 = "0.12.1"
+aoc.workspace = true
+derive_more.workspace = true
+fxhash.workspace = true
+owo-colors.workspace = true
+rand.workspace = true
+rayon.workspace = true
+strum.workspace = true
+typed-arena.workspace = true
 
 [features]
 

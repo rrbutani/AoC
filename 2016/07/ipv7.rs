@@ -7,16 +7,9 @@ fn has_abba(s: &str) -> bool {
         .any(|(a, b, c, d)| a == d && b == c && a != b)
 }
 
-const INP: &str = "abba[mnop]qrst
-abcd[bddb]xyyx
-aaaa[qwer]tyui
-ioxxoj[asdfgh]zxcvbn
-";
-
 fn main() {
     let mut aoc = AdventOfCode::new(2016, 7);
     let inp = aoc.get_input();
-    // let inp = INP;
     let ips = inp
         .lines()
         .map(|ip| {

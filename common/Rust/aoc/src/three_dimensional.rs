@@ -55,13 +55,13 @@ pub enum FixedOrRangeOwned<T> {
 }
 
 pub trait GetForAxis<T> {
-    fn get_for_axis(&self, axis: Axis) -> FixedOrRange<T>;
+    fn get_for_axis(&self, axis: Axis) -> FixedOrRange<'_, T>;
 
     fn from_axis_parts(parts: Triple<FixedOrRangeOwned<T>>) -> Result<Self, ()>
     where
         Self: Sized;
 
-    fn as_axis_parts(&self) -> Triple<FixedOrRange<T>> {
+    fn as_axis_parts(&self) -> Triple<FixedOrRange<'_, T>> {
         Axis::ALL.map(|a| self.get_for_axis(a)).into()
     }
 
@@ -320,7 +320,7 @@ impl<T: Add<T, Output = T> + One + Clone> Into<Cube<T>> for Triple<T> {
 }
 
 impl<T> GetForAxis<T> for Triple<T> {
-    fn get_for_axis(&self, axis: Axis) -> FixedOrRange<T> {
+    fn get_for_axis(&self, axis: Axis) -> FixedOrRange<'_, T> {
         let Self(x, y, z) = self;
         use {Axis::*, FixedOrRange::Fixed};
         match axis {
@@ -422,7 +422,7 @@ impl<T: Add<T, Output = T> + One + Clone> Into<Cube<T>> for Line<T> {
 }
 
 impl<T> GetForAxis<T> for Line<T> {
-    fn get_for_axis(&self, axis: Axis) -> FixedOrRange<T> {
+    fn get_for_axis(&self, axis: Axis) -> FixedOrRange<'_, T> {
         use {Axis::*, FixedOrRange::*};
         match (axis, self.iteration_axis) {
             (X, X) | (Y, Y) | (Z, Z) => Range { lo: &self.a_lo, hi: &self.a_hi },
@@ -613,7 +613,7 @@ impl<T: Add<T, Output = T> + One + Clone> Into<Cube<T>> for Plane<T> {
 }
 
 impl<T> GetForAxis<T> for Plane<T> {
-    fn get_for_axis(&self, axis: Axis) -> FixedOrRange<T> {
+    fn get_for_axis(&self, axis: Axis) -> FixedOrRange<'_, T> {
         use {Axis::*, FixedOrRange::*};
         // same idea as `Line<T>`'s impl but with the logic invert w.r.t to
         // fixed and range
@@ -717,7 +717,7 @@ pub struct Cube<T> {
 }
 
 impl<T> GetForAxis<T> for Cube<T> {
-    fn get_for_axis(&self, axis: Axis) -> FixedOrRange<T> {
+    fn get_for_axis(&self, axis: Axis) -> FixedOrRange<'_, T> {
         use {Axis::*, FixedOrRange::Range};
         match axis {
             X => Range { lo: &self.x_lo, hi: &self.x_hi },

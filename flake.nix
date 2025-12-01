@@ -1,18 +1,18 @@
 {
   inputs = {
-    nixpkgs.url = github:NixOS/nixpkgs;
-    flu.url = github:numtide/flake-utils;
-    rust-overlay.url = github:oxalica/rust-overlay;
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    flake-utils.url = "github:numtide/flake-utils";
+    rust-overlay.url = "github:oxalica/rust-overlay";
   };
 
   outputs = {
-    self, nixpkgs, flu, rust-overlay
-  }: flu.lib.eachDefaultSystem (system:
+    self, nixpkgs, flake-utils, rust-overlay
+  }: flake-utils.lib.eachDefaultSystem (system:
     let
       # We need this because tools like `XCode Instruments` rely on the UUID to
       # correlate debug info files with traces.
       mkStdenv = pkgs:
-        if pkgs.targetPlatform.isDarwin then
+        if pkgs.stdenv.targetPlatform.isDarwin then
           let
             cc = pkgs.stdenv.cc;
             bintools = cc.bintools.overrideAttrs (old: {
@@ -45,7 +45,7 @@
 
       toolchain = np.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
 
-      buildInputs = lib.optionals np.targetPlatform.isDarwin
+      buildInputs = lib.optionals np.stdenv.targetPlatform.isDarwin
         (with np.darwin.apple_sdk.frameworks; [
           Security
         ]);
@@ -63,7 +63,7 @@
 
         nativeBuildInputs = with np; [
           toolchain
-          python311
+          python314
           bashInteractive
 
           cargo-expand cargo-flamegraph irust
@@ -71,7 +71,7 @@
 
           graphviz
 
-          z3_4_12 # should be in sync with what's used by the Rust z3-sys crate
+          z3
           pkg-config
         ];
         buildInputs = buildInputs ++ (with np; [

@@ -3,9 +3,11 @@
 #[allow(unused_imports)]
 use aoc::{friends::*, AdventOfCode};
 
+use std::fmt::{self, Debug, Display};
 use std::marker::PhantomData;
 use std::num::ParseIntError;
 use std::ops::{Add, Mul};
+use std::str::FromStr;
 
 trait ParseTy: Debug {}
 
@@ -22,17 +24,9 @@ impl ParseTy for AddThenMultiply {}
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 enum Expr<T: Mul + Add = usize, D: ParseTy = RightRecursive> {
-    Paren {
-        inner: Box<Expr<T, D>>,
-    },
-    Mul {
-        lhs: Box<Expr<T, D>>,
-        rhs: Box<Expr<T, D>>,
-    },
-    Add {
-        lhs: Box<Expr<T, D>>,
-        rhs: Box<Expr<T, D>>,
-    },
+    Paren { inner: Box<Expr<T, D>> },
+    Mul { lhs: Box<Expr<T, D>>, rhs: Box<Expr<T, D>> },
+    Add { lhs: Box<Expr<T, D>>, rhs: Box<Expr<T, D>> },
     Literal(T, PhantomData<D>),
 }
 
@@ -120,16 +114,10 @@ fn parse_rec_right<T: Mul + Add + FromStr<Err = ParseIntError>>(
             None => break rhs,
             Some((_, ' ')) => {}
             Some((op, '*')) => {
-                break Expr::Mul {
-                    lhs: Box::new(s[..op].parse()?),
-                    rhs: Box::new(rhs),
-                }
+                break Expr::Mul { lhs: Box::new(s[..op].parse()?), rhs: Box::new(rhs) }
             }
             Some((op, '+')) => {
-                break Expr::Add {
-                    lhs: Box::new(s[..op].parse()?),
-                    rhs: Box::new(rhs),
-                }
+                break Expr::Add { lhs: Box::new(s[..op].parse()?), rhs: Box::new(rhs) }
             }
             Some((_, c)) => {
                 return Err(ExprParseError::InvalidChar(c));
@@ -157,9 +145,7 @@ impl<T: Mul + Add + FromStr<Err = ParseIntError>> FromStr for Expr<T, RightRecur
                     let start = skip_til_matching_paren_rev(&mut it)
                         .ok_or(ExprParseError::UnmatchedBrace)?;
 
-                    break Expr::Paren {
-                        inner: Box::new(s[(start + 1)..end].parse()?),
-                    };
+                    break Expr::Paren { inner: Box::new(s[(start + 1)..end].parse()?) };
                 }
 
                 (_, ' ') => {}
@@ -250,9 +236,7 @@ impl<T: Mul + Add + FromStr<Err = ParseIntError>> FromStr for Expr<T, LeftRecurs
                     let end =
                         skip_til_matching_paren(&mut it).ok_or(ExprParseError::UnmatchedBrace)?;
 
-                    break Expr::Paren {
-                        inner: Box::new(s[(start + 1)..end].parse()?),
-                    };
+                    break Expr::Paren { inner: Box::new(s[(start + 1)..end].parse()?) };
                 }
 
                 (_, ' ') => {}
@@ -282,16 +266,10 @@ impl<T: Mul + Add + FromStr<Err = ParseIntError>> FromStr for Expr<T, LeftRecurs
                 None => break lhs,
                 Some((_, ' ')) => {}
                 Some((op, '*')) => {
-                    break Expr::Mul {
-                        lhs: Box::new(lhs),
-                        rhs: Box::new(s[(op + 1)..].parse()?),
-                    }
+                    break Expr::Mul { lhs: Box::new(lhs), rhs: Box::new(s[(op + 1)..].parse()?) }
                 }
                 Some((op, '+')) => {
-                    break Expr::Add {
-                        lhs: Box::new(lhs),
-                        rhs: Box::new(s[(op + 1)..].parse()?),
-                    }
+                    break Expr::Add { lhs: Box::new(lhs), rhs: Box::new(s[(op + 1)..].parse()?) }
                 }
                 Some((_, c)) => {
                     return Err(ExprParseError::InvalidChar(c));

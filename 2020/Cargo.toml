@@ -5,10 +5,10 @@ authors = ["Rahul Butani <rrbutani@users.noreply.github.com>"]
 edition = "2021"
 
 [dependencies]
-aoc = { path = "../common/Rust/aoc" }
+aoc.workspace = true
 dyn-clone = "*"
-genawaiter = "0.99"
-num-traits = "0.2"
+genawaiter.workspace = true
+num-traits.workspace = true
 
 [lib]
 path = "lib.rs"

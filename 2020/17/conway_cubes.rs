@@ -1,13 +1,18 @@
 #!/usr/bin/env rustr
 
+use aoc::Itertools;
 #[allow(unused_imports)]
 use aoc::{friends::*, AdventOfCode};
 
 use std::collections::HashMap;
+use std::fmt;
+use std::fmt::Debug;
+use std::fmt::Display;
 use std::hash::Hash;
 use std::iter;
 use std::mem;
 use std::ops::Range;
+use std::str::FromStr;
 
 trait Coord/* <'a> */: Sized {
     const DIMS: usize;
@@ -115,11 +120,7 @@ impl Coord for Coord3 {
     }
 
     fn new<I: Iterator<Item = isize>>(mut vals: I) -> Self {
-        Self {
-            x: vals.next().unwrap(),
-            y: vals.next().unwrap(),
-            z: vals.next().unwrap(),
-        }
+        Self { x: vals.next().unwrap(), y: vals.next().unwrap(), z: vals.next().unwrap() }
     }
 
     type Dimensions = [Range<isize>; 3];

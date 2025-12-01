@@ -113,10 +113,7 @@ impl<T: FromStr> FromStr for ThreeDimensionalRange<T> {
             let (axis, range) = s.split_once("=").ok_or(None)?;
             let (lower, upper) = range.split_once("..").ok_or(None)?;
 
-            Ok((
-                lower.parse().map_err(Some)?..=upper.parse().map_err(Some)?,
-                axis,
-            ))
+            Ok((lower.parse().map_err(Some)?..=upper.parse().map_err(Some)?, axis))
         }
 
         let (x, x_tag) = incl_range_parse(x).map_err(|_| ())?;
@@ -148,10 +145,7 @@ impl FromStr for RebootStep {
             _ => return Err(()),
         };
 
-        Ok(RebootStep {
-            on,
-            range: range.parse()?,
-        })
+        Ok(RebootStep { on, range: range.parse()? })
     }
 }
 
@@ -280,10 +274,7 @@ impl RebootStep {
 
         (
             non_overlapping_remnants(&self),
-            Some(RebootStep {
-                range: overlap.clone(),
-                on: other.on,
-            }),
+            Some(RebootStep { range: overlap.clone(), on: other.on }),
             non_overlapping_remnants(&other),
         )
     }
@@ -371,6 +362,7 @@ impl RangeFlattener {
     fn new(steps: &[RebootStep]) -> Self {
         let mut layers: Vec<Vec<RebootStep>> = Vec::with_capacity(steps.len());
 
+        #[allow(unused)]
         let mut step_count = 0;
         for s in steps.iter() {
             step_count += 1;
@@ -568,6 +560,7 @@ impl RangeFlattener {
             .unwrap()
     }
 
+    #[allow(unused)]
     fn dump(&self) -> impl Iterator<Item = (isize, isize, isize)> + '_ {
         self.layers
             .iter()
@@ -593,22 +586,6 @@ fn main() {
     // on x=0..2,y=0..4,z=0..3
     // on x=0..3,y=2..3,z=2..5
     // on x=0..4,y=1..3,z=1..4
-
-    let inp = "\
-on x=-20..26,y=-36..17,z=-47..7
-on x=-20..33,y=-21..23,z=-26..28
-on x=-22..28,y=-29..23,z=-38..16
-on x=-46..7,y=-6..46,z=-50..-1
-on x=-49..1,y=-3..46,z=-24..28
-on x=2..47,y=-22..22,z=-23..27
-on x=-27..23,y=-28..26,z=-21..29
-on x=-39..5,y=-6..47,z=-3..44
-on x=-30..21,y=-8..43,z=-13..34
-on x=-22..26,y=-27..20,z=-29..19
-off x=-48..-32,y=26..41,z=-47..-37
-on x=-12..35,y=6..50,z=-50..-2
-off x=-48..-32,y=-32..-16,z=-15..-5
-";
 
     //     let inp = "\
     // on x=-20..26,y=-36..17,z=-47..7
@@ -720,13 +697,7 @@ off x=-48..-32,y=-32..-16,z=-15..-5
     // a step
     let mut count = 0;
     let r = -50..=50;
-    for (x, y, z) in (ThreeDimensionalRange {
-        x: r.clone(),
-        y: r.clone(),
-        z: r,
-    }
-    .iter())
-    {
+    for (x, y, z) in (ThreeDimensionalRange { x: r.clone(), y: r.clone(), z: r }.iter()) {
         let on = p1_steps
             .iter()
             .enumerate()

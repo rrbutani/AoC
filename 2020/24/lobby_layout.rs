@@ -1,7 +1,6 @@
 #!/usr/bin/env rustr
 
-#[allow(unused_imports)]
-use aoc::{friends::*, AdventOfCode};
+use aoc::*;
 
 use std::collections::HashMap;
 use std::mem;
