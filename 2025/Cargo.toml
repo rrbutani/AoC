@@ -21,9 +21,9 @@ path = "lib.rs"
 name = "day01"
 path = "01/secret_entrance.rs"
 
-# [[bin]]
-# name = "day02"
-# path = "02/red_nosed_reports.rs"
+[[bin]]
+name = "day02"
+path = "02/gift_shop.rs"
 
 # [[bin]]
 # name = "day03"
