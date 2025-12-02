@@ -9,6 +9,7 @@ derive_more.workspace = true
 owo-colors.workspace = true
 rand.workspace = true
 rayon.workspace = true
+smallvec.workspace = true
 strum.workspace = true
 static_assertions.workspace = true
 
