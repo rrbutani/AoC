@@ -26,9 +26,9 @@ path = "01/secret_entrance.rs"
 name = "day02"
 path = "02/gift_shop.rs"
 
-# [[bin]]
-# name = "day03"
-# path = "03/mull_it_over.rs"
+[[bin]]
+name = "day03"
+path = "03/lobby.rs"
 
 # [[bin]]
 # name = "day04"
