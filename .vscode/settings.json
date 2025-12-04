@@ -18,4 +18,9 @@
   "editor.inlayHints.enabled": "offUnlessPressed",
   "cSpell.enabled": false,
   "python.defaultInterpreterPath": "python3",
+  "[rust]": {
+    "editor.rulers": [
+      100
+    ]
+  }
 }

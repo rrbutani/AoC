@@ -359,7 +359,7 @@ impl<C> Grid<C> {
         } else {
             queue.iter().map(|(c, _)| *c).collect()
         };
-        let mut next_warn_threshold = 1000;
+        let mut next_warn_threshold = 2500;
 
         while let Some((curr, ctx)) = queue.pop_front() {
             let res = func(
@@ -383,7 +383,7 @@ impl<C> Grid<C> {
 
             if queue.len() > next_warn_threshold {
                 eprintln!("WARNING: big queue size: {}", queue.len());
-                next_warn_threshold *= 10;
+                next_warn_threshold *= 4;
             }
         }
     }
@@ -463,6 +463,10 @@ fn coord_iter_par<T: Sync>(
 impl<C> Grid<C> {
     pub fn cell_iter(&self) -> impl Clone + Iterator<Item = (Coord, &C)> + '_ {
         coord_iter(&self.inner)
+    }
+
+    pub fn coord_iter(&self) -> impl Clone + Iterator<Item = Coord> + '_ {
+        self.cell_iter().map(|(c, _)| c)
     }
 
     pub fn find<'it>(
