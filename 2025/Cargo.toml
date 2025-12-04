@@ -30,9 +30,9 @@ path = "02/gift_shop.rs"
 name = "day03"
 path = "03/lobby.rs"
 
-# [[bin]]
-# name = "day04"
-# path = "04/ceres_search.rs"
+[[bin]]
+name = "day04"
+path = "04/printing_department.rs"
 
 # [[bin]]
 # name = "day05"

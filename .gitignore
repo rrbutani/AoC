@@ -1,5 +1,7 @@
 # General:
 *.input
+inp
+ex[0-9]
 
 # OS Specific:
 .fuse_hidden*
