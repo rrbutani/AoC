@@ -1,4 +1,4 @@
-use std::ops::RangeInclusive;
+use std::{cmp::Ordering::*, ops::RangeInclusive};
 
 use aoc::{AdventOfCode, Itertools, iterator_map_ext::IterMapExt};
 
@@ -14,19 +14,42 @@ fn main() {
                 l..=r
             })
             .collect_vec();
-        let ings = ings.lines().map_parse().collect_vec();
+        let mut ings = ings.lines().map_parse().collect_vec();
 
         ranges.sort_by_key(|r| *r.start());
+        ings.sort();
+
         (ranges, ings)
     };
 
-    let p1 = ingredient_ids
-        .iter()
-        .filter(|i| ranges.iter().any(|r| r.contains(i)))
-        .count();
-    _ = aoc.submit_p1(p1);
+    // walk the sorted arrays together:
+    let mut valid_ingredient_count = 0;
+    let mut r = ranges.iter().peekable();
+    'ing_loop: for ing in ingredient_ids {
+        // skip ranges above this ingredient id:
+        loop {
+            let Some(range) = r.peek() else {
+                // if we're out of ranges the ingredient id and all greater ids aren't valid
+                break 'ing_loop;
+            };
+            match range.start().cmp(&ing) {
+                Less => match range.end().cmp(&ing) {
+                    Greater | Equal => break, // valid!
+                    Less => {
+                        // we've moved past this range; move to the next one and try again
+                        _ = r.next().unwrap();
+                    }
+                },
+                Equal => break,                // valid!
+                Greater => continue 'ing_loop, // this ingredient isn't valid, move to the next
+            }
+        }
 
-    let mut coalesced_ranges = Vec::with_capacity(ranges.len());
+        valid_ingredient_count += 1;
+    }
+    _ = aoc.submit_p1(valid_ingredient_count);
+
+    let mut total_range = 0;
     let mut r = ranges.iter().peekable();
     while let Some(this) = r.next() {
         let (start, mut end) = (*this.start(), *this.end());
@@ -40,11 +63,7 @@ fn main() {
             end = end.max(potential_new_end);
         }
 
-        coalesced_ranges.push(start..=end);
+        total_range += end + 1 - start;
     }
-    let total_range = coalesced_ranges
-        .iter()
-        .map(|r| *r.end() + 1 - *r.start())
-        .sum::<u64>();
     _ = aoc.submit_p2(total_range);
 }
