@@ -38,9 +38,9 @@ path = "04/printing_department.rs"
 name = "day05"
 path = "05/cafeteria.rs"
 
-# [[bin]]
-# name = "day06"
-# path = "06/guard_gallivant.rs"
+[[bin]]
+name = "day06"
+path = "06/trash_compactor.rs"
 
 # [[bin]]
 # name = "day07"

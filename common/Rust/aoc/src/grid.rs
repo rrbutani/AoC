@@ -469,6 +469,17 @@ impl<C> Grid<C> {
         self.cell_iter().map(|(c, _)| c)
     }
 
+    pub fn column_iter(
+        &self,
+    ) -> impl Clone + Iterator<Item = impl Iterator<Item = (Coord, &C)>> + '_ {
+        (0..self.width()).map(move |col| {
+            (0..self.height()).map(move |row| {
+                let c = Coord { row, col };
+                (c, &self[c])
+            })
+        })
+    }
+
     pub fn find<'it>(
         &'it self,
         mut predicate: impl FnMut(&C) -> bool + 'it,
