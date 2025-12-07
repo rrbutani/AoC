@@ -42,9 +42,9 @@ path = "05/cafeteria.rs"
 name = "day06"
 path = "06/trash_compactor.rs"
 
-# [[bin]]
-# name = "day07"
-# path = "07/bridge_repair.rs"
+[[bin]]
+name = "day07"
+path = "07/labratories.rs"
 
 # [[bin]]
 # name = "day08"
@@ -65,55 +65,3 @@ path = "06/trash_compactor.rs"
 # [[bin]]
 # name = "day12"
 # path = "12/garden_groups.rs"
-
-# [[bin]]
-# name = "day13"
-# path = "13/claw_contraption.rs"
-
-# [[bin]]
-# name = "day14"
-# path = "14/restroom_redoubt.rs"
-
-# [[bin]]
-# name = "day15"
-# path = "15/warehouse_woes.rs"
-
-# [[bin]]
-# name = "day16"
-# path = "16/reindeer_maze.rs"
-
-# [[bin]]
-# name = "day17"
-# path = "17/chronospatial_computer.rs"
-
-# [[bin]]
-# name = "day18"
-# path = "18/ram_run.rs"
-
-# [[bin]]
-# name = "day19"
-# path = "19/linen_layout.rs"
-
-# [[bin]]
-# name = "day20"
-# path = "20/race_condition.rs"
-
-# [[bin]]
-# name = "day21"
-# path = "21/keypad_conundrum.rs"
-
-# [[bin]]
-# name = "day22"
-# path = "22/monkey_market.rs"
-
-# [[bin]]
-# name = "day23"
-# path = "23/lan_party.rs"
-
-# [[bin]]
-# name = "day24"
-# path = "24/crossed_wires.rs"
-
-# [[bin]]
-# name = "day25"
-# path = "25/code_chronicle.rs"
