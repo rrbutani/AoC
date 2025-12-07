@@ -1,4 +1,4 @@
-use std::{collections::HashMap, mem};
+use std::mem;
 
 use aoc::{AdventOfCode, Grid, SmallVec};
 use smallvec::smallvec;
@@ -46,19 +46,21 @@ fn main() {
     let grid: Grid<Cell> = aoc.get_input().parse().unwrap();
     let start = grid.find(|&c| c == Cell::Start).next().unwrap();
 
-    let (mut curr_cols, mut next_cols) = (HashMap::from([(start.col, 1)]), HashMap::new());
+    let (mut curr_cols, mut next_cols) = (vec![0; grid.width()], vec![0; grid.width()]);
+    curr_cols[start.col] = 1;
+
     let mut split_count = 0;
     for row in &(*grid)[start.row + 1..] {
-        for (col, count) in step(curr_cols.drain(), row, |_, _| {
-            split_count += 1;
-        }) {
-            *next_cols.entry(col).or_default() += count;
+        next_cols.fill(0);
+        let curr = curr_cols.iter().copied().enumerate().filter(|c| c.1 > 0);
+        for (col, count) in step(curr, row, |_, _| split_count += 1) {
+            next_cols[col] += count;
         }
         mem::swap(&mut curr_cols, &mut next_cols);
     }
 
     _ = aoc.submit_p1(split_count);
-    _ = aoc.submit_p2(curr_cols.values().sum::<usize>());
+    _ = aoc.submit_p2(curr_cols.iter().sum::<usize>());
 }
 
 /*
