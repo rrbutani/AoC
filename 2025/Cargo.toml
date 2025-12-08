@@ -46,9 +46,9 @@ path = "06/trash_compactor.rs"
 name = "day07"
 path = "07/labratories.rs"
 
-# [[bin]]
-# name = "day08"
-# path = "08/resonant_collinearity.rs"
+[[bin]]
+name = "day08"
+path = "08/playground.rs"
 
 # [[bin]]
 # name = "day09"
