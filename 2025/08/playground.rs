@@ -1,5 +1,4 @@
 use std::{
-    cmp::Reverse,
     collections::{HashMap, HashSet},
     ops::Mul,
 };
@@ -8,7 +7,7 @@ use aoc::{AdventOfCode, Itertools, Triple, TryConvert, iterator_map_ext::IterMap
 
 type Coord = Triple<u64>;
 
-// note: not bother to take sqrt; just comparing, don't care about the actual value
+// note: not bothering to take sqrt; just comparing, don't care about the actual value
 fn dist(a: Coord, b: Coord) -> u64 {
     a.to::<[_; _]>()
         .into_iter()
@@ -24,9 +23,9 @@ fn dist(a: Coord, b: Coord) -> u64 {
 // todo: do better than O(N ^ 2)?
 fn group(
     coords: &[Coord],
-    // (conn_num, connected_junction_boxes, distinct_circuits, last connected pair)
-    mut continue_func: impl FnMut(usize, usize, usize, (Coord, Coord)) -> bool,
-) -> Vec<HashSet<Coord>> {
+    // (conn_num, groups, connected_junction_boxes, distinct_circuits, last connected pair)
+    mut continue_func: impl FnMut(usize, &[HashSet<Coord>], usize, usize, (Coord, Coord)) -> bool,
+) {
     let connections = coords
         .iter()
         .array_combinations()
@@ -76,13 +75,10 @@ fn group(
             }
         }
 
-        if !continue_func(conn_num, connected_junction_boxes, distinct_circuits, (a, b)) {
+        if !continue_func(conn_num, &groups, connected_junction_boxes, distinct_circuits, (a, b)) {
             break;
         }
     }
-
-    groups.sort_by_key(|g| Reverse(g.len()));
-    groups
 }
 
 fn main() {
@@ -90,15 +86,17 @@ fn main() {
     let inp = aoc.get_input();
     let junction_box_coords = inp.lines().map_parse::<Coord>().collect_vec();
 
-    let p1 = group(&junction_box_coords, |i, _, _, _| i < 1_000)[0..3]
-        .iter()
-        .map(|g| g.len())
-        .reduce(Mul::mul)
-        .unwrap();
-    _ = aoc.submit_p1(p1);
+    group(&junction_box_coords, |i, groups, connected, circuit_count, (a, b)| {
+        if i == 1_000 {
+            let p1 = groups
+                .iter()
+                .map(|g| g.len())
+                .k_largest(3)
+                .reduce(Mul::mul)
+                .unwrap();
+            _ = aoc.submit_p1(p1);
+        }
 
-    let mut p2 = None;
-    group(&junction_box_coords, |_, connected, circuit_count, (a, b)| {
         if connected < junction_box_coords.len() {
             return true; // keep going
         }
@@ -107,8 +105,8 @@ fn main() {
             return true; // keep going
         }
 
-        p2 = Some(a.0 * b.0);
+        let p2 = a.0 * b.0;
+        _ = aoc.submit_p2(p2);
         return false;
     });
-    _ = aoc.submit_p2(p2.unwrap());
 }
